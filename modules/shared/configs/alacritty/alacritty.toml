@@ -1,0 +1,43 @@
+import = [
+  "~/.config/alacritty/keybindings.toml",
+  # "~/.config/alacritty/themes/tokyonight_moon.toml",
+  "~/.config/alacritty/themes/catppuccin-macchiato.toml",
+]
+
+[env]
+term = "xterm-256color"
+
+[font]
+size = 13.0
+# bold = { family = "MonaspiceNe Nerd Font Mono", style = "Bold" }
+# italic = { family = "MonaspiceNe Nerd Font Mono", style = "Italic" }
+# normal = { family = "MonaspiceNe Nerd Font Mono", style = "Regular" }
+bold = { family = "PragmataProMono Nerd Font", style = "Bold" }
+italic = { family = "PragmataProMono Nerd Font", style = "Italic" }
+normal = { family = "PragmataProMono Nerd Font", style = "Regular" }
+
+# [[hints.enabled]]
+# command = "open"
+# hyperlinks = true
+# post_processing = true
+# regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-<>\"\\s{-}\\^⟨⟩`]+"
+#
+#[hints.enabled.mouse]
+#enabled = true
+#mods = "Command"
+
+[window]
+decorations = "none"
+opacity = 0.99
+
+[window.dimensions]
+columns = 0
+lines = 0
+
+[window.padding]
+x = 10
+y = 10
+
+[window.position]
+x = 0
+y = 0
