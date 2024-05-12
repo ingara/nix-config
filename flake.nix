@@ -3,6 +3,10 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -29,10 +33,10 @@
       flake = false;
     };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, catppuccin, nixpkgs, } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, catppuccin, nixpkgs, disko, } @inputs:
     let
     user = "ingar";
-    linuxSystems = [];
+    linuxSystems = [ "vboxnixos" ];
     darwinSystems = [ "aarch64-darwin" ];
 
     mkApp = scriptName: system: {
@@ -63,6 +67,7 @@
           specialArgs = inputs;
           modules = [
             home-manager.darwinModules.home-manager
+            catppuccin.darwinModules.catppuccin
             nix-homebrew.darwinModules.nix-homebrew
             {
               nix-homebrew = {
@@ -87,11 +92,18 @@
         inherit system;
         specialArgs = inputs;
         modules = [
+          disko.nixosModules.disko
+          catppuccin.nixosModules.catppuccin
           home-manager.nixosModules.home-manager {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.${user} = import ./modules/nixos/home-manager.nix;
+              users.${user} = {
+              imports = [
+                ./modules/nixos/home-manager.nix
+                catppuccin.homeManagerModules.catppuccin
+              ];
+              };
             };
           }
           ./hosts/nixos

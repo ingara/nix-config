@@ -121,10 +121,10 @@ in
       "flake.nix"
     ];
 
-    signing = {
-      signByDefault = true;
-      key = "7A5F92617FB3E7A1";
-    };
+    # signing = {
+    #   signByDefault = true;
+    #   key = "7A5F92617FB3E7A1";
+    # };
 
     extraConfig = {
       core.editor = "nvim";
@@ -220,6 +220,10 @@ in
       wip = "commit -am 'WIP'";
       wipe = "!f() { rev=$(git rev-parse \${1-HEAD}); git add -A && git commit --allow-empty -qm 'WIPE SAVEPOINT' && git reset $rev --hard; }; f";
     };
+  };
+
+  bat = {
+    enable = true;
   };
 
   fzf = {

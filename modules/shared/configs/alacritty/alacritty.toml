@@ -8,13 +8,13 @@ import = [
 term = "xterm-256color"
 
 [font]
-size = 13.0
+size = 12.0
 # bold = { family = "MonaspiceNe Nerd Font Mono", style = "Bold" }
 # italic = { family = "MonaspiceNe Nerd Font Mono", style = "Italic" }
 # normal = { family = "MonaspiceNe Nerd Font Mono", style = "Regular" }
-bold = { family = "PragmataProMono Nerd Font", style = "Bold" }
-italic = { family = "PragmataProMono Nerd Font", style = "Italic" }
-normal = { family = "PragmataProMono Nerd Font", style = "Regular" }
+# bold = { family = "PragmataProMono Nerd Font", style = "Bold" }
+# italic = { family = "PragmataProMono Nerd Font", style = "Italic" }
+# normal = { family = "PragmataProMono Nerd Font", style = "Regular" }
 
 # [[hints.enabled]]
 # command = "open"

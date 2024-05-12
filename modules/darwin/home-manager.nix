@@ -50,7 +50,7 @@ in
     users.${user} = { pkgs, config, lib, ... }:{
       imports = [
         catppuccin.homeManagerModules.catppuccin
-        ../shared/dotfiles.nix
+        (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
       ];
       catppuccin = {
         flavour = "macchiato";

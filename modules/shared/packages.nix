@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 with pkgs; [
+  eza
   colima
   docker
   fd
@@ -40,6 +41,7 @@ with pkgs; [
   findutils
   gnugrep
   gnused
+  lazygit
 
   # node stuff
   nodejs_20
@@ -49,6 +51,8 @@ with pkgs; [
 
   rustc
   cargo
+
+  nixd
 
   # yabai
   # skhd
