@@ -20,6 +20,7 @@ _:
       "authy"
       "elgato-stream-deck"
       "signal"
+      "tidal"
   ];
   brews = [
       "tmux-lazy-session"

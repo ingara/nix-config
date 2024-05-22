@@ -18,10 +18,10 @@ return {
       },
     })
   end,
-  keys = {
-    { "<C-h>", "<cmd>NvimTmuxNavigateLeft<cr>", { desc = "Tmux navigate left", silent = true } },
-    { "<C-j>", "<cmd>NvimTmuxNavigateDown<cr>", { desc = "Tmux navigate down", silent = true } },
-    { "<C-k>", "<cmd>NvimTmuxNavigateUp<cr>", { desc = "Tmux navigate up", silent = true } },
-    { "<C-l>", "<cmd>NvimTmuxNavigateRight<cr>", { desc = "Tmux navigate right", silent = true } },
-  },
+  -- keys = {
+  --   { "<C-h>", "<cmd>NvimTmuxNavigateLeft<cr>", { desc = "Tmux navigate left", silent = true } },
+  --   { "<C-j>", "<cmd>NvimTmuxNavigateDown<cr>", { desc = "Tmux navigate down", silent = true } },
+  --   { "<C-k>", "<cmd>NvimTmuxNavigateUp<cr>", { desc = "Tmux navigate up", silent = true } },
+  --   { "<C-l>", "<cmd>NvimTmuxNavigateRight<cr>", { desc = "Tmux navigate right", silent = true } },
+  -- },
 }

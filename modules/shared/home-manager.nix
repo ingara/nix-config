@@ -246,6 +246,16 @@ in
   alacritty = {
     enable = true;
   };
+  wezterm = {
+    enable = true;
+    extraConfig = ''
+      return {
+        color_scheme = "Catppuccin Macchiato",
+        window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+      }
+    '';
+  };
+
 
   # TODO: use this?
   #
