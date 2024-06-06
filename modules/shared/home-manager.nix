@@ -130,10 +130,11 @@ in
       "flake.nix"
     ];
 
-    # signing = {
-    #   signByDefault = true;
-    #   key = "7A5F92617FB3E7A1";
-    # };
+    signing = {
+      signByDefault = true;
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF2vZOGuH6Eix++BVA093FnJvrjSa1aLa5v976xVsp5K";
+    };
+
 
     extraConfig = {
       core.editor = "nvim";
@@ -151,6 +152,8 @@ in
         clean = "git-lfs clean -- %f";
         smudge = "git-lfs smudge -- %f";
       };
+      gpg.format = "ssh";
+      "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
     };
 
     aliases = {
