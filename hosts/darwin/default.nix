@@ -35,9 +35,10 @@ let user = "ingar"; in
     # '';
   };
 
-  programs = {
-    fish.enable = true;
-  };
+
+  environment.shells = [pkgs.fish];
+  programs.fish.enable = true;
+  users.users.${user}.shell = pkgs.fish;
 
   # Turn off NIX_PATH warnings now that we're using flakes
   system.checks.verifyNixPath = false;
