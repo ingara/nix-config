@@ -14,7 +14,7 @@ let user = "ingar"; in
   # Setup user, packages, programs
   nix = {
     useDaemon = true;
-    package = pkgs.nixUnstable;
+    package = pkgs.nixVersions.latest;
     settings = {
       trusted-users = [ "@admin" "${user}" ];
       experimental-features = [ "nix-command" "flakes" ];
