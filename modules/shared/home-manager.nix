@@ -35,6 +35,14 @@ in
   fish = {
     enable = true;
     shellAliases = aliases;
+    shellInit = ''
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+      # Disable greeting
+      set -g fish_greeting
+
+      # MacOS ALT+d fzf
+      bind "∂" fzf-cd-widget
+    '';
   };
 
   zsh = {
@@ -74,6 +82,7 @@ in
     enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
+    enableTransience = true;
 
     catppuccin.enable = true;
 
@@ -249,10 +258,29 @@ in
   wezterm = {
     enable = true;
     extraConfig = ''
-      return {
-        color_scheme = "Catppuccin Macchiato",
-        window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-      }
+      local wezterm = require('wezterm')
+      local smart_splits = wezterm.plugin.require('https://github.com/mrjones2014/smart-splits.nvim')
+      local config = wezterm.config_builder()
+
+      config.color_scheme = "Catppuccin Macchiato"
+      config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+      config.send_composed_key_when_left_alt_is_pressed = true
+
+      smart_splits.apply_to_config(config, {
+        -- the default config is here, if you'd like to use the default keys,
+        -- you can omit this configuration table parameter and just use
+        -- smart_splits.apply_to_config(config)
+
+        -- directional keys to use in order of: left, down, up, right
+        direction_keys = { 'h', 'j', 'k', 'l' },
+        -- modifier keys to combine with direction_keys
+        modifiers = {
+          move = 'CTRL', -- modifier to use for pane movement, e.g. CTRL+h to move left
+          resize = 'META', -- modifier to use for pane resize, e.g. META+h to resize to the left
+        },
+      })
+
+      return config
     '';
   };
 

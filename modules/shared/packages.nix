@@ -8,6 +8,7 @@ with pkgs; [
   htop
   nixpkgs-fmt
   ripgrep
+  curlie
   # magic-wormhole
   # azure-cli # done via brew
   # qmk # not working on aarch64-darwin
