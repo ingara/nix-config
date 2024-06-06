@@ -1,6 +1,20 @@
 { config, pkgs, ... }:
 
-let user = "ingar"; in
+let
+  user = "ingar";
+
+  # To find key codes:
+  #
+  # Find hex value from: https://developer.apple.com/library/archive/technotes/tn2450/_index.html#//apple_ref/doc/uid/DTS40017618-CH1-KEY_TABLE_USAGES
+  # For exmple 'Keyboard \ and |' has hex code 0x31
+  # bash/zsh:
+  #   $ printf '%d\n' "$(( 0x700000000 | 0x31 ))"
+  #   30064771121
+  keycodes = {
+    backspace = 30064771114;
+    pipe = 30064771121;
+  };
+in
 {
   imports = [
     ../../modules/darwin/home-manager.nix
@@ -56,6 +70,16 @@ let user = "ingar"; in
       enableKeyMapping = true;
       # use caps lock as escape
       remapCapsLockToEscape = true;
+      userKeyMapping = [
+        ({
+          HIDKeyboardModifierMappingDst = keycodes.backspace;
+          HIDKeyboardModifierMappingSrc = keycodes.pipe;
+        })
+        ({
+          HIDKeyboardModifierMappingDst = keycodes.pipe;
+          HIDKeyboardModifierMappingSrc = keycodes.backspace;
+        })
+      ];
     };
     defaults = {
       NSGlobalDomain = {
