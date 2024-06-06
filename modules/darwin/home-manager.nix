@@ -34,7 +34,6 @@ in
     # $ mas search <app name>
     #
     masApps = {
-      "1password" = 1333542190;
       Fantastical = 975937182;
       "Airmail 5" = 918858936;
       "Amphetamine" = 937984704;

@@ -32,8 +32,12 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    koekeishiya = {
+      url = "github:koekeishiya/homebrew-formulae";
+      flake = false;
+    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, catppuccin, nixpkgs, disko, } @inputs:
+  outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
     let
     user = "ingar";
     linuxSystems = [ "vboxnixos" ];
@@ -64,22 +68,24 @@
     darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
         darwin.lib.darwinSystem {
           inherit system;
+          # system = "aarch64-darwin";
           specialArgs = inputs;
           modules = [
             home-manager.darwinModules.home-manager
-            catppuccin.darwinModules.catppuccin
+            # catppuccin.darwinModules.catppuccin
             nix-homebrew.darwinModules.nix-homebrew
             {
               nix-homebrew = {
                 inherit user;
                 enable = true;
-                taps = {
+                enableRosetta = true;
+                taps = with inputs; {
                   "homebrew/homebrew-core" = homebrew-core;
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "homebrew/homebrew-bundle" = homebrew-bundle;
+                  "koekeishiya/homebrew-formulae" = koekeishiya;
                 };
                 mutableTaps = false;
-                autoMigrate = true;
               };
             }
             ./hosts/darwin
@@ -99,10 +105,10 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               users.${user} = {
-              imports = [
-                ./modules/nixos/home-manager.nix
-                catppuccin.homeManagerModules.catppuccin
-              ];
+                imports = [
+                  ./modules/nixos/home-manager.nix
+                  catppuccin.homeManagerModules.catppuccin
+                ];
               };
             };
           }

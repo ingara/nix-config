@@ -157,6 +157,22 @@
         "type": "github"
       }
     },
+    "koekeishiya": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1716031250,
+        "narHash": "sha256-I9f5TYLfIgz1h+UuEnpFkwUwBAVs9WZ6ktQdiCScdNg=",
+        "owner": "koekeishiya",
+        "repo": "homebrew-formulae",
+        "rev": "757b5c222bce502d4292dfbb9648eb749689d704",
+        "type": "github"
+      },
+      "original": {
+        "owner": "koekeishiya",
+        "repo": "homebrew-formulae",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -266,6 +282,7 @@
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
+        "koekeishiya": "koekeishiya",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4"
       }

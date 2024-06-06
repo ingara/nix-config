@@ -6,9 +6,6 @@ let
 in
 shared-packages ++ [
   _1password-gui
-  fastfetch
-  neofetch
-  nerdfetch
   rofi
   xclip
   firefox

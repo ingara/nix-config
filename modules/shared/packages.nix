@@ -9,32 +9,18 @@ with pkgs; [
   nixpkgs-fmt
   ripgrep
   curlie
-  # magic-wormhole
-  # azure-cli # done via brew
-  # qmk # not working on aarch64-darwin
   ngrok
   miniserve
   pre-commit
   wireguard-tools
-  # act # https://github.com/nektos/act
   git-absorb
   k6
   nerd-font-patcher
-
-  ##TF
-  # terraform
-  # tfenv # installed with brew
-  tflint
-  terragrunt
-
-  # Nix language server https://github.com/oxalica/nil
-  # nil
+  fastfetch
+  neofetch
+  nerdfetch
+  tealdeer
   nixd
-
-  # k8s stuff
-  kubectl
-  kubecolor
-  kubectx
   yq-go
 
   # Better userland for macOS
@@ -48,29 +34,9 @@ with pkgs; [
   nodejs_20
   corepack_20
   nodePackages.vercel
-  # nodePackages_latest.pnpm
 
   rustc
   cargo
-
-  nixd
-
-  # yabai
-  # skhd
-
-  (buildGoModule {
-   name = "terraform-config-inspect";
-   version = "latest";
-
-   src = fetchFromGitHub {
-   owner = "hashicorp";
-   repo = "terraform-config-inspect";
-   rev = "a34142ec2a72dd916592afd3247dd354f1cc7e5c";
-   hash = "sha256-+NsVQ3K7fiQjI/41kPV3iAzFO3Z3Z4oeUA5gJgR+EyU=";
-   };
-
-   vendorHash = "sha256-JO02/PrlyFpQnNAb0ZZ8sfGiMmGjtbhwmAasWkHPg1A=";
-   })
 
   (buildGoModule rec {
    pname = "updo";
