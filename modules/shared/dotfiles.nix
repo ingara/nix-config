@@ -2,10 +2,8 @@
 
 let
   dots = {
-    # "targetfile" = "testrc";
-    # "ideavim/ideavimrc" = ".ideavimrc";
-    # "yabai/yabairc" = "yabairc";
-    # "skhd/skhdrc" = "skhdrc";
+    "yabai/yabairc" = "yabairc";
+    "skhd/skhdrc" = "skhdrc";
     "lazygit/config.yml" = "lazygit.yml";
     "nvim" = "nvim";
     "alacritty" = "alacritty";
