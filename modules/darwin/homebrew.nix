@@ -16,6 +16,8 @@ _:
       "elgato-stream-deck"
       "signal"
       "tidal"
+      "slack"
+      "jordanbaird-ice"
   ];
   brews = [
   #     "tmux-lazy-session"

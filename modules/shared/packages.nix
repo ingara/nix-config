@@ -22,6 +22,7 @@ with pkgs; [
   tealdeer
   nixd
   yq-go
+  jq
 
   # Better userland for macOS
   coreutils

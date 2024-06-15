@@ -136,6 +136,7 @@ in
     };
 
 
+
     extraConfig = {
       core.editor = "nvim";
       init.defaultBranch = "main";
@@ -269,6 +270,20 @@ in
       config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
       config.send_composed_key_when_left_alt_is_pressed = true
 
+      config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
+      config.keys = {
+        {
+          key = '|',
+          mods = 'LEADER',
+          action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }
+        },
+        {
+          key = '-',
+          mods = 'LEADER',
+          action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }
+        },
+      }
+
       smart_splits.apply_to_config(config, {
         -- the default config is here, if you'd like to use the default keys,
         -- you can omit this configuration table parameter and just use
@@ -285,6 +300,10 @@ in
 
       return config
     '';
+  };
+
+  zoxide = {
+    enable = true;
   };
 
 
