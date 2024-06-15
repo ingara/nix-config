@@ -10,7 +10,7 @@ let
   };
 
 mkOutOfStoreSymlink = key: value: {
-  source = config.lib.file.mkOutOfStoreSymlink "${configPath}/modules/shared/configs/${value}";
+  source = config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}";
 };
 in
 {
