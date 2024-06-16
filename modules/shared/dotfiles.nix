@@ -7,6 +7,7 @@ let
     "lazygit/config.yml" = "lazygit.yml";
     "nvim" = "nvim";
     "alacritty" = "alacritty";
+    "sketchybar" = "sketchybar";
   };
 
 mkOutOfStoreSymlink = key: value: {
