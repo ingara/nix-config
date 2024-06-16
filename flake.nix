@@ -18,24 +18,6 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
-
-    # Homebrew taps
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
-    koekeishiya = {
-      url = "github:koekeishiya/homebrew-formulae";
-      flake = false;
-    };
   };
   outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
     let
@@ -79,13 +61,15 @@
                 inherit user;
                 enable = true;
                 enableRosetta = true;
-                taps = with inputs; {
-                  "homebrew/homebrew-core" = homebrew-core;
-                  "homebrew/homebrew-cask" = homebrew-cask;
-                  "homebrew/homebrew-bundle" = homebrew-bundle;
-                  "koekeishiya/homebrew-formulae" = koekeishiya;
-                };
-                mutableTaps = false;
+                # taps = with inputs; {
+                #   "homebrew/homebrew-core" = homebrew-core;
+                #   "homebrew/homebrew-cask" = homebrew-cask;
+                #   "homebrew/homebrew-bundle" = homebrew-bundle;
+                #   "homebrew/homebrew-services" = homebrew-services;
+                #   "koekeishiya/homebrew-formulae" = koekeishiya;
+                #   "FelixKratz/homebrew-formulae" = FelixKratz;
+                # };
+                mutableTaps = true;
               };
             }
             ./hosts/darwin

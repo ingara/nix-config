@@ -20,8 +20,10 @@ _:
       "jordanbaird-ice"
   ];
   brews = [
-  #     "tmux-lazy-session"
       "koekeishiya/formulae/skhd"
       "koekeishiya/formulae/yabai"
+  ];
+  taps = [
+    "koekeishiya/homebrew-formulae"
   ];
 }
