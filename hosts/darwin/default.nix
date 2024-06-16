@@ -62,9 +62,6 @@ in
 
   # TODO: set EDITOR etc?
 
-  # Enable fonts dir
-  fonts.fontDir.enable = true;
-
   system = {
     keyboard = {
       enableKeyMapping = true;
