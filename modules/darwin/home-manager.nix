@@ -52,7 +52,7 @@ in
         (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
       ];
       catppuccin = {
-        flavour = "macchiato";
+        flavor = "macchiato";
         enable = false; #TODO: enable?
       };
       home = {
