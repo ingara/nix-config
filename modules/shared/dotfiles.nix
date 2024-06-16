@@ -8,6 +8,7 @@ let
     "nvim" = "nvim";
     "alacritty" = "alacritty";
     "sketchybar" = "sketchybar";
+    "wezterm/extra" = "wezterm/extra";
   };
 
 mkOutOfStoreSymlink = key: value: {
