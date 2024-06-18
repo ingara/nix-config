@@ -3,10 +3,10 @@
 # -----------------------------------
 # -------- Icons
 # -----------------------------------
-YABAI_BSP=􀏜
-YABAI_STACK=􀏭
-YABAI_FLOAT=􀢌
-ERROR_ICON=􀏎
+YABAI_BSP=
+YABAI_STACK=
+YABAI_FLOAT=
+ERROR_ICON=
 # YABAI_PARENT_ZOOM=􀥃
 # YABAI_GRID=􀧍
 
