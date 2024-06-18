@@ -262,7 +262,8 @@ in
   wezterm = {
     enable = true;
     extraConfig = ''
-      require('extra.main')
+      local config = require('extra.main')
+      return config
     '';
   };
 
