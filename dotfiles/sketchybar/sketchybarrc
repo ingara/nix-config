@@ -10,6 +10,8 @@ ITEM_MARGIN=5
 ITEM_PADDING=2
 FONT="Hack Nerd Font"
 
+source colors.sh
+
 ##### Bar Appearance #####
 # Configuring the general appearance of the bar.
 # These are only some of the options available. For all options see:
@@ -17,7 +19,18 @@ FONT="Hack Nerd Font"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar position=top height=40 blur_radius=30 color=0x40000000
+sketchybar --bar position=top \
+  height=32 \
+  y_offset=2 \
+  blur_radius=10 \
+  padding_left=4 \
+  padding_right=4 \
+  margin=10 \
+  corner_radius=12 \
+  color=0xE725273A \
+  border_color=0x44CAD3F5 \
+  shadow=off
+  # color=0x40000000
 
 ##### Changing Defaults #####
 # We now change some default values, which are applied to all further items.
@@ -25,16 +38,20 @@ sketchybar --bar position=top height=40 blur_radius=30 color=0x40000000
 # https://felixkratz.github.io/SketchyBar/config/items
 
 default=(
+  updates=when_shown
   padding_left=5
   padding_right=5
   icon.font="$FONT:Bold:17.0"
   label.font="$FONT:Bold:14.0"
-  icon.color=0xffffffff
-  label.color=0xffffffff
+  icon.color=0xffCAD3F5
+  icon.highlight_color=0xff728FCB
   icon.padding_left=$ITEM_PADDING
   icon.padding_right=$ITEM_PADDING
+  label.color=0xffCAD3F5
   label.padding_left=$ITEM_PADDING
   label.padding_right=$ITEM_PADDING
+  background.corner_radius=5
+  background.padding_left=4
 )
 sketchybar --default "${default[@]}"
 
