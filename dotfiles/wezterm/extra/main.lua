@@ -4,6 +4,7 @@ local config = wezterm.config_builder()
 
 config.color_scheme = "Catppuccin Macchiato"
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+config.window_background_opacity = 0.95
 config.send_composed_key_when_left_alt_is_pressed = true
 
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
@@ -17,6 +18,22 @@ config.keys = {
 		key = "-",
 		mods = "LEADER",
 		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+	},
+	{
+		key = "LeftArrow",
+		mods = "CTRL",
+		action = wezterm.action.AdjustPaneSize({ "Left", 5 }),
+	},
+	{
+		key = "DownArrow",
+		mods = "CTRL",
+		action = wezterm.action.AdjustPaneSize({ "Down", 5 }),
+	},
+	{ key = "UpArrow", mods = "CTRL", action = wezterm.action.AdjustPaneSize({ "Up", 5 }) },
+	{
+		key = "RightArrow",
+		mods = "CTRL",
+		action = wezterm.action.AdjustPaneSize({ "Right", 5 }),
 	},
 }
 

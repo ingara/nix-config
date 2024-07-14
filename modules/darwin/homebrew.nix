@@ -18,6 +18,11 @@ _:
       "tidal"
       "slack"
       "jordanbaird-ice"
+      "whatsapp"
+      "todoist"
+      "chatgpt"
+      "postico"
+      "vial"
   ];
   brews = [
       "koekeishiya/formulae/skhd"

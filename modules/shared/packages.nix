@@ -23,6 +23,7 @@ with pkgs; [
   nixd
   yq-go
   jq
+  chafa
 
   # Better userland for macOS
   coreutils

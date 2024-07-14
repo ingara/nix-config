@@ -117,6 +117,7 @@ in
     userEmail = email;
     delta = {
       enable = true;
+      catppuccin.enable = true;
       options = {
         line-numbers = true;
       };
@@ -128,6 +129,7 @@ in
       ".envrc"
       "flake.lock"
       "flake.nix"
+      ".pre-commit-config.yaml"
     ];
 
     signing = {
@@ -237,6 +239,7 @@ in
 
   bat = {
     enable = true;
+    catppuccin.enable = true;
   };
 
   fzf = {

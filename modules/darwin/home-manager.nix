@@ -40,6 +40,8 @@ in
       "Spotica Menu" = 570549457;
       "Balance Lock" = 1019371109;
       "Velja" = 1607635845;
+      "Canary Mail App" = 1236045954;
+      "Infuse • Video Player" = 1136220934;
     };
   };
 
@@ -66,7 +68,7 @@ in
         stateVersion = "23.11";
       };
 
-      programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib; };
+      programs = { } // import ../shared/home-manager.nix { inherit config pkgs lib; };
 
       # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344
