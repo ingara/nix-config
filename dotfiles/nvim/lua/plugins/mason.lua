@@ -55,6 +55,7 @@ return {
     opts = {
       ensure_installed = {
         "biome",
+        "nixpkgs-fmt",
       },
     },
   },

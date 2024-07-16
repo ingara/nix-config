@@ -15,9 +15,10 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.coding.copilot-chat" },
     { import = "lazyvim.plugins.extras.coding.yanky" },
 
+    { import = "lazyvim.plugins.extras.editor.fzf" },
     { import = "lazyvim.plugins.extras.editor.harpoon2" },
 
-    { import = "lazyvim.plugins.extras.formatting.prettier" },
+    -- { import = "lazyvim.plugins.extras.formatting.prettier" },
 
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.markdown" },
@@ -28,7 +29,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.yaml" },
 
-    { import = "lazyvim.plugins.extras.linting.eslint" },
+    -- { import = "lazyvim.plugins.extras.linting.eslint" },
 
     { import = "lazyvim.plugins.extras.util.project" },
 
@@ -60,5 +61,8 @@ require("lazy").setup({
         "zipPlugin",
       },
     },
+  },
+  ui = {
+    border = "rounded",
   },
 })

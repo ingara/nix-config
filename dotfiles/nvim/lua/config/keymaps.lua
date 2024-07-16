@@ -3,9 +3,9 @@
 -- Add any additional keymaps here
 local map = vim.keymap.set
 
-map("", "<leader>y", '"+y', { desc = "Copy to clipboard in normal, visual, select and operator modes" })
+-- map("", "<leader>y", '"+y', { desc = "Copy to clipboard in normal, visual, select and operator modes" })
 map("n", "H", "_", { desc = "Start of line" })
-map("n", "L", "$", { desc = "End of line" })
+map("n", "L", "g_", { desc = "End of line" })
 map("n", "<leader>uz", ":ZenMode<CR>", { desc = "Toggle Zen mode" })
 
 map("n", "ø", "[", { remap = true })
