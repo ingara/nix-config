@@ -4,7 +4,6 @@ shift + alt + cmd - n : yabai -m space --create && \
                   yabai -m space --focus "${index}"
 
 ctrl + alt + cmd - n : yabai -m space --create
-ctrl - x : yabai -m space --focus recent
 ctrl - 1 : yabai -m space --focus 1
 ctrl - 2 : yabai -m space --focus 2
 ctrl - 3 : yabai -m space --focus 3
