@@ -24,6 +24,7 @@ with pkgs; [
   yq-go
   jq
   chafa
+  glow
 
   # Better userland for macOS
   coreutils
@@ -31,6 +32,7 @@ with pkgs; [
   gnugrep
   gnused
   lazygit
+  wget
 
   # node stuff
   nodejs_20
