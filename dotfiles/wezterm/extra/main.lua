@@ -2,6 +2,7 @@ local wezterm = require("wezterm")
 local smart_splits = wezterm.plugin.require("https://github.com/mrjones2014/smart-splits.nvim")
 local config = wezterm.config_builder()
 
+config.font = wezterm.font("CaskaydiaCove Nerd Font Mono")
 config.color_scheme = "Catppuccin Macchiato"
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 config.window_background_opacity = 0.95
