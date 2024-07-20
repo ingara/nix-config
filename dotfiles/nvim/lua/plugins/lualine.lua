@@ -1,10 +1,11 @@
 return {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",
-  opts =  {
+  opts = {
     options = {
       -- theme = "auto",
       globalstatus = false,
+      theme = "catppuccin",
     },
-  }
+  },
 }

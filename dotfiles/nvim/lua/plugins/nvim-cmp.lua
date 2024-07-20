@@ -10,6 +10,15 @@ return {
 
     local cmp = require("cmp")
 
+    opts.window = {
+      completion = cmp.config.window.bordered({
+        winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
+      }),
+      documentation = cmp.config.window.bordered({
+        winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+      }),
+    }
+
     opts.mapping = vim.tbl_extend("force", opts.mapping, {
       -- ["<Esc>"] = cmp.mapping(function(fallback)
       --   if cmp.visible() then
