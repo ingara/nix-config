@@ -75,14 +75,15 @@ in
       manual.manpages.enable = false;
     };
   };
-  services = {
-    sketchybar = {
-      enable = true;
-      extraPackages = [
-        pkgs.sketchybar-app-font
-      ];
-    };
-  };
+  # Can't get this to work. Running through homebrew instead.
+  # services = {
+  #   sketchybar = {
+  #     enable = true;
+  #     extraPackages = [
+  #       pkgs.sketchybar-app-font
+  #     ];
+  #   };
+  # };
 
   # Fully declarative dock using the latest from Nix Store
   # local = {

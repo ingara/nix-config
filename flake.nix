@@ -18,8 +18,12 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
+    homebrew-services = {
+      url = "github:homebrew/homebrew-services";
+      flake = false;
+    };
   };
-  outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-services, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
     let
     user = "ingar";
     linuxSystems = [ "vboxnixos" ];
@@ -61,15 +65,17 @@
                 inherit user;
                 enable = true;
                 enableRosetta = true;
-                # taps = with inputs; {
-                #   "homebrew/homebrew-core" = homebrew-core;
-                #   "homebrew/homebrew-cask" = homebrew-cask;
-                #   "homebrew/homebrew-bundle" = homebrew-bundle;
-                #   "homebrew/homebrew-services" = homebrew-services;
-                #   "koekeishiya/homebrew-formulae" = koekeishiya;
-                #   "FelixKratz/homebrew-formulae" = FelixKratz;
-                # };
                 mutableTaps = true;
+
+                taps = {
+                  # Services are not working: https://github.com/zhaofengli/nix-homebrew/issues/13
+                  # Workaround from https://github.com/zhaofengli/nix-homebrew/issues/13#issuecomment-2156223912
+                  "homebrew/homebrew-services" = nixpkgs.legacyPackages."${system}".applyPatches {
+                    name = "homebrew-services-patched";
+                    src = homebrew-services;
+                    patches = [./patches/homebrew-services.patch];
+                  };
+                };
               };
             }
             ./hosts/darwin

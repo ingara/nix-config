@@ -8,6 +8,7 @@ shared-packages ++ [
     fonts = [
       "Hack"
       "CascadiaCode"
+      "ZedMono"
     ];
   })
 ]
