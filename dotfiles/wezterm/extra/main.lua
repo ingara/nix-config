@@ -2,7 +2,7 @@ local wezterm = require("wezterm")
 local smart_splits = wezterm.plugin.require("https://github.com/mrjones2014/smart-splits.nvim")
 local config = wezterm.config_builder()
 
-config.font = wezterm.font("CaskaydiaCove Nerd Font Mono")
+config.font = wezterm.font("ZedMono Nerd Font")
 config.color_scheme = "Catppuccin Macchiato"
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 config.window_background_opacity = 0.95
@@ -10,6 +10,16 @@ config.send_composed_key_when_left_alt_is_pressed = true
 
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 config.keys = {
+	{
+		key = "x",
+		mods = "LEADER",
+		action = wezterm.action.CloseCurrentPane({ confirm = true }),
+	},
+	{
+		key = "r",
+		mods = "LEADER",
+		action = wezterm.action.RotatePanes("Clockwise"),
+	},
 	{
 		key = "|",
 		mods = "LEADER",
