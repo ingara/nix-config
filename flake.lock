@@ -109,6 +109,86 @@
         "type": "github"
       }
     },
+    "homebrew-bundle": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721170081,
+        "narHash": "sha256-jHxRbuZbO3uDpwA9IzwVrt2OI/Q1TVNPpTG3MPbAV7o=",
+        "owner": "homebrew",
+        "repo": "homebrew-bundle",
+        "rev": "160fe4627b8916fcb48e4c46de723f5f0c6074cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "homebrew",
+        "repo": "homebrew-bundle",
+        "type": "github"
+      }
+    },
+    "homebrew-cask": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721618606,
+        "narHash": "sha256-OZkeB69tvjDfOTx9+4V6U7XMpSgfxjCzJIAeR3g5qMM=",
+        "owner": "homebrew",
+        "repo": "homebrew-cask",
+        "rev": "4342aaff8e06e45a3d17048e753547d86df13524",
+        "type": "github"
+      },
+      "original": {
+        "owner": "homebrew",
+        "repo": "homebrew-cask",
+        "type": "github"
+      }
+    },
+    "homebrew-core": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721626354,
+        "narHash": "sha256-ATYt+CT543DQQhDQZqbIoQlc5YNHmjg7HRUizYhoftE=",
+        "owner": "homebrew",
+        "repo": "homebrew-core",
+        "rev": "a001f3a0a3832d2d44a410e9086b5e4fe8b02f6d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "homebrew",
+        "repo": "homebrew-core",
+        "type": "github"
+      }
+    },
+    "homebrew-felixkratz": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1710407834,
+        "narHash": "sha256-nFfpcreYCqE/jCzY0mNeO+ZArUF9oMasG1r+R019MI4=",
+        "owner": "FelixKratz",
+        "repo": "homebrew-formulae",
+        "rev": "135452bb73f5fee5b31ca726b9eecdedb5f6492e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FelixKratz",
+        "repo": "homebrew-formulae",
+        "type": "github"
+      }
+    },
+    "homebrew-koekeishiya": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1716031250,
+        "narHash": "sha256-I9f5TYLfIgz1h+UuEnpFkwUwBAVs9WZ6ktQdiCScdNg=",
+        "owner": "koekeishiya",
+        "repo": "homebrew-formulae",
+        "rev": "757b5c222bce502d4292dfbb9648eb749689d704",
+        "type": "github"
+      },
+      "original": {
+        "owner": "koekeishiya",
+        "repo": "homebrew-formulae",
+        "type": "github"
+      }
+    },
     "homebrew-services": {
       "flake": false,
       "locked": {
@@ -231,6 +311,11 @@
         "darwin": "darwin",
         "disko": "disko",
         "home-manager": "home-manager",
+        "homebrew-bundle": "homebrew-bundle",
+        "homebrew-cask": "homebrew-cask",
+        "homebrew-core": "homebrew-core",
+        "homebrew-felixkratz": "homebrew-felixkratz",
+        "homebrew-koekeishiya": "homebrew-koekeishiya",
         "homebrew-services": "homebrew-services",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4"

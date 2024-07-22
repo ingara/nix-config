@@ -18,33 +18,6 @@ in
     shell = pkgs.fish;
   };
 
-  homebrew = import ./homebrew.nix {} // {
-  # homebrew = {
-    # This is a module from nix-darwin
-    # Homebrew is *installed* via the flake input nix-homebrew
-    enable = true;
-    # imports = [ ./homebrew.nix ];
-    # casks = pkgs.callPackage ./casks.nix {};
-
-    # These app IDs are from using the mas CLI app
-    # mas = mac app store
-    # https://github.com/mas-cli/mas
-    #
-    # $ nix shell nixpkgs#mas
-    # $ mas search <app name>
-    #
-    masApps = {
-      Fantastical = 975937182;
-      "Airmail 5" = 918858936;
-      "Amphetamine" = 937984704;
-      "Spotica Menu" = 570549457;
-      "Balance Lock" = 1019371109;
-      "Velja" = 1607635845;
-      "Canary Mail App" = 1236045954;
-      "Infuse • Video Player" = 1136220934;
-    };
-  };
-
   # Enable home-manager
   home-manager = {
     useGlobalPkgs = true;

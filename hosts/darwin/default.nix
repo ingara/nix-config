@@ -19,6 +19,7 @@ in
   imports = [
     ../../modules/darwin/home-manager.nix
       ../../modules/shared
+    ../../modules/darwin/homebrew.nix
   ];
 
 

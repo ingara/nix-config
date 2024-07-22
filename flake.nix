@@ -18,12 +18,33 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
+
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
     homebrew-services = {
       url = "github:homebrew/homebrew-services";
       flake = false;
     };
+    homebrew-bundle = {
+      url = "github:homebrew/homebrew-bundle";
+      flake = false;
+    };
+    homebrew-koekeishiya = {
+      url = "github:koekeishiya/homebrew-formulae";
+      flake = false;
+    };
+    homebrew-felixkratz = {
+      url = "github:FelixKratz/homebrew-formulae";
+      flake = false;
+    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-services, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
+  outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
     let
     user = "ingar";
     linuxSystems = [ "vboxnixos" ];
@@ -65,16 +86,20 @@
                 inherit user;
                 enable = true;
                 enableRosetta = true;
-                mutableTaps = true;
+                mutableTaps = false;
 
                 taps = {
+                  "homebrew/homebrew-core" = inputs.homebrew-core;
+                  "homebrew/homebrew-cask" = inputs.homebrew-cask;
                   # Services are not working: https://github.com/zhaofengli/nix-homebrew/issues/13
                   # Workaround from https://github.com/zhaofengli/nix-homebrew/issues/13#issuecomment-2156223912
                   "homebrew/homebrew-services" = nixpkgs.legacyPackages."${system}".applyPatches {
                     name = "homebrew-services-patched";
-                    src = homebrew-services;
+                    src = inputs.homebrew-services;
                     patches = [./patches/homebrew-services.patch];
                   };
+                  "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
+                  "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
                 };
               };
             }
