@@ -9,7 +9,7 @@ ITEM_MARGIN=5
 ITEM_PADDING=2
 FONT="Hack Nerd Font"
 
-source colors.sh
+source "$CONFIG_DIR/colors.sh"
 
 ##### Bar Appearance #####
 # Configuring the general appearance of the bar.
