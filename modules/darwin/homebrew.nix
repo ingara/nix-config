@@ -26,6 +26,7 @@
       "postico"
       "vial"
       "qmk-toolbox"
+      "protonvpn"
     ];
     brews = [
       "skhd"
