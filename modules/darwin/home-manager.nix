@@ -48,15 +48,39 @@ in
       manual.manpages.enable = false;
     };
   };
-  # Can't get this to work. Running through homebrew instead.
-  # services = {
-  #   sketchybar = {
-  #     enable = true;
-  #     extraPackages = [
-  #       pkgs.sketchybar-app-font
-  #     ];
-  #   };
-  # };
+
+  services = {
+    skhd = {
+      enable = true;
+    };
+    sketchybar = {
+      enable = true;
+      extraPackages = [
+        pkgs.sketchybar-app-font
+      ];
+    };
+    yabai = {
+      enable = true;
+      package = pkgs.yabai;
+      enableScriptingAddition = true;
+    };
+  };
+
+  launchd.user.agents = {
+    sketchybar.serviceConfig = {
+      StandardOutPath = "/tmp/sketchybar.log";
+      StandardErrorPath = "/tmp/sketchybar.log";
+    };
+    skhd.serviceConfig = {
+      StandardOutPath = "/tmp/skhd.log";
+      StandardErrorPath = "/tmp/skhd.log";
+    };
+    yabai.serviceConfig = {
+      StandardOutPath = "/tmp/yabai.log";
+      StandardErrorPath = "/tmp/yabai.log";
+    };
+  };
+
 
   # Fully declarative dock using the latest from Nix Store
   # local = {

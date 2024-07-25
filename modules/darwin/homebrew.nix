@@ -28,11 +28,7 @@
       "qmk-toolbox"
       "protonvpn"
     ];
-    brews = [
-      "skhd"
-      "yabai"
-      "sketchybar"
-    ];
+    brews = [];
     taps = map (key: builtins.replaceStrings ["homebrew-"] [""] key) (builtins.attrNames config.nix-homebrew.taps);
     masApps = {
       Fantastical = 975937182;
