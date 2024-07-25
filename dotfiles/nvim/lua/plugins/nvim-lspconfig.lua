@@ -4,5 +4,6 @@ return {
     servers = {
       biome = {},
     },
+    inlay_hints = { enabled = false },
   },
 }
