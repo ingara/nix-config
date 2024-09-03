@@ -4,11 +4,6 @@ shift + alt + cmd - n : yabai -m space --create && \
                   yabai -m space --focus "${index}"
 
 ctrl + alt + cmd - n : yabai -m space --create
-ctrl - 1 : yabai -m space --focus 1
-ctrl - 2 : yabai -m space --focus 2
-ctrl - 3 : yabai -m space --focus 3
-ctrl - 4 : yabai -m space --focus 4
-ctrl - 5 : yabai -m space --focus 5
 alt - 1 : yabai -m space --focus 1
 alt - 2 : yabai -m space --focus 2
 alt - 3 : yabai -m space --focus 3
@@ -98,10 +93,10 @@ shift + alt - 9: yabai -m window --space 9; yabai -m space --focus 9
 # Focus applications
 cmd + ctrl - s: open /Applications/Slack.app/
 cmd + ctrl - x: open /Applications/Spotify.app/
-cmd + ctrl - a: open /Applications/Airmail.app/
-cmd + ctrl - v: open /Applications/Visual Studio Code.app/
+cmd + ctrl - m: open /Applications/Airmail.app/
 cmd + ctrl - d: open /Applications/Firefox\ Developer\ Edition.app/
 cmd + ctrl - f: open /Applications/Firefox.app/
-cmd + ctrl - t: alacritty
-cmd + ctrl - w: wezterm-gui
-
+cmd + ctrl - t: open ~/Applications/Home\ Manager\ Apps/WezTerm.app/
+cmd + ctrl - w: open /Applications/WhatsApp.app/
+cmd + ctrl - a: open /Applications/Arc.app/
+cmd + ctrl - c: open /Applications/ChatGPT.app/

@@ -21,6 +21,12 @@ yabai -m config \
   mouse_drop_action swap \
   layout stack
 
+yabai -m space 1 --layout stack
+yabai -m space 2 --layout bsp
+yabai -m space 3 --layout stack
+yabai -m space 4 --layout bsp
+yabai -m space 5 --layout bsp
+
 # Sketchybar
 yabai -m signal --add event=window_created      action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_created"
 # yabai -m signal --add event=window_destroyed    action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_destroyed"
@@ -30,7 +36,7 @@ yabai -m signal --add event=window_moved        action="command -v sketchybar &>
 yabai -m signal --add event=application_visible action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_visible"
 # yabai -m signal --add event=application_hidden  action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_hidden"
 
-yabai -m rule --add app="^(System Preferences|Alacritty|1Password|Messages)$" manage=off
+yabai -m rule --add app="^(System Preferences|1Password)$" manage=off
 
 yabai -m rule --apply # https://github.com/koekeishiya/yabai/issues/2178
 

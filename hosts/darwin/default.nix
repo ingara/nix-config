@@ -65,7 +65,7 @@ in
 
   system = {
     keyboard = {
-      enableKeyMapping = true;
+      enableKeyMapping = false; # using karabiner-elements
       # use caps lock as escape
       remapCapsLockToEscape = true;
       # TODO: fix only for internal keyboard

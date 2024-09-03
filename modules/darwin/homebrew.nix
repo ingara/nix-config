@@ -2,9 +2,20 @@
 {
   homebrew = {
     enable = true;
+    onActivation = {
+      cleanup = "zap";
+      autoUpdate = true;
+      upgrade = true;
+    };
+    global = {
+      brewfile = true;
+      autoUpdate = true;
+      lockfiles = true;
+    };
     casks = [
       "firefox"
       "firefox@developer-edition"
+      "spotify"
       "raycast"
       "shottr" # screenshot tool
       "hammerspoon"
@@ -19,7 +30,6 @@
       "signal"
       "tidal"
       "slack"
-      "jordanbaird-ice"
       "whatsapp"
       "todoist"
       "chatgpt"
@@ -27,6 +37,15 @@
       "vial"
       "qmk-toolbox"
       "protonvpn"
+      "logi-options-plus"
+      "arc"
+      "karabiner-elements"
+      "zoom"
+
+      # SF Mono font for sketchybar
+      "sf-symbols"
+      "font-sf-mono"
+      "font-sf-pro"
     ];
     brews = [];
     taps = map (key: builtins.replaceStrings ["homebrew-"] [""] key) (builtins.attrNames config.nix-homebrew.taps);
