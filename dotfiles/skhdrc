@@ -94,9 +94,6 @@ shift + alt - 9: yabai -m window --space 9; yabai -m space --focus 9
 cmd + ctrl - s: open /Applications/Slack.app/
 cmd + ctrl - x: open /Applications/Spotify.app/
 cmd + ctrl - m: open /Applications/Airmail.app/
-cmd + ctrl - d: open /Applications/Firefox\ Developer\ Edition.app/
-cmd + ctrl - f: open /Applications/Firefox.app/
 cmd + ctrl - t: open ~/Applications/Home\ Manager\ Apps/WezTerm.app/
 cmd + ctrl - w: open /Applications/WhatsApp.app/
 cmd + ctrl - a: open /Applications/Arc.app/
-cmd + ctrl - c: open /Applications/ChatGPT.app/
