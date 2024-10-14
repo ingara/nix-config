@@ -9,6 +9,7 @@ shared-packages ++ [
       "Hack"
       "CascadiaCode"
       "ZedMono"
+      "VictorMono"
     ];
   })
 ]

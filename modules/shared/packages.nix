@@ -25,6 +25,7 @@ with pkgs; [
   jq
   chafa
   glow
+  magic-wormhole
 
   # Better userland for macOS
   coreutils
