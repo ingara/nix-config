@@ -23,6 +23,11 @@ return {
         noice = true,
         lsp_trouble = true,
         which_key = true,
+        indent_blankline = {
+          enabled = true,
+          scope_color = "pink",
+          colored_indent_levels = true,
+        },
       },
     },
   },
@@ -38,6 +43,12 @@ return {
     "folke/tokyonight.nvim",
     lazy = true,
     opts = { style = "moon" },
+  },
+  {
+    "rasulomaroff/reactive.nvim",
+    opts = {
+      load = { "catppuccin-macchiato-cursor", "catppuccin-macchiato-cursorline" },
+    },
   },
   -- Configure LazyVim to load theme
   {
