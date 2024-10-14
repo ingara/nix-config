@@ -50,6 +50,7 @@ in
     # '';
   };
 
+  system.stateVersion = 5;
 
   environment.shells = [pkgs.fish];
   programs.fish.enable = true;
