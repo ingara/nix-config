@@ -37,10 +37,11 @@
       "vial"
       "qmk-toolbox"
       "protonvpn"
-      "logi-options-plus"
       "arc"
       "karabiner-elements"
       "zoom"
+      "mac-mouse-fix"
+      "steam"
 
       # SF Mono font for sketchybar
       "sf-symbols"

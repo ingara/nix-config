@@ -2,7 +2,14 @@ local wezterm = require("wezterm")
 local smart_splits = wezterm.plugin.require("https://github.com/mrjones2014/smart-splits.nvim")
 local config = wezterm.config_builder()
 
+-- https://github.com/wez/wezterm/issues/5990#issuecomment-2305416553
+config.front_end = "WebGpu"
+
 config.font = wezterm.font("ZedMono Nerd Font")
+-- config.font = wezterm.font("CaskaydiaCove Nerd Font")
+-- config.font = wezterm.font("Hack Nerd Font")
+-- config.font = wezterm.font("VictorMono Nerd Font")
+config.font_size = 13
 config.color_scheme = "Catppuccin Macchiato"
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 config.window_background_opacity = 0.95
