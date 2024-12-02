@@ -6,7 +6,7 @@
 vim.g.root_spec = { { ".git", "lua" }, "lsp", "cwd" }
 
 -- Disable trouble in lualine since we're using dropbar
-vim.g.trouble_lualine = false
+-- vim.g.trouble_lualine = false
 
 -- Needed to play nice with bun: https://github.com/oven-sh/bun/issues/8520
 vim.o.backupcopy = "yes"
@@ -22,3 +22,5 @@ vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.h
 })
 
 vim.opt.wrap = true
+
+vim.g.lazyvim_prettier_needs_config = true

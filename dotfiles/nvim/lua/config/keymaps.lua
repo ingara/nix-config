@@ -8,14 +8,14 @@ map({ "n", "v", "o" }, "H", "^", { desc = "Start of line" })
 map({ "n", "v", "o" }, "L", "g_", { desc = "End of line" })
 map("n", "<leader>uz", ":ZenMode<CR>", { desc = "Toggle Zen mode" })
 
-map({ "n", "v" }, "ø", "[", { remap = true })
-map({ "n", "v" }, "æ", "]", { remap = true })
-map({ "n", "v" }, "Ø", "{", { remap = true })
-map({ "n", "v" }, "Æ", "}", { remap = true })
+map({ "n", "v", "o", "x" }, "ø", "[", { remap = true })
+map({ "n", "v", "o", "x" }, "æ", "]", { remap = true })
+map({ "n", "v", "o", "x" }, "Ø", "{", { remap = true })
+map({ "n", "v", "o", "x" }, "Æ", "}", { remap = true })
 
 -- lazygit
 map("n", "<C-g>", function()
-  LazyVim.lazygit({ cwd = LazyVim.root.git() })
+  Snacks.lazygit({ cwd = LazyVim.root.git() })
 end, { desc = "Lazygit (Root Dir)" })
 
 -- LSP
