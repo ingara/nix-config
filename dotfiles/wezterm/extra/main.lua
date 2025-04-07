@@ -53,6 +53,8 @@ config.keys = {
 		mods = "CTRL",
 		action = wezterm.action.AdjustPaneSize({ "Right", 5 }),
 	},
+	{ mods = "CTRL", key = ",", action = wezterm.action.MoveTabRelative(-1) },
+	{ mods = "CTRL", key = ".", action = wezterm.action.MoveTabRelative(1) },
 }
 
 smart_splits.apply_to_config(config, {

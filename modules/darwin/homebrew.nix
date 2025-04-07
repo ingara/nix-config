@@ -42,13 +42,16 @@
       "zoom"
       "mac-mouse-fix"
       "steam"
+      "notion-calendar"
 
       # SF Mono font for sketchybar
       "sf-symbols"
       "font-sf-mono"
       "font-sf-pro"
     ];
-    brews = [];
+    brews = [
+      "livekit"
+    ];
     taps = map (key: builtins.replaceStrings ["homebrew-"] [""] key) (builtins.attrNames config.nix-homebrew.taps);
     masApps = {
       Fantastical = 975937182;
@@ -57,7 +60,7 @@
       "Spotica Menu" = 570549457;
       "Balance Lock" = 1019371109;
       "Velja" = 1607635845;
-      "Canary Mail App" = 1236045954;
+      # "Canary Mail App" = 1236045954;
       "Infuse • Video Player" = 1136220934;
     };
   };

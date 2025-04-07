@@ -64,6 +64,18 @@ in
       package = pkgs.yabai;
       enableScriptingAddition = true;
     };
+
+    # https://mynixos.com/options/services.jankyborders
+    jankyborders = {
+      enable = true;
+      style = "round";
+      width = 3.0;
+      hidpi= true;
+      #active_color= "0xffcdd6f4";  # Lavender
+      active_color = "0xffee99a0"; # Maroon
+      inactive_color= "0xff45475a";  # Surface0
+      order = "above";
+    };
   };
 
   launchd.user.agents = {

@@ -7,7 +7,6 @@ with pkgs; [
   fd
   htop
   nixpkgs-fmt
-  ripgrep
   curlie
   ngrok
   miniserve

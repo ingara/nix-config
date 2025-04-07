@@ -37,11 +37,12 @@ yabai -m signal --add event=application_visible action="command -v sketchybar &>
 # yabai -m signal --add event=application_hidden  action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_hidden"
 
 # Rules
-yabai -m rule --add app="^(System Preferences|1Password)$" manage=off
+yabai -m rule --add app="^(System Preferences|1Password|^Steam$)$" manage=off
 yabai -m rule --add app="^Spotify$" scratchpad=spotify grid=11:11:1:1:9:9
 yabai -m rule --add app="^Discord$" title!="^Discord Updater$" scratchpad=discord grid=11:11:1:1:9:9
 yabai -m rule --apply # https://github.com/koekeishiya/yabai/issues/2178
 
 command -v sketchybar &> /dev/null && sketchybar --trigger yabai_loaded
+
 echo "yabai configuration loaded.."
 osascript -e "display notification \"yabai configuration loaded..!\" with title \"yabai\""

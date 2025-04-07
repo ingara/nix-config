@@ -247,10 +247,15 @@ in
     catppuccin.enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
-    changeDirWidgetCommand = "${pkgs.fd}/bin/fd --type d";
-    defaultCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
-    fileWidgetCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
-    fileWidgetOptions = [ "--preview '${pkgs.bat}/bin/bat --style=numbers --color=always {}'" ];
+    # changeDirWidgetCommand = "${pkgs.fd}/bin/fd --type d";
+    # defaultCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
+    # fileWidgetCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
+    # fileWidgetOptions = [ "--preview '${pkgs.bat}/bin/bat --style=numbers --color=always {}'" ];
+  };
+
+  ripgrep = {
+    enable = true;
+    arguments = [ "--column" "--line-number" "--max-columns-preview" "--colors=line:style:bold" ];
   };
 
   neovim = {
