@@ -6,7 +6,6 @@ local map = vim.keymap.set
 -- map("", "<leader>y", '"+y', { desc = "Copy to clipboard in normal, visual, select and operator modes" })
 map({ "n", "v", "o" }, "H", "^", { desc = "Start of line" })
 map({ "n", "v", "o" }, "L", "g_", { desc = "End of line" })
-map("n", "<leader>uz", ":ZenMode<CR>", { desc = "Toggle Zen mode" })
 
 map({ "n", "v", "o", "x" }, "ø", "[", { remap = true })
 map({ "n", "v", "o", "x" }, "æ", "]", { remap = true })
