@@ -11,11 +11,11 @@ let
     "wezterm/extra" = "wezterm/extra";
   };
 
-mkOutOfStoreSymlink = key: value: {
-  source = config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}";
-};
+  symlink = key: value: {
+    source = config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}";
+  };
 in
 {
-  xdg.configFile = lib.mapAttrs mkOutOfStoreSymlink dots;
+  xdg.configFile = lib.mapAttrs symlink dots;
 }
 

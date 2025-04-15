@@ -21,14 +21,15 @@ in
   # Enable home-manager
   home-manager = {
     useGlobalPkgs = true;
+    backupFileExtension = "backup";
     users.${user} = { pkgs, config, lib, ... }:{
       imports = [
-        catppuccin.homeManagerModules.catppuccin
+        catppuccin.homeModules.catppuccin
         (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
       ];
       catppuccin = {
         flavor = "macchiato";
-        enable = false; #TODO: enable?
+        enable = true;
       };
       home = {
         enableNixpkgsReleaseCheck = false;

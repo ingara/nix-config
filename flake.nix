@@ -91,13 +91,6 @@
                 taps = {
                   "homebrew/homebrew-core" = inputs.homebrew-core;
                   "homebrew/homebrew-cask" = inputs.homebrew-cask;
-                  # Services are not working: https://github.com/zhaofengli/nix-homebrew/issues/13
-                  # Workaround from https://github.com/zhaofengli/nix-homebrew/issues/13#issuecomment-2156223912
-                  "homebrew/homebrew-services" = nixpkgs.legacyPackages."${system}".applyPatches {
-                    name = "homebrew-services-patched";
-                    src = inputs.homebrew-services;
-                    patches = [./patches/homebrew-services.patch];
-                  };
                   "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
                   "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
                 };

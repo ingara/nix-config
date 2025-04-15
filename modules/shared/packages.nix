@@ -7,6 +7,7 @@ with pkgs; [
   fd
   htop
   nixpkgs-fmt
+  ripgrep
   curlie
   ngrok
   miniserve
@@ -39,8 +40,8 @@ with pkgs; [
   corepack_20
   nodePackages.vercel
 
-  rustc
-  cargo
+  # fonts
+  maple-mono-NF
 
   (buildGoModule rec {
    pname = "updo";

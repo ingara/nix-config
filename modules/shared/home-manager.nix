@@ -84,8 +84,6 @@ in
     enableFishIntegration = true;
     enableTransience = true;
 
-    catppuccin.enable = true;
-
     settings = {
       directory = {
         truncation_length = 5;
@@ -117,7 +115,6 @@ in
     userEmail = email;
     delta = {
       enable = true;
-      catppuccin.enable = true;
       options = {
         line-numbers = true;
       };
@@ -239,12 +236,10 @@ in
 
   bat = {
     enable = true;
-    catppuccin.enable = true;
   };
 
   fzf = {
     enable = true;
-    catppuccin.enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
     # changeDirWidgetCommand = "${pkgs.fd}/bin/fd --type d";
@@ -259,13 +254,16 @@ in
   };
 
   neovim = {
-    enable = true;
+    enable = false;
     viAlias = true;
     vimAlias = true;
+#     extraLuaConfig = ''
+# require("config.lazy")
+#     '';
   };
 
   alacritty = {
-    enable = true;
+    enable = false;
   };
   wezterm = {
     enable = true;
@@ -313,8 +311,6 @@ in
 
   tmux = {
     enable = true;
-
-    catppuccin.enable = true;
 
     clock24 = true;
     escapeTime = 0;
