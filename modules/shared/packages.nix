@@ -41,7 +41,7 @@ with pkgs; [
   nodePackages.vercel
 
   # fonts
-  maple-mono-NF
+  maple-mono.NF
 
   (buildGoModule rec {
    pname = "updo";

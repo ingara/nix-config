@@ -15,6 +15,7 @@
     casks = [
       "firefox"
       "firefox@developer-edition"
+      "zen-browser"
       "spotify"
       "raycast"
       "shottr" # screenshot tool
