@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 with pkgs; [
+  neovim
   eza
   colima
   docker
