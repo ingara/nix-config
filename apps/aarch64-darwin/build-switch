@@ -20,3 +20,7 @@ echo "${YELLOW}Cleaning up...${NC}"
 unlink ./result
 
 echo "${GREEN}Switch to new generation complete!${NC}"
+
+echo "${YELLOW}Loading yabai scripting addition...${NC}"
+sudo yabai --load-sa
+echo "${GREEN}Yabai scripting addition loaded!${NC}"
