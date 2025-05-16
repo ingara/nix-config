@@ -10,7 +10,6 @@
     global = {
       brewfile = true;
       autoUpdate = true;
-      lockfiles = true;
     };
     casks = [
       "firefox"
@@ -44,6 +43,9 @@
       "mac-mouse-fix"
       "steam"
       "notion-calendar"
+      "cursor"
+      "steermouse"
+      "ghostty"
 
       # SF Mono font for sketchybar
       "sf-symbols"
@@ -61,7 +63,6 @@
       "Spotica Menu" = 570549457;
       "Balance Lock" = 1019371109;
       "Velja" = 1607635845;
-      # "Canary Mail App" = 1236045954;
       "Infuse • Video Player" = 1136220934;
     };
   };
