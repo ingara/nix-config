@@ -16,7 +16,7 @@
       url = "github:catppuccin/nix";
     };
     nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
+      url = "github:zhaofengli/nix-homebrew";
     };
 
     homebrew-core = {
@@ -79,7 +79,6 @@
           specialArgs = inputs;
           modules = [
             home-manager.darwinModules.home-manager
-            # catppuccin.darwinModules.catppuccin
             nix-homebrew.darwinModules.nix-homebrew
             {
               nix-homebrew = {
