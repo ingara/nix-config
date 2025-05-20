@@ -23,6 +23,11 @@ return {
       temperature = 0,
       max_tokens = 8192,
     },
+    rag_service = {
+      enabled = true,
+      provider = "gemini",
+      host_mount = os.getenv("HOME") .. "/dev/soolv",
+    },
   },
   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
   build = "make",

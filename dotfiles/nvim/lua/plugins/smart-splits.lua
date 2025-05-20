@@ -5,7 +5,7 @@ return {
     {
       "<leader>wr",
       function()
-        require("smart-splits").start_resize_mode
+        require("smart-splits").start_resize_mode()
       end,
       desc = "Start resize mode",
     },
@@ -13,30 +13,34 @@ return {
     {
       "<C-h>",
       function()
-        require("smart-splits").move_cursor_left
+        require("smart-splits").move_cursor_left()
       end,
-      { desc = "navigate left", silent = true },
+      mode = { "i", "n", "v" },
+      { desc = "navigate left" },
     },
     {
       "<C-j>",
       function()
-        require("smart-splits").move_cursor_down
+        require("smart-splits").move_cursor_down()
       end,
-      { desc = "navigate down", silent = true },
+      mode = { "i", "n", "v" },
+      { desc = "navigate down" },
     },
     {
       "<C-k>",
       function()
-        require("smart-splits").move_cursor_up
+        require("smart-splits").move_cursor_up()
       end,
-      { desc = "navigate up", silent = true },
+      mode = { "i", "n", "v" },
+      { desc = "navigate up" },
     },
     {
       "<C-l>",
       function()
-        require("smart-splits").move_cursor_right
+        require("smart-splits").move_cursor_right()
       end,
-      { desc = "navigate right", silent = true },
+      mode = { "i", "n", "v" },
+      { desc = "navigate right" },
     },
     -- Resizing
     {
