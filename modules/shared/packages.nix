@@ -27,6 +27,7 @@ with pkgs; [
   chafa
   glow
   magic-wormhole
+  zellij
 
   # Better userland for macOS
   coreutils
