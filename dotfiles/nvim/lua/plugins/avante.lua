@@ -2,6 +2,8 @@ return {
   "yetone/avante.nvim",
   event = "VeryLazy",
   version = false, -- Never set this value to "*"! Never!
+  ---@module "avante.api"
+  ---@class avante.Config
   opts = {
     -- add any opts here
     -- for example
@@ -17,16 +19,27 @@ return {
     -- },
     -- Gemini 2.5 flash
     gemini = {
-      endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-      model = "gemini-2.5-pro-preview-03-25",
+      -- endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+      model = "gemini-2.5-pro-preview-05-06",
       timeout = 30000, -- Timeout in milliseconds
       temperature = 0,
       max_tokens = 8192,
     },
     rag_service = {
-      enabled = true,
+      enabled = false,
       provider = "gemini",
       host_mount = os.getenv("HOME") .. "/dev/soolv",
+      -- endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+    },
+    selector = { provider = "fzf_lua" },
+  },
+  keys = {
+    {
+      "<leader>ok",
+      function()
+        require("avante.api").ask({ new_chat = false, question = "OK" })
+      end,
+      desc = "Avante: send 'OK' to agent",
     },
   },
   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
@@ -40,10 +53,10 @@ return {
     --- The below dependencies are optional,
     "echasnovski/mini.pick", -- for file_selector provider mini.pick
     "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-    "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+    -- "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
     "ibhagwan/fzf-lua", -- for file_selector provider fzf
     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-    "zbirenbaum/copilot.lua", -- for providers='copilot'
+    -- "zbirenbaum/copilot.lua", -- for providers='copilot'
     {
       -- support for image pasting
       "HakonHarnes/img-clip.nvim",

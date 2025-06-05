@@ -12,12 +12,13 @@ require("lazy").setup({
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     -- import any extras modules here
     { import = "lazyvim.plugins.extras.ai.copilot" },
-    { import = "lazyvim.plugins.extras.ai.copilot-chat" },
+    -- { import = "lazyvim.plugins.extras.ai.copilot-chat" },
     { import = "lazyvim.plugins.extras.coding.yanky" },
 
     -- { import = "lazyvim.plugins.extras.editor.fzf" },
     { import = "lazyvim.plugins.extras.editor.harpoon2" },
     { import = "lazyvim.plugins.extras.editor.navic" },
+    { import = "lazyvim.plugins.extras.editor.mini-files" },
 
     { import = "lazyvim.plugins.extras.formatting.biome" },
 
@@ -33,6 +34,7 @@ require("lazy").setup({
     -- { import = "lazyvim.plugins.extras.linting.eslint" },
 
     { import = "lazyvim.plugins.extras.util.project" },
+    { import = "util.mini-hipatterns" },
 
     -- import/override with your plugins
     { import = "plugins" },

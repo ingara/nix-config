@@ -1,6 +1,9 @@
 return {
   "saghen/blink.cmp",
 
+  -- dependencies = {
+  --   "Kaiser-Yang/blink-cmp-avante",
+  -- },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
@@ -10,6 +13,17 @@ return {
       -- compat = {},
       default = { "lsp", "path", "buffer" },
       -- cmdline = {},
+      -- providers = {
+      --   avante = {
+      --     name = "avante",
+      --     module = "blink-cmp-avante",
+      --     kind = "Avante",
+      --     async = true,
+      --     opts = {
+      --       -- options for blink-cmp-avante
+      --     },
+      --   },
+      -- },
     },
     completion = {
       accept = { auto_brackets = { enabled = false } },
