@@ -36,6 +36,12 @@ yabai -m signal --add event=window_moved        action="command -v sketchybar &>
 yabai -m signal --add event=application_visible action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_visible"
 # yabai -m signal --add event=application_hidden  action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_hidden"
 
+# Handle Ghostty tabs
+yabai -m signal --add app='^Ghostty$' event=window_created action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+yabai -m signal --add app='^Ghostty$' event=window_destroyed action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+yabai -m signal --add app='^Finder$' event=window_created action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+yabai -m signal --add app='^Finder$' event=window_destroyed action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+
 # Rules
 yabai -m rule --add app="^(System Preferences|1Password|^Steam$)$" manage=off
 yabai -m rule --add app="^Spotify$" scratchpad=spotify grid=11:11:1:1:9:9

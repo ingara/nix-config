@@ -1,1 +1,5 @@
-theme = catppuccin
+theme = catppuccin-macchiato
+background-opacity = 0.9
+# font-family = "Hack Nerd Font Mono Regular"
+# font-size = 10
+font-family = "ZedMono NFM"

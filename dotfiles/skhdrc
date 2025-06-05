@@ -99,3 +99,4 @@ cmd + ctrl - t: open ~/Applications/Home\ Manager\ Apps/WezTerm.app/
 cmd + ctrl - w: open /Applications/WhatsApp.app/
 cmd + ctrl - a: open /Applications/Arc.app/
 cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord
+cmd + ctrl - g: open /Applications/Ghostty.app/
