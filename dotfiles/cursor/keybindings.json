@@ -1,0 +1,86 @@
+[
+  // AI & Cursor-specific actions
+  {
+    "key": "space i c",
+    "command": "workbench.panel.chat.view.focus",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "space i a",
+    "command": "composerMode.agent",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "space i b",
+    "command": "cursor.chatWithSelection",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  {
+    "key": "space i e",
+    "command": "cursor.explainCode",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  {
+    "key": "space i f",
+    "command": "cursor.fixCode",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  {
+    "key": "space i o",
+    "command": "cursor.optimizeCode",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  {
+    "key": "space i d",
+    "command": "cursor.documentCode",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  {
+    "key": "space i t",
+    "command": "cursor.addTests",
+    "when": "editorHasSelection && editorTextFocus"
+  },
+  // LSP and editor actions
+  {
+    "key": "space l a",
+    "command": "editor.action.quickFix",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "space l d",
+    "command": "editor.action.showHover",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "space l f",
+    "command": "editor.action.formatDocument",
+    "when": "editorTextFocus"
+  },
+  // Navigation (pane movement)
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.navigateUp",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.navigateDown",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.navigateLeft",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.navigateRight",
+    "when": "editorTextFocus"
+  },
+  // WhichKey discoverability (if using WhichKey extension)
+  {
+    "key": "space",
+    "command": "whichkey.show",
+    "when": "editorTextFocus"
+  }
+]

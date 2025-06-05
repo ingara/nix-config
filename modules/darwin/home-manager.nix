@@ -26,6 +26,7 @@ in
       imports = [
         catppuccin.homeModules.catppuccin
         (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
+        (import ./dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
       ];
       catppuccin = {
         flavor = "macchiato";
