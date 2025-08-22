@@ -2,11 +2,12 @@
 
 let
   dots = {
-    "yabai/yabairc" = "yabairc";
+    "yabai" = "yabai";
     "skhd/skhdrc" = "skhdrc";
     "lazygit/config.yml" = "lazygit.yml";
     "nvim" = "nvim";
     "ghostty" = "ghostty";
+    "zellij" = "zellij";
     "alacritty" = "alacritty";
     "sketchybar" = "sketchybar";
     "wezterm/extra" = "wezterm/extra";

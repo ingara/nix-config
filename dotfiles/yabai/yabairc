@@ -42,6 +42,10 @@ yabai -m signal --add app='^Ghostty$' event=window_destroyed action='yabai -m sp
 yabai -m signal --add app='^Finder$' event=window_created action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
 yabai -m signal --add app='^Finder$' event=window_destroyed action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
 
+# Auto-apply setup when displays change
+yabai -m signal --add event=display_added action="sleep 3 && ~/.config/yabai/apply_setup.sh auto"
+yabai -m signal --add event=display_removed action="sleep 3 && ~/.config/yabai/apply_setup.sh auto"
+
 # Rules
 yabai -m rule --add app="^(System Preferences|1Password|^Steam$)$" manage=off
 yabai -m rule --add app="^Spotify$" scratchpad=spotify grid=11:11:1:1:9:9
