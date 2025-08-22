@@ -90,6 +90,13 @@ shift + alt - 7: yabai -m window --space 7; yabai -m space --focus 7
 shift + alt - 8: yabai -m window --space 8; yabai -m space --focus 8
 shift + alt - 9: yabai -m window --space 9; yabai -m space --focus 9
 
+# Setup management
+cmd + shift + alt - h : ~/.config/yabai/apply_setup.sh home
+cmd + shift + alt - o : ~/.config/yabai/apply_setup.sh office
+cmd + shift + alt - m : ~/.config/yabai/apply_setup.sh mobile
+cmd + shift + alt - d : ~/.config/yabai/detect_setup.sh
+cmd + shift + alt - a : ~/.config/yabai/apply_setup.sh auto
+
 # Focus applications
 cmd + ctrl - s: open /Applications/Slack.app/
 cmd + ctrl - x: yabai -m window --toggle spotify || open /Applications/Spotify.app/
@@ -100,3 +107,4 @@ cmd + ctrl - w: open /Applications/WhatsApp.app/
 cmd + ctrl - a: open /Applications/Arc.app/
 cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord
 cmd + ctrl - g: open /Applications/Ghostty.app/
+cmd + ctrl - c: open /Applications/Cursor.app/
