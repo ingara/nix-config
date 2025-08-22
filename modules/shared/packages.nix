@@ -1,7 +1,9 @@
 { pkgs, ... }:
 
 with pkgs; [
+  nh
   neovim
+
   eza
   colima
   docker
@@ -27,7 +29,6 @@ with pkgs; [
   chafa
   glow
   magic-wormhole
-  zellij
 
   # Better userland for macOS
   coreutils
@@ -44,6 +45,9 @@ with pkgs; [
 
   # fonts
   maple-mono.NF
+
+  # rustc
+  # cargo
 
   (buildGoModule rec {
    pname = "updo";

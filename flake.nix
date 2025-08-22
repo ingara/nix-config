@@ -43,8 +43,12 @@
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;
     };
+    nh = {
+      url = "github:nix-community/nh";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
-  outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, ... } @inputs:
+  outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, nh, ... } @inputs:
     let
     user = "ingar";
     linuxSystems = [ "vboxnixos" ];
@@ -64,6 +68,15 @@
       # "apply" = mkApp "apply" system;
       "build" = mkApp "build" system;
       "build-switch" = mkApp "build-switch" system;
+      "nh-switch" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "nh-switch" ''
+          #!/usr/bin/env bash
+          PATH=${nh.packages.${system}.default}/bin:${nixpkgs.legacyPackages.${system}.git}/bin:$PATH
+          echo "Running 'nh-switch' for '${system}' with args: $@"
+          exec ${self}/apps/${system}/nh-switch $@
+        '')}/bin/nh-switch";
+      };
       # "copy-keys" = mkApp "copy-keys" system;
       # "create-keys" = mkApp "create-keys" system;
       # "check-keys" = mkApp "check-keys" system;
