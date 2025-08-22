@@ -1,4 +1,25 @@
 [
+  {
+    "key": "æ c",
+    "command": "editor.action.inlineDiffs.nextChange",
+    "when": "editorTextFocus && @inlineDiffs.nextChange.isActiveEditorWithDiffs"
+  },
+  {
+    "key": "ø c",
+    "command": "editor.action.inlineDiffs.previousChange",
+    "when": "editorTextFocus && @inlineDiffs.previousChange.isActiveEditorWithDiffs"
+  },
+  {
+    "key": "æ d",
+    "command": "editor.action.marker.nextInFiles",
+    "when": "editorFocus"
+  },
+  {
+    "key": "ø d",
+    "command": "editor.action.marker.previousInFiles",
+    "when": "editorFocus"
+  }
+  /*
   // AI & Cursor-specific actions
   {
     "key": "space i c",
@@ -83,4 +104,5 @@
     "command": "whichkey.show",
     "when": "editorTextFocus"
   }
+  */
 ]
