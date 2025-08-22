@@ -18,7 +18,7 @@ in
 {
   imports = [
     ../../modules/darwin/home-manager.nix
-      ../../modules/shared
+    ../../modules/shared
     ../../modules/darwin/homebrew.nix
   ];
 
@@ -78,6 +78,7 @@ in
   # TODO: set EDITOR etc?
 
   system = {
+    primaryUser = "ingar";
     keyboard = {
       enableKeyMapping = false; # using karabiner-elements
       # use caps lock as escape
