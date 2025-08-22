@@ -39,6 +39,10 @@ in
           sharedFiles
           additionalFiles
         ];
+        sessionVariables = {
+          PAGER = "less";
+          LESS = "-R --quit-if-one-screen --no-init";
+        };
 
         stateVersion = "23.11";
       };

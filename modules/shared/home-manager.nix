@@ -40,6 +40,10 @@ in
       # Disable greeting
       set -g fish_greeting
 
+      # Pager configuration
+      set -gx PAGER less
+      set -gx LESS "-R --quit-if-one-screen --no-init"
+
       # MacOS ALT+d fzf
       bind "∂" fzf-cd-widget
     '';
@@ -83,6 +87,7 @@ in
     enableZshIntegration = true;
     enableFishIntegration = true;
     enableTransience = true;
+    catppuccin.enable = true;
 
     settings = {
       directory = {
@@ -115,8 +120,14 @@ in
     userEmail = email;
     delta = {
       enable = true;
+      catppuccin.enable = true;
       options = {
+        navigate = true;
         line-numbers = true;
+        side-by-side = false;
+        pager = "less";
+        hyperlinks = true;
+        keep-plus-minus-markers = true;
       };
     };
     ignores = [
@@ -236,12 +247,14 @@ in
 
   bat = {
     enable = true;
+    catppuccin.enable = true;
   };
 
   fzf = {
     enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
+    catppuccin.enable = true;
     # changeDirWidgetCommand = "${pkgs.fd}/bin/fd --type d";
     # defaultCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
     # fileWidgetCommand = "${pkgs.fd}/bin/fd --type file --hidden --exclude .git";
@@ -311,6 +324,7 @@ in
 
   tmux = {
     enable = true;
+    catppuccin.enable = true;
 
     clock24 = true;
     escapeTime = 0;
