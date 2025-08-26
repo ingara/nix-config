@@ -11,7 +11,7 @@ in
     username = "${user}";
     homeDirectory = "/home/${user}";
     packages = pkgs.callPackage ./packages.nix {};
-    file = import ./files.nix { inherit user pkgs; };
+    file = { };
     stateVersion = "23.11";
   };
   programs = import ../shared/home-manager.nix { inherit config pkgs lib; };

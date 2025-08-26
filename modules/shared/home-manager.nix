@@ -66,19 +66,7 @@ in
         "kubectl"
       ];
     };
-    initExtraFirst = ''
-      # if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
-      #   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-      #   . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
-      # fi
-
-      # if [[ "$(uname)" == "Linux" ]]; then
-      #   alias pbcopy='xclip -selection clipboard'
-      # fi
-
-      # # Remove history data we don't want to see
-      # export HISTIGNORE="pwd:ls:cd"
-    '';
+    initExtraFirst = ''';
   };
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.starship.enable
@@ -266,14 +254,7 @@ in
     arguments = [ "--column" "--line-number" "--max-columns-preview" "--colors=line:style:bold" ];
   };
 
-  neovim = {
-    enable = false;
-    viAlias = true;
-    vimAlias = true;
-#     extraLuaConfig = ''
-# require("config.lazy")
-#     '';
-  };
+
 
   alacritty = {
     enable = false;
@@ -291,35 +272,7 @@ in
   };
 
 
-  # TODO: use this?
-  #
-  # ssh = {
-  #   enable = true;
-  #
-  #   extraConfig = lib.mkMerge [
-  #     (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-  #       ''
-  #       Include /home/${user}/.ssh/config_external
-  #       '')
-  #     (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-  #       ''
-  #       Include /Users/${user}/.ssh/config_external
-  #       '')
-  #     ''
-  #       Host github.com
-  #         Hostname github.com
-  #         IdentitiesOnly yes
-  #     ''
-  #     (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-  #       ''
-  #         IdentityFile /home/${user}/.ssh/id_github
-  #       '')
-  #     (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-  #       ''
-  #         IdentityFile /Users/${user}/.ssh/id_github
-  #       '')
-  #   ];
-  # };
+
 
 
   tmux = {

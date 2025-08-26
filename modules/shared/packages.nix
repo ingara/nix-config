@@ -29,6 +29,7 @@ with pkgs; [
   chafa
   glow
   magic-wormhole
+  claude-code
 
   # Better userland for macOS
   coreutils
@@ -46,8 +47,7 @@ with pkgs; [
   # fonts
   maple-mono.NF
 
-  # rustc
-  # cargo
+
 
   (buildGoModule rec {
    pname = "updo";

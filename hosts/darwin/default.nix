@@ -56,11 +56,7 @@ in
     };
 
 
-    # Turn this on to make command line easier
-    # extraOptions = ''
-    #   extra-platforms = aarch64-darwin x86_64-darwin
-    #   experimental-features = nix-command flakes
-    # '';
+
   };
 
   system.stateVersion = 5;
@@ -75,8 +71,6 @@ in
   # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; };
 
-  # TODO: set EDITOR etc?
-
   system = {
     primaryUser = "ingar";
     keyboard = {
@@ -87,17 +81,7 @@ in
       # https://stackoverflow.com/questions/54392510/how-to-assign-a-key-remapping-to-specific-device-using-hidutil
       # https://github.com/LnL7/nix-darwin/blob/master/modules/system/keyboard.nix
       # https://github.com/LnL7/nix-darwin/commit/edc3be51cef94c0a0fe8ee6ce122be7f4329325d
-      #
-      # userKeyMapping = [
-      #   ({
-      #     HIDKeyboardModifierMappingDst = keycodes.backspace;
-      #     HIDKeyboardModifierMappingSrc = keycodes.pipe;
-      #   })
-      #   ({
-      #     HIDKeyboardModifierMappingDst = keycodes.pipe;
-      #     HIDKeyboardModifierMappingSrc = keycodes.backspace;
-      #   })
-      # ];
+
     };
     defaults = {
       NSGlobalDomain = {

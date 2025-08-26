@@ -1,5 +1,5 @@
 {
-  description = "";
+  description = "Personal macOS development environment with nix-darwin and home-manager";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
@@ -35,10 +35,7 @@
       url = "github:homebrew/homebrew-bundle";
       flake = false;
     };
-    homebrew-koekeishiya = {
-      url = "github:koekeishiya/homebrew-formulae";
-      flake = false;
-    };
+
     homebrew-felixkratz = {
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;
@@ -68,6 +65,8 @@
       # "apply" = mkApp "apply" system;
       "build" = mkApp "build" system;
       "build-switch" = mkApp "build-switch" system;
+      # nh-switch has different implementation than mkApp pattern because it needs 
+      # the 'nh' binary in PATH, unlike other apps that only need git
       "nh-switch" = {
         type = "app";
         program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "nh-switch" ''

@@ -2,8 +2,6 @@
 
 let
   user = "ingar";
-  sharedFiles = import ../shared/files.nix { inherit config lib pkgs; };
-  additionalFiles = import ./files.nix { inherit user config pkgs; };
 in
 {
   imports = [
@@ -35,10 +33,7 @@ in
       home = {
         enableNixpkgsReleaseCheck = false;
         packages = pkgs.callPackage ./packages.nix {};
-        file = lib.mkMerge [
-          sharedFiles
-          additionalFiles
-        ];
+        file = { };
         sessionVariables = {
           PAGER = "less";
           LESS = "-R --quit-if-one-screen --no-init";
