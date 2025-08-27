@@ -100,21 +100,23 @@
     # Development shell with formatting tools
     devShells = nixpkgs.lib.genAttrs darwinSystems (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
-      pkgs.mkShell {
-        buildInputs = with pkgs; [
-          nixfmt-rfc-style  # RFC 166 nix formatter
-          just              # Command runner
-          git
-        ];
-        
-        shellHook = ''
-          echo "🚀 Nix config development environment loaded!"
-          echo "Available commands:"
-          echo "  just fmt     - Format all nix files with nixfmt-rfc-style"
-          echo "  just check   - Run nix flake check"
-          echo "  just switch  - Switch to new configuration" 
-          echo "  just build   - Build configuration"
-        '';
+      {
+        default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            nixfmt-rfc-style  # RFC 166 nix formatter
+            just              # Command runner
+            git
+          ];
+          
+          shellHook = ''
+            echo "🚀 Nix config development environment loaded!"
+            echo "Available commands:"
+            echo "  just fmt     - Format all nix files with nixfmt-rfc-style"
+            echo "  just check   - Run nix flake check"
+            echo "  just switch  - Switch to new configuration" 
+            echo "  just build   - Build configuration"
+          '';
+        };
       }
     );
 
