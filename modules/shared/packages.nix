@@ -47,8 +47,6 @@ with pkgs; [
   # fonts
   maple-mono.NF
 
-
-
   (buildGoModule rec {
    pname = "updo";
    version = "0.1.1";

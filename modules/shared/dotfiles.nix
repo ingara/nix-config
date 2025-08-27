@@ -11,6 +11,7 @@ let
     "alacritty" = "alacritty";
     "sketchybar" = "sketchybar";
     "wezterm/extra" = "wezterm/extra";
+    "git/extra" = "git-extra";
   };
 
   symlink = key: value: {
