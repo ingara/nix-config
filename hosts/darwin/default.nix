@@ -1,7 +1,7 @@
-{ config, pkgs, ... }:
+{ config, pkgs, userConfig, ... }:
 
 let
-  user = "ingar";
+  user = userConfig.username;
 
   # To find key codes:
   #
@@ -54,9 +54,6 @@ in
       interval = { Weekday = 0; Hour = 2; Minute = 0; };
       options = "--delete-older-than 30d";
     };
-
-
-
   };
 
   system.stateVersion = 5;
@@ -72,7 +69,7 @@ in
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; };
 
   system = {
-    primaryUser = "ingar";
+    primaryUser = userConfig.username;
     keyboard = {
       enableKeyMapping = false; # using karabiner-elements
       # use caps lock as escape

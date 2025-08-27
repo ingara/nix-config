@@ -1,7 +1,7 @@
-{ config, pkgs, catppuccin, lib, home-manager, ... }:
+{ config, pkgs, catppuccin, lib, home-manager, userConfig, ... }:
 
 let
-  user = "ingar";
+  user = userConfig.username;
 in
 {
   imports = [
@@ -42,7 +42,7 @@ in
         stateVersion = "23.11";
       };
 
-      programs = { } // import ../shared/home-manager.nix { inherit config pkgs lib; };
+      programs = { } // import ../shared/home-manager.nix { inherit config pkgs lib userConfig; };
 
       # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344

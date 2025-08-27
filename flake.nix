@@ -47,9 +47,24 @@
   };
   outputs = { self, darwin, nix-homebrew, home-manager, catppuccin, nixpkgs, disko, nh, ... } @inputs:
     let
-    user = "ingar";
-    linuxSystems = [ "vboxnixos" ];
+    # Centralized user configuration
+    userConfig = {
+      username = "ingar";
+      fullName = "Ingar Mathisen Almklov";
+      email = "ingara@gmail.com";
+      signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF2vZOGuH6Eix++BVA093FnJvrjSa1aLa5v976xVsp5K";
+    };
+    
+    # Legacy alias for compatibility
+    user = userConfig.username;
+    
+    # System architectures for apps
+    linuxSystems = [ "x86_64-linux" ];
     darwinSystems = [ "aarch64-darwin" ];
+    
+    # Configuration names 
+    nixosHosts = [ "vboxnixos" ];
+    darwinHosts = [ "aarch64-darwin" ];
 
     mkApp = scriptName: system: {
       type = "app";
@@ -82,13 +97,34 @@
       # "rollback" = mkApp "rollback" system;
     };
   in {
+    # Development shell with formatting tools
+    devShells = nixpkgs.lib.genAttrs darwinSystems (system:
+      let pkgs = nixpkgs.legacyPackages.${system}; in
+      pkgs.mkShell {
+        buildInputs = with pkgs; [
+          nixfmt-rfc-style  # RFC 166 nix formatter
+          just              # Command runner
+          git
+        ];
+        
+        shellHook = ''
+          echo "🚀 Nix config development environment loaded!"
+          echo "Available commands:"
+          echo "  just fmt     - Format all nix files with nixfmt-rfc-style"
+          echo "  just check   - Run nix flake check"
+          echo "  just switch  - Switch to new configuration" 
+          echo "  just build   - Build configuration"
+        '';
+      }
+    );
+
     apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
-    darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
-        darwin.lib.darwinSystem {
-          inherit system;
-          # system = "aarch64-darwin";
-          specialArgs = inputs;
+    darwinConfigurations = nixpkgs.lib.genAttrs darwinHosts (hostname:
+      let system = "aarch64-darwin"; in
+      darwin.lib.darwinSystem {
+        inherit system;
+        specialArgs = inputs // { inherit userConfig; };
           modules = [
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
@@ -112,10 +148,11 @@
         }
     );
 
-    nixosConfigurations = nixpkgs.lib.genAttrs linuxSystems (system:
+    nixosConfigurations = nixpkgs.lib.genAttrs nixosHosts (hostname:
+      let system = "x86_64-linux"; in
       nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = inputs;
+        specialArgs = inputs // { inherit userConfig; };
         modules = [
           disko.nixosModules.disko
           catppuccin.nixosModules.catppuccin

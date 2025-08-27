@@ -1,6 +1,6 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, userConfig, ... }:
 let
-  user = "ingar";
+  user = userConfig.username;
 in
 {
   imports = [
@@ -14,7 +14,7 @@ in
     file = { };
     stateVersion = "23.11";
   };
-  programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
+  programs = import ../shared/home-manager.nix { inherit config pkgs lib userConfig; };
   gtk = {
     enable = true;
   };
