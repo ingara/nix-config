@@ -55,7 +55,9 @@
     brews = [
       "livekit"
     ];
-    taps = map (key: builtins.replaceStrings ["homebrew-"] [""] key) (builtins.attrNames config.nix-homebrew.taps);
+    taps = map (key: builtins.replaceStrings [ "homebrew-" ] [ "" ] key) (
+      builtins.attrNames config.nix-homebrew.taps
+    );
     masApps = {
       Fantastical = 975937182;
       "Airmail 5" = 918858936;

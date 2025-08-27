@@ -1,4 +1,10 @@
-{ config, pkgs, lib, userConfig, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  userConfig,
+  ...
+}:
 let
   user = userConfig.username;
 in
@@ -10,11 +16,18 @@ in
     enableNixpkgsReleaseCheck = false;
     username = "${user}";
     homeDirectory = "/home/${user}";
-    packages = pkgs.callPackage ./packages.nix {};
+    packages = pkgs.callPackage ./packages.nix { };
     file = { };
     stateVersion = "23.11";
   };
-  programs = import ../shared/home-manager.nix { inherit config pkgs lib userConfig; };
+  programs = import ../shared/home-manager.nix {
+    inherit
+      config
+      pkgs
+      lib
+      userConfig
+      ;
+  };
   gtk = {
     enable = true;
   };
@@ -45,8 +58,15 @@ in
           height = 40;
           radius.top = 2.0;
           radius.bottom = 2.0;
-          modules.left = [ "launcher" "workspaces" ];
-          modules.right = [ "memory" "cpu" "sysmenu" ];
+          modules.left = [
+            "launcher"
+            "workspaces"
+          ];
+          modules.right = [
+            "memory"
+            "cpu"
+            "sysmenu"
+          ];
           wm.name = "bspwm";
           wm.restack = "bspwm";
           enable.ipc = true;

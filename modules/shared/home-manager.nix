@@ -1,4 +1,10 @@
-{ config, pkgs, lib, userConfig, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  userConfig,
+  ...
+}:
 
 let
   # Use centralized user configuration from flake
@@ -91,10 +97,10 @@ in
       };
 
       shell = {
-          disabled = false;
-          fish_indicator = "🐟";
-          zsh_indicator = "𝓏";
-        };
+        disabled = false;
+        fish_indicator = "🐟";
+        zsh_indicator = "𝓏";
+      };
     };
   };
 
@@ -132,8 +138,6 @@ in
       signByDefault = true;
       key = userConfig.signingKey; # Centralized from flake config
     };
-
-
 
     extraConfig = {
       core.editor = "nvim";
@@ -176,10 +180,13 @@ in
 
   ripgrep = {
     enable = true;
-    arguments = [ "--column" "--line-number" "--max-columns-preview" "--colors=line:style:bold" ];
+    arguments = [
+      "--column"
+      "--line-number"
+      "--max-columns-preview"
+      "--colors=line:style:bold"
+    ];
   };
-
-
 
   alacritty = {
     enable = false;
@@ -195,10 +202,6 @@ in
   zoxide = {
     enable = true;
   };
-
-
-
-
 
   tmux = {
     enable = true;

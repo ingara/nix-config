@@ -1,6 +1,14 @@
-{ config, inputs, lib, pkgs, userConfig, ... }:
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  userConfig,
+  ...
+}:
 
-let user = userConfig.username;
+let
+  user = userConfig.username;
 in
 {
   imports = [
@@ -17,7 +25,14 @@ in
         efiInstallAsRemovable = true;
       };
     };
-    initrd.availableKernelModules = [ "ata_piix" "ohci_pci" "ehci_pci" "ahci" "sd_mod" "sr_mod" ];
+    initrd.availableKernelModules = [
+      "ata_piix"
+      "ohci_pci"
+      "ehci_pci"
+      "ahci"
+      "sd_mod"
+      "sr_mod"
+    ];
   };
 
   # Set your time zone.
@@ -50,22 +65,24 @@ in
     fish.enable = true;
   };
 
-  environment.gnome.excludePackages = (with pkgs; [
-    gnome-photos
-    gnome-tour
-  ]) ++ (with pkgs.gnome; [
-    cheese
-    gnome-music
-    epiphany
-    geary
-    evince
-    gnome-characters
-    totem
-    tali
-    iagno
-    hitori
-    atomix
-  ]);
+  environment.gnome.excludePackages =
+    (with pkgs; [
+      gnome-photos
+      gnome-tour
+    ])
+    ++ (with pkgs.gnome; [
+      cheese
+      gnome-music
+      epiphany
+      geary
+      evince
+      gnome-characters
+      totem
+      tali
+      iagno
+      hitori
+      atomix
+    ]);
   services = {
     # displayManager.defaultSession = "none+bspwm";
 
@@ -74,7 +91,11 @@ in
     xserver = {
       enable = true;
 
-      videoDrivers = lib.mkForce [ "vmware" "virtualbox" "modesetting" ];
+      videoDrivers = lib.mkForce [
+        "vmware"
+        "virtualbox"
+        "modesetting"
+      ];
 
       displayManager.gdm.enable = true;
       desktopManager.gnome.enable = true;
@@ -92,20 +113,22 @@ in
     tumbler.enable = true; # Thumbnail support for images
   };
 
-  systemd.user.services = let
-    vbox-client = desc: flags: {
-      description = "VirtualBox Guest: ${desc}";
-      wantedBy = [ "graphical-session.target" ];
-      requires = [ "dev-vboxguest.device" ];
-      after = [ "dev-vboxguest.device" ];
+  systemd.user.services =
+    let
+      vbox-client = desc: flags: {
+        description = "VirtualBox Guest: ${desc}";
+        wantedBy = [ "graphical-session.target" ];
+        requires = [ "dev-vboxguest.device" ];
+        after = [ "dev-vboxguest.device" ];
 
-      unitConfig.ConditionVirtualization = "oracle";
-      serviceConfig.ExecStart = "${config.boot.kernelPackages.virtualboxGuestAdditions}/bin/VBoxClient -fv ${flags}";
+        unitConfig.ConditionVirtualization = "oracle";
+        serviceConfig.ExecStart = "${config.boot.kernelPackages.virtualboxGuestAdditions}/bin/VBoxClient -fv ${flags}";
+      };
+    in
+    {
+      virtualbox-resize = vbox-client "Resize" "--vmsvga";
+      virtualbox-clipboard = vbox-client "Clipboard" "--clipboard";
     };
-  in {
-    virtualbox-resize = vbox-client "Resize" "--vmsvga";
-    virtualbox-clipboard = vbox-client "Clipboard" "--clipboard";
-  };
 
   # Enable sound
   # sound.enable = true;
@@ -125,10 +148,10 @@ in
   # Sync state between machines
   # Add docker daemon
   virtualisation = {
-  #   docker = {
-  #     enable = true;
-  #     logDriver = "json-file";
-  #   };
+    #   docker = {
+    #     enable = true;
+    #     logDriver = "json-file";
+    #   };
     virtualbox.guest = {
       enable = true;
     };
@@ -148,15 +171,17 @@ in
   # Don't require password for users in `wheel` group for these commands
   security.sudo = {
     enable = true;
-    extraRules = [{
-      commands = [
-       {
-         command = "${pkgs.systemd}/bin/reboot";
-         options = [ "NOPASSWD" ];
-        }
-      ];
-      groups = [ "wheel" ];
-    }];
+    extraRules = [
+      {
+        commands = [
+          {
+            command = "${pkgs.systemd}/bin/reboot";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+        groups = [ "wheel" ];
+      }
+    ];
   };
 
   fonts.packages = with pkgs; [

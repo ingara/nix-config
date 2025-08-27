@@ -1,4 +1,5 @@
-{ configPath }: { config, lib, ... }:
+{ configPath }:
+{ config, lib, ... }:
 
 let
   dots = {
@@ -21,4 +22,3 @@ in
 {
   xdg.configFile = lib.mapAttrs symlink dots;
 }
-

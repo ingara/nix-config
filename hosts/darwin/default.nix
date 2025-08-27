@@ -1,4 +1,9 @@
-{ config, pkgs, userConfig, ... }:
+{
+  config,
+  pkgs,
+  userConfig,
+  ...
+}:
 
 let
   user = userConfig.username;
@@ -25,16 +30,16 @@ in
   # The default Nix build user group ID was changed from 30000 to 350.
   # You are currently managing Nix build users with nix-darwin, but your
   # nixbld group has GID 30000, whereas we expected 350.
-  # 
+  #
   # Possible causes include setting up a new Nix installation with an
   # existing nix-darwin configuration, setting up a new nix-darwin
   # installation with an existing Nix installation, or manually increasing
   # your `system.stateVersion` setting.
-  # 
+  #
   # You can set the configured group ID to match the actual value:
-  # 
+  #
   #     ids.gids.nixbld = 30000;
-  # 
+  #
   # We do not recommend trying to change the group ID with macOS user
   # management tools without a complete uninstallation and reinstallation
   # of Nix.
@@ -45,20 +50,30 @@ in
     enable = true;
     package = pkgs.nixVersions.latest;
     settings = {
-      trusted-users = [ "@admin" "${user}" ];
-      experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [
+        "@admin"
+        "${user}"
+      ];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
 
     gc = {
       automatic = true;
-      interval = { Weekday = 0; Hour = 2; Minute = 0; };
+      interval = {
+        Weekday = 0;
+        Hour = 2;
+        Minute = 0;
+      };
       options = "--delete-older-than 30d";
     };
   };
 
   system.stateVersion = 5;
 
-  environment.shells = [pkgs.fish];
+  environment.shells = [ pkgs.fish ];
   programs.fish.enable = true;
   users.users.${user}.shell = pkgs.fish;
 

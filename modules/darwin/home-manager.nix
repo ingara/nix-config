@@ -1,11 +1,19 @@
-{ config, pkgs, catppuccin, lib, home-manager, userConfig, ... }:
+{
+  config,
+  pkgs,
+  catppuccin,
+  lib,
+  home-manager,
+  userConfig,
+  ...
+}:
 
 let
   user = userConfig.username;
 in
 {
   imports = [
-   # ./dock
+    # ./dock
   ];
 
   # It me
@@ -20,34 +28,50 @@ in
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "backup";
-    users.${user} = { pkgs, config, lib, ... }:{
-      imports = [
-        catppuccin.homeModules.catppuccin
-        (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
-        (import ./dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
-      ];
-      catppuccin = {
-        flavor = "macchiato";
-        enable = true;
-      };
-      home = {
-        enableNixpkgsReleaseCheck = false;
-        packages = pkgs.callPackage ./packages.nix {};
-        file = { };
-        sessionVariables = {
-          PAGER = "less";
-          LESS = "-R --quit-if-one-screen --no-init";
+    users.${user} =
+      {
+        pkgs,
+        config,
+        lib,
+        ...
+      }:
+      {
+        imports = [
+          catppuccin.homeModules.catppuccin
+          (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
+          (import ./dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
+        ];
+        catppuccin = {
+          flavor = "macchiato";
+          enable = true;
+        };
+        home = {
+          enableNixpkgsReleaseCheck = false;
+          packages = pkgs.callPackage ./packages.nix { };
+          file = { };
+          sessionVariables = {
+            PAGER = "less";
+            LESS = "-R --quit-if-one-screen --no-init";
+          };
+
+          stateVersion = "23.11";
         };
 
-        stateVersion = "23.11";
+        programs =
+          { }
+          // import ../shared/home-manager.nix {
+            inherit
+              config
+              pkgs
+              lib
+              userConfig
+              ;
+          };
+
+        # Marked broken Oct 20, 2022 check later to remove this
+        # https://github.com/nix-community/home-manager/issues/3344
+        manual.manpages.enable = false;
       };
-
-      programs = { } // import ../shared/home-manager.nix { inherit config pkgs lib userConfig; };
-
-      # Marked broken Oct 20, 2022 check later to remove this
-      # https://github.com/nix-community/home-manager/issues/3344
-      manual.manpages.enable = false;
-    };
   };
 
   services = {
@@ -71,10 +95,10 @@ in
       enable = true;
       style = "round";
       width = 3.0;
-      hidpi= true;
+      hidpi = true;
       #active_color= "0xffcdd6f4";  # Lavender
       active_color = "0xffee99a0"; # Maroon
-      inactive_color= "0xff45475a";  # Surface0
+      inactive_color = "0xff45475a"; # Surface0
       order = "above";
     };
   };
@@ -93,7 +117,6 @@ in
       StandardErrorPath = "/tmp/yabai.log";
     };
   };
-
 
   # Fully declarative dock using the latest from Nix Store
   # local = {
