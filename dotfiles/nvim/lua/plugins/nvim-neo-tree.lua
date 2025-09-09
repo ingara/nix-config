@@ -104,17 +104,28 @@ return {
         })
       end,
       avante_add_files = function(state)
+        local avante_ok, avante = pcall(require, "avante")
+        if not avante_ok then
+          vim.notify("Avante is not available", vim.log.levels.WARN)
+          return
+        end
+
         local node = state.tree:get_node()
         local filepath = node:get_id()
-        local relative_path = require("avante.utils").relative_path(filepath)
-
-        local sidebar = require("avante").get()
+        local utils_ok, avante_utils = pcall(require, "avante.utils")
+        if not utils_ok then
+          vim.notify("Avante utils not available", vim.log.levels.WARN)
+          return
+        end
+        
+        local relative_path = avante_utils.relative_path(filepath)
+        local sidebar = avante.get()
 
         local open = sidebar:is_open()
         -- ensure avante sidebar is open
         if not open then
           require("avante.api").ask()
-          sidebar = require("avante").get()
+          sidebar = avante.get()
         end
 
         sidebar.file_selector:add_selected_file(relative_path)
