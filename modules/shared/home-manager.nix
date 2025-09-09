@@ -81,7 +81,6 @@ in
     enableZshIntegration = true;
     enableFishIntegration = true;
     enableTransience = true;
-    catppuccin.enable = true;
 
     settings = {
       directory = {
@@ -114,7 +113,6 @@ in
     userEmail = email;
     delta = {
       enable = true;
-      catppuccin.enable = true;
       options = {
         navigate = true;
         line-numbers = true;
@@ -168,14 +166,12 @@ in
 
   bat = {
     enable = true;
-    catppuccin.enable = true;
   };
 
   fzf = {
     enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
-    catppuccin.enable = true;
   };
 
   ripgrep = {
@@ -205,7 +201,6 @@ in
 
   tmux = {
     enable = true;
-    catppuccin.enable = true;
 
     clock24 = true;
     escapeTime = 0;

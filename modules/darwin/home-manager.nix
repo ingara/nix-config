@@ -44,6 +44,11 @@ in
         catppuccin = {
           flavor = "macchiato";
           enable = true;
+          starship.enable = true;
+          tmux.enable = true;
+          fzf.enable = true;
+          delta.enable = true;
+          bat.enable = true;
         };
         home = {
           enableNixpkgsReleaseCheck = false;

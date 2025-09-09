@@ -87,6 +87,9 @@
             exec ${self}/apps/${system}/${scriptName} $@
           '')
         }/bin/${scriptName}";
+        meta = {
+          description = "Build script for ${scriptName}";
+        };
       };
       mkLinuxApps = system: { };
       mkDarwinApps = system: {
@@ -105,6 +108,9 @@
               exec ${self}/apps/${system}/nh-switch $@
             '')
           }/bin/nh-switch";
+          meta = {
+            description = "NixOS system switching using nh";
+          };
         };
         # "copy-keys" = mkApp "copy-keys" system;
         # "create-keys" = mkApp "create-keys" system;
@@ -196,8 +202,11 @@
                 users.${user} = {
                   imports = [
                     ./modules/nixos/home-manager.nix
-                    catppuccin.homeManagerModules.catppuccin
+                    catppuccin.homeModules.catppuccin
                   ];
+                };
+                extraSpecialArgs = {
+                  inherit userConfig;
                 };
               };
             }

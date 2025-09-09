@@ -69,8 +69,6 @@ in
     (with pkgs; [
       gnome-photos
       gnome-tour
-    ])
-    ++ (with pkgs.gnome; [
       cheese
       gnome-music
       epiphany
