@@ -12,7 +12,7 @@ config.font = wezterm.font("ZedMono Nerd Font")
 config.font_size = 13
 config.color_scheme = "Catppuccin Macchiato"
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-config.window_background_opacity = 0.95
+config.window_background_opacity = 1
 config.send_composed_key_when_left_alt_is_pressed = true
 
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }

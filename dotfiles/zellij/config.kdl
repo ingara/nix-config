@@ -33,6 +33,14 @@ keybinds {
           payload "right";
         };
       }
+
+      bind "Ctrl Tab" { GoToNextTab; }
+      bind "Ctrl Shift Tab" { GoToPreviousTab; }
+      bind "Ctrl 1" { GoToTab 1; }
+      bind "Ctrl 2" { GoToTab 2; }
+      bind "Ctrl 3" { GoToTab 3; }
+      bind "Ctrl 4" { GoToTab 4; }
+      bind "Ctrl 5" { GoToTab 5; }
     }
 
     tmux clear-defaults=true {
@@ -50,6 +58,7 @@ keybinds {
       bind "-" { NewPane "down"; SwitchToMode "Normal"; }
       bind "_" { NewPane "up"; SwitchToMode "Normal"; }
       bind "|" { NewPane "right"; SwitchToMode "Normal"; }
+      bind "\\" { NewPane "left"; SwitchToMode "Normal"; }
       bind "n" { GoToNextTab; SwitchToMode "Normal"; }
       bind "N" { GoToPreviousTab; SwitchToMode "Normal"; }
 

@@ -64,8 +64,8 @@ setup_office() {
 
   yabai -m space 1 --layout stack
   yabai -m space 2 --layout bsp
-  yabai -m space 3 --layout bsp
-  yabai -m space 4 --layout bsp
+  yabai -m space 3 --layout stack
+  yabai -m space 4 --layout stack
   yabai -m space 5 --layout bsp
 
   # Set app locations: Mac main (display 1) + LG secondary (display 2)
