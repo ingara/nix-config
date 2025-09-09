@@ -2,35 +2,35 @@
 
 with pkgs;
 [
-  nh
-  neovim
-
-  eza
-  colima
-  docker
-  fd
-  htop
-  nixpkgs-fmt
-  ripgrep
-  curlie
-  ngrok
-  miniserve
-  pre-commit
-  wireguard-tools
-  git-absorb
-  k6
-  nerd-font-patcher
-  fastfetch
-  neofetch
-  nerdfetch
-  tealdeer
-  nixd
-  yq-go
-  jq
   chafa
-  glow
-  magic-wormhole
   claude-code
+  colima
+  curlie
+  docker
+  eza
+  fastfetch
+  fd
+  git-absorb
+  glow
+  htop
+  jq
+  k6
+  magic-wormhole
+  miniserve
+  neofetch
+  neovim
+  nerd-font-patcher
+  nerdfetch
+  ngrok
+  nh
+  nixd
+  nixpkgs-fmt
+  pre-commit
+  ripgrep
+  tealdeer
+  wireguard-tools
+  yq-go
+  zellij
 
   # Better userland for macOS
   coreutils
