@@ -49,6 +49,7 @@ in
           fzf.enable = true;
           delta.enable = true;
           bat.enable = true;
+          fish.enable = true;
         };
         home = {
           enableNixpkgsReleaseCheck = false;
