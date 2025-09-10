@@ -43,7 +43,9 @@ in
     enable = true;
     shellAliases = aliases;
     shellInit = ''
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      ''}
       # Disable greeting
       set -g fish_greeting
 
@@ -51,8 +53,10 @@ in
       set -gx PAGER less
       set -gx LESS "-R --quit-if-one-screen --no-init"
 
-      # MacOS ALT+d fzf
-      bind "∂" fzf-cd-widget
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # MacOS ALT+d fzf
+        bind "∂" fzf-cd-widget
+      ''}
     '';
   };
 
