@@ -189,13 +189,9 @@
         }
       );
 
-      nixosConfigurations = nixpkgs.lib.genAttrs nixosHosts (
-        hostname:
-        let
+      nixosConfigurations = {
+        vboxnixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-        in
-        nixpkgs.lib.nixosSystem {
-          inherit system;
           specialArgs = inputs // {
             inherit userConfig;
           };
@@ -218,9 +214,37 @@
                 };
               };
             }
-            ./hosts/nixos
+            ./hosts/nixos/vbox
           ];
-        }
-      );
+        };
+
+        wsl = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = inputs // {
+            inherit userConfig;
+          };
+          modules = [
+            nixos-wsl.nixosModules.wsl
+            catppuccin.nixosModules.catppuccin
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.${user} = {
+                  imports = [
+                    ./modules/nixos/home-manager.nix
+                    catppuccin.homeModules.catppuccin
+                  ];
+                };
+                extraSpecialArgs = {
+                  inherit userConfig;
+                };
+              };
+            }
+            ./hosts/nixos/wsl
+          ];
+        };
+      };
     };
 }
