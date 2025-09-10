@@ -139,6 +139,7 @@
               nixfmt-rfc-style # RFC 166 nix formatter
               just # Command runner
               git
+              bash # For justfile shebang recipes
             ];
 
             shellHook = ''
