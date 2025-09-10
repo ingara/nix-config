@@ -65,8 +65,9 @@ in
     fish.enable = true;
   };
 
-  environment.gnome.excludePackages =
-    (with pkgs; [
+  environment.gnome.excludePackages = (
+    with pkgs;
+    [
       gnome-photos
       gnome-tour
       cheese
@@ -80,7 +81,8 @@ in
       iagno
       hitori
       atomix
-    ]);
+    ]
+  );
   services = {
     # displayManager.defaultSession = "none+bspwm";
 

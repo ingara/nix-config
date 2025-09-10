@@ -11,11 +11,18 @@ fmt:
 check:
     nix flake check
 
-# Build the darwin configuration
+# Build configuration (auto-detects platform)
 build:
-    nix build .#darwinConfigurations.aarch64-darwin.system
+    #!/usr/bin/env bash
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        nix build .#darwinConfigurations.aarch64-darwin.system
+    elif [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
+        nix build .#nixosConfigurations.wsl.config.system.build.toplevel
+    else
+        nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel
+    fi
 
-# Quick darwin-rebuild switch (equivalent to nix run .#nh-switch)
+# Switch to new configuration (auto-detects platform)
 switch:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -23,15 +30,35 @@ switch:
     YELLOW='\033[1;33m'
     NC='\033[0m'
     
-    echo -e "${YELLOW}Starting darwin switch with nh...${NC}"
-    export NIXPKGS_ALLOW_UNFREE=1
-    nh darwin switch -H aarch64-darwin . "$@"
-    
-    echo -e "${YELLOW}Loading yabai scripting addition...${NC}"
-    sudo yabai --load-sa
-    echo -e "${GREEN}Yabai scripting addition loaded!${NC}"
-    
-    echo -e "${GREEN}Switch to new generation complete with nh!${NC}"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "${YELLOW}Starting darwin switch with nh...${NC}"
+        export NIXPKGS_ALLOW_UNFREE=1
+        nh darwin switch -H aarch64-darwin . "$@"
+        
+        echo -e "${YELLOW}Loading yabai scripting addition...${NC}"
+        sudo yabai --load-sa
+        echo -e "${GREEN}Yabai scripting addition loaded!${NC}"
+        
+        echo -e "${GREEN}Switch to new generation complete with nh!${NC}"
+    elif [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
+        echo -e "${YELLOW}Starting NixOS WSL switch with nh...${NC}"
+        nh os switch --hostname wsl . "$@"
+        echo -e "${GREEN}NixOS WSL switch complete with nh!${NC}"
+    else
+        echo -e "${YELLOW}Starting NixOS switch with nh...${NC}"
+        nh os switch --hostname vboxnixos . "$@"
+        echo -e "${GREEN}NixOS switch complete with nh!${NC}"
+    fi
+
+# Build specific configuration
+build-darwin:
+    nix build .#darwinConfigurations.aarch64-darwin.system
+
+build-wsl:
+    nix build .#nixosConfigurations.wsl.config.system.build.toplevel
+
+build-vbox:
+    nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel
 
 # Enter development shell with tools
 dev:

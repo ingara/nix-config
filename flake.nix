@@ -44,6 +44,10 @@
       url = "github:nix-community/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {
@@ -55,6 +59,7 @@
       nixpkgs,
       disko,
       nh,
+      nixos-wsl,
       ...
     }@inputs:
     let
@@ -74,7 +79,10 @@
       darwinSystems = [ "aarch64-darwin" ];
 
       # Configuration names
-      nixosHosts = [ "vboxnixos" ];
+      nixosHosts = [
+        "vboxnixos"
+        "wsl"
+      ];
       darwinHosts = [ "aarch64-darwin" ];
 
       mkApp = scriptName: system: {
@@ -120,7 +128,7 @@
     in
     {
       # Development shell with formatting tools
-      devShells = nixpkgs.lib.genAttrs darwinSystems (
+      devShells = nixpkgs.lib.genAttrs (darwinSystems ++ linuxSystems) (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
