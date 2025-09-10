@@ -13,6 +13,7 @@ with pkgs;
   git-absorb
   glow
   htop
+  just
   jq
   k6
   magic-wormhole

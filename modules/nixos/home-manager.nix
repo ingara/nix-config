@@ -10,7 +10,7 @@ let
 in
 {
   imports = [
-    (import ../shared/dotfiles.nix { configPath = "/etc/nixos/nix-config"; })
+    (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
   ];
   home = {
     enableNixpkgsReleaseCheck = false;

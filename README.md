@@ -48,21 +48,26 @@ just switch
 
 Install [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) first.
 
-Apply config:
+Initial setup (as `nixos` user):
 ```bash
-# Clone directly to /etc/nixos (standard location)
+# Clone and apply config (creates "ingar" user)
 nix-shell -p git --run "sudo git clone https://github.com/ingar/nix-config.git /etc/nixos/nix-config"
 cd /etc/nixos/nix-config
-
-# Edit username in flake.nix if needed (or keep "ingar" and let it create the user)
 sudo nixos-rebuild switch --flake .#wsl
+```
+
+After WSL restart (now logged in as `ingar`):
+```bash
+# Move config to home directory and take ownership
+sudo mv /etc/nixos/nix-config ~/nix-config
+sudo chown -R ingar:users ~/nix-config
 ```
 
 Updates:
 ```bash
-cd /etc/nixos/nix-config
-# Use sudo for editing system config files
-sudo just switch
+cd ~/nix-config
+sudo nixos-rebuild switch --flake .#wsl
+# or: just switch
 ```
 
 ### NixOS VirtualBox
@@ -71,9 +76,9 @@ Install NixOS in VirtualBox.
 
 Apply config:
 ```bash
-# Clone to standard location
-sudo git clone https://github.com/ingar/nix-config.git /etc/nixos/nix-config
-cd /etc/nixos/nix-config
+# Clone to home directory
+git clone https://github.com/ingar/nix-config.git ~/nix-config
+cd ~/nix-config
 
 # Edit username in flake.nix if needed (default is "ingar")  
 sudo nixos-rebuild switch --flake .#vboxnixos
@@ -81,8 +86,8 @@ sudo nixos-rebuild switch --flake .#vboxnixos
 
 Updates:
 ```bash
-cd /etc/nixos/nix-config
-sudo just switch
+cd ~/nix-config
+just switch
 ```
 
 ## Commands
@@ -105,6 +110,8 @@ just build-darwin   # macOS
 just build-wsl      # WSL  
 just build-vbox     # VirtualBox
 ```
+
+Run commands from your config directory (`~/nix-config` on NixOS, `./nix-config` on macOS).
 
 ## Structure
 
