@@ -6,7 +6,6 @@ let
 in
 shared-packages
 ++ [
-  _1password-gui
   rofi
   xclip
   firefox

@@ -25,7 +25,7 @@ with pkgs;
   ngrok
   nh
   nixd
-  nixpkgs-fmt
+  nixfmt-rfc-style
   pre-commit
   ripgrep
   tealdeer

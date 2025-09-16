@@ -14,6 +14,7 @@ in
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
     ../../modules/shared
+    ../../modules/nixos
   ];
 
   wsl = {

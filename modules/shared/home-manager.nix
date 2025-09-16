@@ -14,7 +14,6 @@ let
   aliases = {
     cat = "bat";
     g = "git";
-    dr = "darwin-rebuild";
     tls = "tmux-lazy-session";
     tf = "terraform";
     lg = "lazygit";
@@ -144,7 +143,6 @@ in
     extraConfig = {
       core.editor = "nvim";
       init.defaultBranch = "main";
-      credential.helper = "osxkeychain";
       pull = {
         default = "current";
         rebase = true;
@@ -158,7 +156,11 @@ in
         smudge = "git-lfs smudge -- %f";
       };
       gpg.format = "ssh";
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      credential.helper = "osxkeychain";
       "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+    } // lib.optionalAttrs pkgs.stdenv.isLinux {
+      credential.helper = "store";
     };
 
     # Include all git config files from git-extra directory
