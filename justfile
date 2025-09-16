@@ -1,4 +1,5 @@
 # Nix configuration development tasks
+set shell := ["bash", "-euo", "pipefail", "-c"]
 
 default:
     @just --list
@@ -13,38 +14,33 @@ check:
 
 # Build configuration (auto-detects platform)
 build:
-    #!/usr/bin/env bash
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        nix build .#darwinConfigurations.aarch64-darwin.system
-    elif [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
-        nix build .#nixosConfigurations.wsl.config.system.build.toplevel
-    else
-        nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel
+    @if [ "{{os()}}" = "macos" ]; then \
+        nix build .#darwinConfigurations.aarch64-darwin.system; \
+    elif [ -f /proc/version ] && grep -qi microsoft /proc/version; then \
+        nix build .#nixosConfigurations.wsl.config.system.build.toplevel; \
+    else \
+        nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel; \
     fi
 
 # Switch to new configuration (auto-detects platform)
-switch:
-    @bash -euo pipefail -c ' \
-    GREEN="\033[1;32m"; \
-    YELLOW="\033[1;33m"; \
-    NC="\033[0m"; \
-    if [[ "$$OSTYPE" == "darwin"* ]]; then \
-        echo -e "$${YELLOW}Starting darwin switch...$${NC}"; \
+switch *ARGS:
+    @if [ "{{os()}}" = "macos" ]; then \
+        printf "\033[1;33mStarting darwin switch...\033[0m\n"; \
         export NIXPKGS_ALLOW_UNFREE=1; \
-        nh darwin switch -H aarch64-darwin . "$$@"; \
-        echo -e "$${YELLOW}Loading yabai scripting addition...$${NC}"; \
+        nh darwin switch -H aarch64-darwin . {{ARGS}}; \
+        printf "\033[1;33mLoading yabai scripting addition...\033[0m\n"; \
         sudo yabai --load-sa; \
-        echo -e "$${GREEN}Yabai scripting addition loaded!$${NC}"; \
-        echo -e "$${GREEN}Switch to new generation complete!$${NC}"; \
-    elif [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then \
-        echo -e "$${YELLOW}Starting NixOS WSL switch...$${NC}"; \
-        nh os switch --hostname wsl . "$$@"; \
-        echo -e "$${GREEN}NixOS WSL switch complete!$${NC}"; \
+        printf "\033[1;32mYabai scripting addition loaded!\033[0m\n"; \
+        printf "\033[1;32mSwitch to new generation complete!\033[0m\n"; \
+    elif [ -f /proc/version ] && grep -qi microsoft /proc/version; then \
+        printf "\033[1;33mStarting NixOS WSL switch...\033[0m\n"; \
+        nh os switch --hostname wsl . {{ARGS}}; \
+        printf "\033[1;32mNixOS WSL switch complete!\033[0m\n"; \
     else \
-        echo -e "$${YELLOW}Starting NixOS switch...$${NC}"; \
-        nh os switch --hostname vboxnixos . "$$@"; \
-        echo -e "$${GREEN}NixOS switch complete!$${NC}"; \
-    fi' -- "$@"
+        printf "\033[1;33mStarting NixOS switch...\033[0m\n"; \
+        nh os switch --hostname vboxnixos . {{ARGS}}; \
+        printf "\033[1;32mNixOS switch complete!\033[0m\n"; \
+    fi
 
 # Build specific configuration
 build-darwin:
