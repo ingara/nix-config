@@ -44,6 +44,7 @@
       "steam"
       "notion-calendar"
       "cursor"
+      "cursor-cli"
       "steermouse"
       "ghostty"
 
