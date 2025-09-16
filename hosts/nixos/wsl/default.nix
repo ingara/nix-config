@@ -10,6 +10,7 @@ in
 {
   imports = [
     ../base.nix
+    ../../../modules/nixos
   ];
 
   networking.hostName = "nixos-wsl";

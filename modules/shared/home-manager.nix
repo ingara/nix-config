@@ -161,6 +161,7 @@ in
       "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
       credential.helper = "store";
+      "gpg \"ssh\"".program = "${pkgs._1password-gui}/bin/op-ssh-sign";
     };
 
     # Include all git config files from git-extra directory
