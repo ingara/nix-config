@@ -13,6 +13,7 @@ let
     "sketchybar" = "sketchybar";
     "wezterm/extra" = "wezterm/extra";
     "git/extra" = "git-extra";
+    "claude" = "claude";
   };
 
   symlink = key: value: {

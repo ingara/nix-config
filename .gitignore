@@ -1,3 +1,5 @@
 *.swp
 .DS_Store
 result
+dotfiles/claude/*
+!dotfiles/claude/settings.json

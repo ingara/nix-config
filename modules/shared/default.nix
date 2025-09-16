@@ -13,6 +13,8 @@ in
       EDITOR = "nvim";
       VISUAL = "nvim";
       XDG_CONFIG_HOME = "$HOME/.config";
+      # Since Claude Code doesn't respect XDG_CONFIG_HOME
+      CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
     };
   };
 
