@@ -14,19 +14,19 @@ apple_logo=(
 )
 
 apple_prefs=(
-  icon=""
+  icon="􀍟"
   label="Preferences"
   click_script="open -a 'System Preferences'; $POPUP_OFF"
 )
 
 apple_activity=(
-  icon=""
+  icon="􀢬"
   label="Activity"
   click_script="open -a 'Activity Monitor'; $POPUP_OFF"
 )
 
 apple_lock=(
-  icon=""
+  icon="􀒲"
   label="Lock Screen"
   click_script="pmset displaysleepnow; $POPUP_OFF"
 )
