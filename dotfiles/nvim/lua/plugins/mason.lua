@@ -51,10 +51,11 @@ return {
     },
   },
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
+    dependencies = { "mason-org/mason-lspconfig.nvim" },
     opts = {
       ensure_installed = {
-        "biome",
+        "@biomejs/biome",
         "nixpkgs-fmt",
       },
     },
