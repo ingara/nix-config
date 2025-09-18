@@ -1,10 +1,24 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-# Some events send additional information specific to the event in the $INFO
-# variable. E.g. the front_app_switched event sends the name of the newly
-# focused application in the $INFO variable:
-# https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
+# Source icon_map.sh to get the __icon_map function
+source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
 
-if [ "$SENDER" = "front_app_switched" ]; then
-  sketchybar --set "$NAME" label="$INFO"
+get_current_app() {
+  yabai -m query --windows --space mouse | jq -r 'map(select(.["has-focus"] == true)) | .[0].app // empty'
+}
+
+if [ "$SENDER" = "front_app_switched" ] && [ -n "$INFO" ]; then
+  current_app="$INFO"
+else
+  current_app=$(get_current_app)
+fi
+
+if [ -n "$current_app" ]; then
+  __icon_map "$current_app"
+  
+  if [ -n "$icon_result" ]; then
+    sketchybar --set "$NAME" icon="$icon_result" label="$current_app"
+  else
+    sketchybar --set "$NAME" icon="􀆊" label="$current_app"
+  fi
 fi

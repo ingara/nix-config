@@ -86,9 +86,6 @@ in
     };
     sketchybar = {
       enable = true;
-      extraPackages = [
-        pkgs.sketchybar-app-font
-      ];
     };
     yabai = {
       enable = true;

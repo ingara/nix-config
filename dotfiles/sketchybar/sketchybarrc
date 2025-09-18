@@ -34,14 +34,13 @@ sketchybar-cpu-helper $HELPER > /dev/null 2>&1 &
 sketchybar --bar position=top \
   height=32 \
   y_offset=2 \
-  blur_radius=20 \
+  blur_radius=50 \
   padding_left=$BRACKET_PADDING \
   padding_right=$BRACKET_PADDING \
   margin=10 \
   corner_radius=8 \
   color=$COLOR_BACKGROUND \
-  border_width=1 \
-  border_color=$COLOR_BORDER \
+  border_width=0 \
   shadow=on
 
 ##### Changing Defaults #####
@@ -79,11 +78,6 @@ sketchybar --default "${default[@]}"
 # -----------------------------------
 sketchybar \
   --add event yabai_loaded              \
-  --add event yabai_window_created      \
-  --add event yabai_window_moved        \
-  --add event yabai_window_focused      \
-  --add event yabai_window_resized      \
-  --add event yabai_application_visible \
   --add event skhd_space_type_changed   \
   --add event skhd_window_type_changed
 

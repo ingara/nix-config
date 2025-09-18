@@ -27,24 +27,47 @@ yabai -m space 3 --layout stack
 yabai -m space 4 --layout bsp
 yabai -m space 5 --layout bsp
 
-# Sketchybar
-yabai -m signal --add event=window_created      action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_created"
-# yabai -m signal --add event=window_destroyed    action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_destroyed"
-yabai -m signal --add event=window_focused      action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_focused"
-yabai -m signal --add event=window_resized      action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_resized"
-yabai -m signal --add event=window_moved        action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_window_moved"
-yabai -m signal --add event=application_visible action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_visible"
-# yabai -m signal --add event=application_hidden  action="command -v sketchybar &> /dev/null && sketchybar --trigger yabai_application_hidden"
+# Signal helper functions
+add_sketchybar_signal() {
+    yabai -m signal --add event="$1" action="command -v sketchybar &> /dev/null && sketchybar --trigger $2"
+}
 
-# Handle Ghostty tabs
-yabai -m signal --add app='^Ghostty$' event=window_created action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
-yabai -m signal --add app='^Ghostty$' event=window_destroyed action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
-yabai -m signal --add app='^Finder$' event=window_created action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
-yabai -m signal --add app='^Finder$' event=window_destroyed action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+add_app_focus_signal() {
+    yabai -m signal --add app="^$1$" event="$2" action='yabai -m space --focus next; sleep 0.01; yabai -m space --focus prev'
+}
 
-# Auto-apply setup when displays change
-yabai -m signal --add event=display_added action="sleep 3 && ~/.config/yabai/apply_setup.sh auto"
-yabai -m signal --add event=display_removed action="sleep 3 && ~/.config/yabai/apply_setup.sh auto"
+add_display_signal() {
+    yabai -m signal --add event="$1" action="sleep 3 && ~/.config/yabai/apply_setup.sh auto"
+}
+
+# Sketchybar signals (only the ones we actually use)
+SKETCHYBAR_SIGNALS=(
+    "window_focused:window_focus"
+    "application_front_switched:front_app_switched"
+    "space_changed:space_change"
+)
+
+for signal in "${SKETCHYBAR_SIGNALS[@]}"; do
+    event="${signal%:*}"
+    trigger="${signal#*:}"
+    add_sketchybar_signal "$event" "$trigger"
+done
+
+# App focus refresh signals
+APP_FOCUS_APPS=("Ghostty" "Finder")
+APP_FOCUS_EVENTS=("window_created" "window_destroyed")
+
+for app in "${APP_FOCUS_APPS[@]}"; do
+    for event in "${APP_FOCUS_EVENTS[@]}"; do
+        add_app_focus_signal "$app" "$event"
+    done
+done
+
+# Display change signals
+DISPLAY_EVENTS=("display_added" "display_removed")
+for event in "${DISPLAY_EVENTS[@]}"; do
+    add_display_signal "$event"
+done
 
 # Rules
 yabai -m rule --add app="^(System Preferences|1Password|^Steam$)$" manage=off
