@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-APP_FONT="SF Pro"
-
 prefs=(
   update_freq=10
-  padding_left=15
+  padding_left=$ITEM_SPACING
   icon.drawing=on
   icon="􀆊"
-  icon.padding_right=5
-  label.font="$APP_FONT:Bold:14.0"
+  icon.font="$ICON_FONT:Semibold:15.0"
+  icon.padding_right=$ITEM_PADDING
+  icon.color=$COLOR_ACCENT
+  label.font="$FONT_FAMILY:Medium:13.0"
+  label.color=$COLOR_LABEL
   script="$PLUGIN_DIR/front_app.sh"
 )
 

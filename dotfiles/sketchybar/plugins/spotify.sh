@@ -1,67 +1,58 @@
-#!/bin/sh
-
-# References:
-# - https://gist.github.com/zfarbp/581ce7e50a1b5740b4d31f007cac87fb
-# - https://github.com/NamesCode/.Dotfiles/blob/main/ext/sketchybar/plugins/spotify.sh
+#!/usr/bin/env bash
 
 source "$HOME/.config/sketchybar/colors.sh"
 
-update ()
-{
+update() {
   PLAYING=1
+  TRACK=""
+  ARTIST=""
+  
+  # Check if Spotify is running
+  if ! pgrep -f "Spotify" > /dev/null 2>&1; then
+    sketchybar --set "$NAME" label="Spotify Not Running" drawing=off
+    sketchybar --set spotify.play drawing=off
+    return
+  fi
+  
+  # Get playback state and track info
   if [ -z "$INFO" ]; then
-    if [ "$(osascript -e 'tell application "Spotify" to player state')" == 'playing' ]; then
+    if [ "$(osascript -e 'tell application "Spotify" to player state' 2>/dev/null)" == 'playing' ]; then
       PLAYING=0
     fi
-    TRACK="$(osascript -e 'tell application "Spotify" to name of current track')"
-    ARTIST="$(osascript -e 'tell application "Spotify" to artist of current track')"
-    ALBUM="$(osascript -e 'tell application "Spotify" to album of current track')"
-  elif [ "$(echo "$INFO" | jq -r '.["Player State"]')" = "Playing" ]; then
+    TRACK="$(osascript -e 'tell application "Spotify" to name of current track' 2>/dev/null)"
+    ARTIST="$(osascript -e 'tell application "Spotify" to artist of current track' 2>/dev/null)"
+  elif [ "$(echo "$INFO" | jq -r '.["Player State"]' 2>/dev/null)" = "Playing" ]; then
     PLAYING=0
-    TRACK="$(echo "$INFO" | jq -r .Name)"
-    ARTIST="$(echo "$INFO" | jq -r .Artist)"
-    ALBUM="$(echo "$INFO" | jq -r .Album)"
+    TRACK="$(echo "$INFO" | jq -r .Name 2>/dev/null)"
+    ARTIST="$(echo "$INFO" | jq -r .Artist 2>/dev/null)"
   fi
 
-  args=(
-  )
-  play_args=(
-  )
-
-  if [ $PLAYING -eq 0 ]; then
-    if [ "$ARTIST" == "" ]; then
-      args+=(label="$TRACK | $ALBUM")
-      args+=(drawing=on)
+  # Update main Spotify item
+  if [ $PLAYING -eq 0 ] && [ -n "$TRACK" ]; then
+    if [ -n "$ARTIST" ]; then
+      sketchybar --set "$NAME" label="$ARTIST – $TRACK" icon="􀑪" icon.color="$COLOR_SUCCESS" drawing=on
     else
-      args+=(label="$ARTIST – $TRACK")
-      args+=(drawing=on)
+      sketchybar --set "$NAME" label="$TRACK" icon="􀑪" icon.color="$COLOR_SUCCESS" drawing=on
     fi
-    play_args+=(icon=􀊆)
+    sketchybar --set spotify.play icon="􀊆" icon.color="$COLOR_ACCENT" drawing=on
+    sketchybar --set spotify.next drawing=on
   else
-    play_args+=(icon=􀊄)
+    sketchybar --set "$NAME" label="Not Playing" icon="􀑪" icon.color="$COLOR_ICON_SECONDARY" drawing=on
+    sketchybar --set spotify.play icon="􀊄" icon.color="$COLOR_ICON_SECONDARY" drawing=on
+    sketchybar --set spotify.next drawing=off
   fi
-  sketchybar --set "$NAME" "${args[@]}"
-  sketchybar --set spotify.play "${play_args[@]}"
 }
 
-handle_mouse_click() {
+handle_click() {
   case "$NAME" in
-    "spotify") osascript -e 'tell application "Spotify" to playpause'
-    ;;
-    "spotify_next") osascript -e 'tell application "Spotify" to next track'
-    ;;
-    "spotify_prev") osascript -e 'tell application "Spotify" to previous track'
-    ;;
-    *) exit
-    ;;
+    "spotify") osascript -e 'tell application "Spotify" to playpause' ;;
+    "spotify.play") osascript -e 'tell application "Spotify" to playpause' ;;
+    "spotify.next") osascript -e 'tell application "Spotify" to next track' ;;
   esac
 }
 
 case "$SENDER" in
-  "mouse.clicked") mouse_clicked
-  ;;
-  "forced") exit
-  ;;
-  *) update
-  ;;
+  "mouse.clicked") handle_click ;;
+  "forced") exit 0 ;;
+  *) update ;;
 esac

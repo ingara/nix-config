@@ -1,39 +1,21 @@
 #!/usr/bin/env bash
 
-# -----------------------------------
-# -------- Icons
-# -----------------------------------
-ERROR_ICON=
-
-# -----------------------------------
-# -------- Fields
-# -----------------------------------
-ICON_FONT="SF Pro:Bold:14.0"
-LABEL_FONT="$FONT:Semibold:11.0"
-
-# -----------------------------------
-# -------- Preferences
-# -----------------------------------
+# Modern yabai status indicator
 yabai=(
-	update_freq=0
-	display=active
-	# script="$SCRIPT_DIR/yabai.sh"
-	script="$PLUGIN_DIR/yabai.sh"
-	padding_left="$ITEM_MARGIN"
-
-	icon="$ERROR_ICON"
-	icon.font="$ICON_FONT"
-	icon.color="$RED"
-
-	label='ERROR'
-	label.font="$LABEL_FONT"
-	label.color="$RED"
-	label.y_offset=5
+  update_freq=0
+  display=active
+  script="$PLUGIN_DIR/yabai.sh"
+  padding_left=$ITEM_SPACING
+  
+  icon="􀢊"
+  icon.font="$ICON_FONT:Semibold:15.0"
+  icon.color=$COLOR_ERROR
+  
+  label="Yabai Error"
+  label.font="$FONT_FAMILY:Medium:13.0"
+  label.color=$COLOR_ERROR
 )
 
-# -----------------------------------
-# -------- Setup
-# -----------------------------------
 sketchybar --add item yabai left \
-	--set yabai "${yabai[@]}" \
-	--subscribe yabai skhd_space_type_changed skhd_window_type_changed yabai_window_focused yabai_loaded
+  --set yabai "${yabai[@]}" \
+  --subscribe yabai skhd_space_type_changed skhd_window_type_changed yabai_window_focused yabai_loaded

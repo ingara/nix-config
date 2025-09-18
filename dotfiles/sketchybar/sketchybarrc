@@ -5,10 +5,16 @@
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 ITEM_DIR="$CONFIG_DIR/items"
-ITEM_MARGIN=5
-ITEM_PADDING=2
-# FONT="Hack Nerd Font"
-FONT="SF Mono"
+
+# Consistent spacing and typography
+ITEM_SPACING=8
+ITEM_PADDING=4
+BRACKET_PADDING=6
+
+# Typography system
+FONT_FAMILY="SF Pro"
+FONT_MONO="SF Mono"
+ICON_FONT="SF Pro"
 
 source "$CONFIG_DIR/colors.sh"
 
@@ -28,12 +34,13 @@ sketchybar-cpu-helper $HELPER > /dev/null 2>&1 &
 sketchybar --bar position=top \
   height=32 \
   y_offset=2 \
-  blur_radius=10 \
-  padding_left=4 \
-  padding_right=4 \
+  blur_radius=20 \
+  padding_left=$BRACKET_PADDING \
+  padding_right=$BRACKET_PADDING \
   margin=10 \
-  corner_radius=12 \
+  corner_radius=8 \
   color=$COLOR_BACKGROUND \
+  border_width=1 \
   border_color=$COLOR_BORDER \
   shadow=on
 
@@ -44,10 +51,10 @@ sketchybar --bar position=top \
 
 default=(
   updates=when_shown
-  padding_left=5
-  padding_right=5
-  icon.font="SF Pro:Bold:14.0"
-  label.font="$FONT:Semibold:13.0"
+  padding_left=$ITEM_SPACING
+  padding_right=$ITEM_SPACING
+  icon.font="$ICON_FONT:Semibold:15.0"
+  label.font="$FONT_FAMILY:Medium:13.0"
   icon.color=$COLOR_ICON
   icon.highlight_color=$COLOR_ICON_HIGHLIGHT
   icon.padding_left=$ITEM_PADDING
@@ -55,13 +62,14 @@ default=(
   label.color=$COLOR_LABEL
   label.padding_left=$ITEM_PADDING
   label.padding_right=$ITEM_PADDING
-  background.corner_radius=5
-  background.padding_left=4
-  popup.background.border_width=2
-  popup.background.corner_radius=9
+  background.corner_radius=6
+  background.padding_left=$ITEM_PADDING
+  background.padding_right=$ITEM_PADDING
+  popup.background.border_width=1
+  popup.background.corner_radius=8
   popup.background.border_color="$COLOR_POPUP_BORDER"
   popup.background.color="$COLOR_POPUP_BACKGROUND"
-  popup.blur_radius=20
+  popup.blur_radius=30
   popup.background.shadow.drawing=on
 )
 sketchybar --default "${default[@]}"
@@ -79,30 +87,37 @@ sketchybar \
   --add event skhd_space_type_changed   \
   --add event skhd_window_type_changed
 
+# Left side items
 source "$ITEM_DIR/apple.sh"
 source "$ITEM_DIR/spaces.sh"
 source "$ITEM_DIR/yabai.sh"
 source "$ITEM_DIR/front_app.sh"
 
-##### Adding Right Items #####
-# In the same way as the left items we can add items to the right side.
-# Additional position (e.g. center) are available, see:
-# https://felixkratz.github.io/SketchyBar/config/items#adding-items-to-sketchybar
+# Create left side bracket for system items
+sketchybar --add bracket system apple.logo spaces yabai front_app \
+  --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+  background.corner_radius=8 \
+  background.border_width=1 \
+  background.border_color=$COLOR_BORDER
 
-# Some items refresh on a fixed cycle, e.g. the clock runs its script once
-# every 10s. Other items respond to events they subscribe to, e.g. the
-# volume.sh script is only executed once an actual change in system audio
-# volume is registered. More info about the event system can be found here:
-# https://felixkratz.github.io/SketchyBar/config/events
-
-# source "$ITEM_DIR/clock.sh"
-# source "$ITEM_DIR/volume.sh"
-# source "$ITEM_DIR/battery.sh"
+# Right side items (reverse order since they stack right to left)
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
 source "$ITEM_DIR/spotify.sh"
 
-# sketchybar --add alias "Spotica Menu" right
+# Create right side bracket for media controls
+sketchybar --add bracket media spotify spotify.play spotify.next \
+  --set media background.color=$COLOR_BACKGROUND_SECONDARY \
+  background.corner_radius=8 \
+  background.border_width=1 \
+  background.border_color=$COLOR_BORDER
+
+# Create right side bracket for info items
+sketchybar --add bracket info calendar status \
+  --set info background.color=$COLOR_BACKGROUND_SECONDARY \
+  background.corner_radius=8 \
+  background.border_width=1 \
+  background.border_color=$COLOR_BORDER
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --hotload on
