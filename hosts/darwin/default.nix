@@ -87,13 +87,6 @@ in
     primaryUser = userConfig.username;
     keyboard = {
       enableKeyMapping = false; # using karabiner-elements
-      # use caps lock as escape
-      remapCapsLockToEscape = true;
-      # TODO: fix only for internal keyboard
-      # https://stackoverflow.com/questions/54392510/how-to-assign-a-key-remapping-to-specific-device-using-hidutil
-      # https://github.com/LnL7/nix-darwin/blob/master/modules/system/keyboard.nix
-      # https://github.com/LnL7/nix-darwin/commit/edc3be51cef94c0a0fe8ee6ce122be7f4329325d
-
     };
     defaults = {
       NSGlobalDomain = {

@@ -156,10 +156,12 @@ in
         smudge = "git-lfs smudge -- %f";
       };
       gpg.format = "ssh";
-    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    }
+    // lib.optionalAttrs pkgs.stdenv.isDarwin {
       credential.helper = "osxkeychain";
       "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-    } // lib.optionalAttrs pkgs.stdenv.isLinux {
+    }
+    // lib.optionalAttrs pkgs.stdenv.isLinux {
       credential.helper = "store";
       "gpg \"ssh\"".program = "${pkgs._1password-gui}/bin/op-ssh-sign";
     };
