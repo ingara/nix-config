@@ -27,6 +27,7 @@ with pkgs;
   nixd
   nixfmt-rfc-style
   pre-commit
+  statix
   ripgrep
   tealdeer
   wireguard-tools

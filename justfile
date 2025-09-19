@@ -71,3 +71,11 @@ update:
 # Format check (don't format, just check)
 fmt-check:
     find . -name "*.nix" -type f -exec nixfmt --check {} \;
+
+# Lint nix files with statix
+lint:
+    statix check .
+
+# Auto-fix linting issues with statix
+lint-fix:
+    statix fix .
