@@ -43,11 +43,13 @@ in
         };
         "settings" = {
           screenchange.reload = false;
-          compositing.background = "source";
-          compositing.foreground = "over";
-          compositing.overline = "over";
-          compositing.underline = "over";
-          compositing.border = "over";
+          compositing = {
+            background = "source";
+            foreground = "over";
+            overline = "over";
+            underline = "over";
+            border = "over";
+          };
           pseudo.transparency = false;
         };
         "bar/main" = {

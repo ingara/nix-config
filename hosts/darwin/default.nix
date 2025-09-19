@@ -71,19 +71,17 @@ in
     };
   };
 
-  system.stateVersion = 5;
-
   environment.shells = [ pkgs.fish ];
   programs.fish.enable = true;
   users.users.${user}.shell = pkgs.fish;
-
-  # Turn off NIX_PATH warnings now that we're using flakes
-  system.checks.verifyNixPath = false;
 
   # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; };
 
   system = {
+    stateVersion = 5;
+    # Turn off NIX_PATH warnings now that we're using flakes
+    checks.verifyNixPath = false;
     primaryUser = userConfig.username;
     keyboard = {
       enableKeyMapping = false; # using karabiner-elements

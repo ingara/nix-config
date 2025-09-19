@@ -5,8 +5,6 @@
   ...
 }:
 
-let
-in
 {
   environment = {
     variables = {

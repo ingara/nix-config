@@ -10,7 +10,7 @@ let
   # Use centralized user configuration from flake
   name = userConfig.fullName;
   user = userConfig.username;
-  email = userConfig.email;
+  inherit (userConfig) email;
   aliases = {
     cat = "bat";
     g = "git";

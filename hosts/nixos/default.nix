@@ -65,24 +65,21 @@ in
     fish.enable = true;
   };
 
-  environment.gnome.excludePackages = (
-    with pkgs;
-    [
-      gnome-photos
-      gnome-tour
-      cheese
-      gnome-music
-      epiphany
-      geary
-      evince
-      gnome-characters
-      totem
-      tali
-      iagno
-      hitori
-      atomix
-    ]
-  );
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-photos
+    gnome-tour
+    cheese
+    gnome-music
+    epiphany
+    geary
+    evince
+    gnome-characters
+    totem
+    tali
+    iagno
+    hitori
+    atomix
+  ];
   services = {
     # displayManager.defaultSession = "none+bspwm";
 

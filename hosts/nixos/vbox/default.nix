@@ -62,24 +62,21 @@
   };
 
   # Exclude unwanted GNOME packages
-  environment.gnome.excludePackages = (
-    with pkgs;
-    [
-      gnome-photos
-      gnome-tour
-      cheese
-      gnome-music
-      epiphany
-      geary
-      evince
-      gnome-characters
-      totem
-      tali
-      iagno
-      hitori
-      atomix
-    ]
-  );
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-photos
+    gnome-tour
+    cheese
+    gnome-music
+    epiphany
+    geary
+    evince
+    gnome-characters
+    totem
+    tali
+    iagno
+    hitori
+    atomix
+  ];
 
   # VirtualBox guest services
   systemd.user.services =
