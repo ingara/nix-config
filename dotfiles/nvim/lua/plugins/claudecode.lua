@@ -4,14 +4,17 @@ return {
   config = true,
   opts = {
     git_repo_cwd = true,
-    snacks_win_opts = {
-      animate = false,
-    },
-    diff_opts = {
-      auto_close_on_accept = true,
-      vertical_split = false,
-      open_in_current_tab = true,
-      keep_terminal_focus = true,
+    terminal = {
+      ---@module "snacks"
+      ---@type snacks.win.Config|{}
+      snacks_win_opts = {
+        animate = false,
+
+        position = "bottom",
+        height = 0.4,
+        width = 1.0,
+        border = "double",
+      },
     },
   },
   keys = {
