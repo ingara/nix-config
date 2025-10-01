@@ -2,18 +2,10 @@ return {
   {
     "catppuccin/nvim",
     name = "catppuccin",
-    -- Fix for LazyVim bufferline integration issue: https://github.com/LazyVim/LazyVim/issues/6355
-    -- Catppuccin changed API from get() to get_theme(), this creates compatibility alias
-    opts = function(_, opts)
-      local module = require("catppuccin.groups.integrations.bufferline")
-      if module then
-        module.get = module.get_theme
-      end
-      return {
-        flavour = "macchiato",
-        transparent_background = true,
-      }
-    end,
+    opts = {
+      flavour = "macchiato",
+      transparent_background = true,
+    },
   },
   {
     "rasulomaroff/reactive.nvim",
