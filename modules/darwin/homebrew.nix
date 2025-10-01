@@ -14,7 +14,7 @@
     casks = [
       "firefox"
       "firefox@developer-edition"
-      "zen-browser"
+      "zen"
       "spotify"
       "raycast"
       "shottr" # screenshot tool
@@ -31,7 +31,7 @@
       "tidal"
       "slack"
       "whatsapp"
-      "todoist"
+      "todoist-app"
       "chatgpt"
       "postico"
       "vial"
