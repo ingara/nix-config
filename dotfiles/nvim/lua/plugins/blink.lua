@@ -7,6 +7,11 @@ return {
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
+    fuzzy = {
+      -- Use Lua implementation as workaround for path resolution bug
+      -- https://github.com/Saghen/blink.cmp/discussions/1341
+      implementation = "lua",
+    },
     sources = {
       -- adding any nvim-cmp sources here will enable them
       -- with blink.compat
