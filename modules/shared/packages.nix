@@ -3,7 +3,6 @@
 with pkgs;
 [
   chafa
-  claude-code
   colima
   curlie
   docker
@@ -29,6 +28,7 @@ with pkgs;
   pre-commit
   statix
   ripgrep
+  rustup
   tealdeer
   wireguard-tools
   yq-go
@@ -43,8 +43,8 @@ with pkgs;
   wget
 
   # node stuff
-  nodejs_20
-  corepack_20
+  nodejs_22
+  corepack_22
   nodePackages.vercel
 
   # fonts

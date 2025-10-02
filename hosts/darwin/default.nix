@@ -2,6 +2,7 @@
   config,
   pkgs,
   userConfig,
+  claude-code-nix,
   ...
 }:
 
@@ -76,7 +77,9 @@ in
   users.users.${user}.shell = pkgs.fish;
 
   # Load configuration that is shared across systems
-  environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; };
+  environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
+    claude-code-nix.packages.${pkgs.system}.claude-code
+  ];
 
   system = {
     stateVersion = 5;
