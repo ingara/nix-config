@@ -49,8 +49,8 @@ in
       set -g fish_greeting
 
       # Pager configuration
-      set -gx PAGER less
-      set -gx LESS "-R --quit-if-one-screen --no-init"
+      # set -gx PAGER less
+      # set -gx LESS "-R --quit-if-one-screen --no-init"
 
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         # MacOS ALT+d fzf
