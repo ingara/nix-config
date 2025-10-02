@@ -2,8 +2,8 @@
 -- - Buffer switching https://gist.github.com/towry/41ff484a898c81a8ca23b644d7e513ef
 return {
   "nvim-neo-tree/neo-tree.nvim",
-  -----@module "neo-tree"
-  -----@type neotree.Config
+  ---@module "neo-tree"
+  ---@type neotree.Config
   opts = {
     filesystem = {
       filtered_items = {
@@ -103,38 +103,6 @@ return {
           },
         })
       end,
-      avante_add_files = function(state)
-        local avante_ok, avante = pcall(require, "avante")
-        if not avante_ok then
-          vim.notify("Avante is not available", vim.log.levels.WARN)
-          return
-        end
-
-        local node = state.tree:get_node()
-        local filepath = node:get_id()
-        local utils_ok, avante_utils = pcall(require, "avante.utils")
-        if not utils_ok then
-          vim.notify("Avante utils not available", vim.log.levels.WARN)
-          return
-        end
-        
-        local relative_path = avante_utils.relative_path(filepath)
-        local sidebar = avante.get()
-
-        local open = sidebar:is_open()
-        -- ensure avante sidebar is open
-        if not open then
-          require("avante.api").ask()
-          sidebar = avante.get()
-        end
-
-        sidebar.file_selector:add_selected_file(relative_path)
-
-        -- remove neo tree buffer
-        if not open then
-          sidebar.file_selector:remove_selected_file("neo-tree filesystem [1]")
-        end
-      end,
     },
     buffers = {
       group_empty_dirs = true, -- when true, empty directories will be grouped together
@@ -144,7 +112,6 @@ return {
         ["<esc>"] = false,
         ["s"] = "flash_jump",
         ["-"] = "flash_jump_open",
-        ["A"] = "avante_add_files",
       },
     },
   },
