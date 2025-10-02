@@ -1,8 +1,6 @@
 return {
   "nyngwang/NeoZoom.lua",
-  config = function()
-    require("neo-zoom").setup({})
-  end,
+  config = true,
   keys = {
     {
       "<leader>wz",

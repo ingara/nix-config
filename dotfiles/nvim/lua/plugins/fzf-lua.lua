@@ -2,12 +2,6 @@ return {
   "ibhagwan/fzf-lua",
   opts = {
     fzf_opts = { ["--cycle"] = true },
-    -- keymap = {
-    --   fzf = {
-    --     ["ctrl-n"] = "down",
-    --     ["ctrl-p"] = "up",
-    --   },
-    -- },
   },
   keys = {
     {
