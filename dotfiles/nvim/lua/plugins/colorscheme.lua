@@ -10,6 +10,11 @@ return {
   {
     "rasulomaroff/reactive.nvim",
     opts = {
+      builtin = {
+        cursorline = true,
+        cursor = true,
+        modemsg = true,
+      },
       load = { "catppuccin-macchiato-cursor", "catppuccin-macchiato-cursorline" },
     },
   },
@@ -17,7 +22,6 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      -- colorscheme = "tokyonight",
       colorscheme = "catppuccin",
     },
   },
