@@ -56,9 +56,11 @@ build-vbox:
 dev:
     nix develop
 
-# Clean up build artifacts
+# Clean up build artifacts and old generations
 clean:
     rm -f result*
+    nh clean all --keep 5
+    nix-collect-garbage -d
 
 # Show flake info
 info:
