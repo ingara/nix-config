@@ -149,13 +149,7 @@
 
             shellHook = ''
               echo "🚀 Nix config development environment loaded!"
-              echo "Available commands:"
-              echo "  just fmt      - Format all nix files with nixfmt-rfc-style"
-              echo "  just lint     - Run statix linter on all nix files"
-              echo "  just lint-fix - Auto-fix linting issues with statix"
-              echo "  just check    - Run nix flake check"
-              echo "  just switch   - Switch to new configuration" 
-              echo "  just build    - Build configuration"
+              just
             '';
           };
         }
