@@ -6,12 +6,13 @@ with pkgs;
   colima
   curlie
   docker
+  dust
   eza
   fastfetch
   fd
   git-absorb
   glow
-  htop
+  btop
   just
   jq
   k6
