@@ -2,6 +2,10 @@ return {
   {
     "mrjones2014/smart-splits.nvim",
     lazy = false,
+    opts = {
+      -- Enable Zellij integration: move to next tab when at edge of pane
+      zellij_move_focus_or_tab = true,
+    },
     keys = {
       {
         "<leader>wr",
