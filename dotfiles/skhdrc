@@ -4,11 +4,18 @@ shift + alt + cmd - n : yabai -m space --create && \
                   yabai -m space --focus "${index}"
 
 ctrl + alt + cmd - n : yabai -m space --create
+# Space focus by number
 alt - 1 : yabai -m space --focus 1
 alt - 2 : yabai -m space --focus 2
 alt - 3 : yabai -m space --focus 3
 alt - 4 : yabai -m space --focus 4
 alt - 5 : yabai -m space --focus 5
+# Space focus by label (QWERT)
+alt - q : yabai -m space --focus dev
+alt - w : yabai -m space --focus terminal
+alt - e : yabai -m space --focus social
+alt - r : yabai -m space --focus work
+alt - t : yabai -m space --focus other
 alt - tab : yabai -m space --focus recent
 
 # Arrow Keys
@@ -37,6 +44,14 @@ alt - k: yabai -m window --focus north
 alt - l: yabai -m window --focus east
 alt - z: yabai -m window --focus stack.prev || yabai -m window --focus stack.last
 alt - c: yabai -m window --focus stack.next || yabai -m window --focus stack.first
+
+# Focus specific windows
+alt - a: ~/.config/yabai/window_finders/focus_arc.sh dev
+shift + alt - a: ~/.config/yabai/window_finders/focus_arc.sh other
+alt - s: ~/.config/yabai/window_finders/focus_cursor.sh 1 main
+alt - d: ~/.config/yabai/window_finders/focus_cursor.sh 1 agent
+alt - f: ~/.config/yabai/window_finders/focus_cursor.sh 2 main
+alt - g: ~/.config/yabai/window_finders/focus_cursor.sh 2 agent
 
 # Swap windows
 shift + alt - x: yabai -m window --swap recent
@@ -97,6 +112,9 @@ cmd + shift + alt - o : ~/.config/yabai/apply_setup.sh office
 cmd + shift + alt - m : ~/.config/yabai/apply_setup.sh mobile
 cmd + shift + alt - d : ~/.config/yabai/detect_setup.sh
 cmd + shift + alt - a : ~/.config/yabai/apply_setup.sh auto
+
+# Label spaces
+cmd + shift + alt - l : ~/.config/yabai/label_spaces.sh
 
 # Focus applications
 cmd + ctrl - s: open /Applications/Slack.app/

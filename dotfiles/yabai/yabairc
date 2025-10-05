@@ -21,11 +21,17 @@ yabai -m config \
   mouse_drop_action swap \
   layout stack
 
+# Default space layouts (will be overridden by apply_setup.sh based on display config)
+# Space 1 (dev):      stack (laptop) or bsp (external monitor)
+# Space 2 (terminal): stack
+# Space 3 (social):   stack
+# Space 4 (work):     stack
+# Space 5 (other):    stack (multi-monitor only)
 yabai -m space 1 --layout stack
-yabai -m space 2 --layout bsp
+yabai -m space 2 --layout stack
 yabai -m space 3 --layout stack
-yabai -m space 4 --layout bsp
-yabai -m space 5 --layout bsp
+yabai -m space 4 --layout stack
+yabai -m space 5 --layout stack 2>/dev/null || true
 
 # Signal helper functions
 add_sketchybar_signal() {
@@ -76,6 +82,10 @@ yabai -m rule --add app="^Discord$" title!="^Discord Updater$" scratchpad=discor
 yabai -m rule --apply # https://github.com/koekeishiya/yabai/issues/2178
 
 command -v sketchybar &> /dev/null && sketchybar --trigger yabai_loaded
+
+# Apply workspace setup (auto-detects display configuration)
+# This also handles space labeling internally
+~/.config/yabai/apply_setup.sh auto
 
 echo "yabai configuration loaded.."
 osascript -e "display notification \"yabai configuration loaded..!\" with title \"yabai\""
