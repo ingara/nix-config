@@ -1,0 +1,58 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
+                format_left   "{mode}{pipe_zjstatus_hints}"
+                format_center "{tabs}"
+                format_right  "{command_git_branch}{datetime}#[bg=#8aadf4,fg=#24273a,bold] {session} "
+                format_space  ""
+
+                border_enabled  "false"
+                border_char     "─"
+                border_format   "#[fg=#6c7086]{char}"
+                border_position "top"
+
+                hide_frame_for_single_pane "true"
+
+                // Mode indicators - Catppuccin Macchiato (hints come from zjstatus-hints plugin)
+                mode_locked        "#[bg=#6e738d,fg=#24273a,bold]  LOCKED "
+                mode_normal        "#[bg=#8aadf4,fg=#24273a,bold]  NORMAL "
+                mode_pane          "#[bg=#a6da95,fg=#24273a,bold]  PANE "
+                mode_tab           "#[bg=#c6a0f6,fg=#24273a,bold]  TAB "
+                mode_resize        "#[bg=#eed49f,fg=#24273a,bold]  RESIZE "
+                mode_move          "#[bg=#91d7e3,fg=#24273a,bold]  MOVE "
+                mode_scroll        "#[bg=#f5bde6,fg=#24273a,bold]  SCROLL "
+                mode_enter_search  "#[bg=#f9e2af,fg=#24273a,bold]  SEARCH "
+                mode_search        "#[bg=#f9e2af,fg=#24273a,bold]  SEARCH "
+                mode_rename_tab    "#[bg=#c6a0f6,fg=#24273a,bold]  RENAME TAB "
+                mode_rename_pane   "#[bg=#a6da95,fg=#24273a,bold]  RENAME PANE "
+                mode_session       "#[bg=#7dc4e4,fg=#24273a,bold]  SESSION "
+                mode_prompt        "#[bg=#eed49f,fg=#24273a,bold]  PROMPT "
+
+                // Pipe widget for dynamic keybinding hints
+                pipe_zjstatus_hints_format "#[fg=#6c7086,bold] {output} "
+
+                // Tab styling with clear visual separation
+                tab_normal              "#[fg=#6c7086] {index} {name} "
+                tab_normal_fullscreen   "#[fg=#6c7086] {index} {name} 󰊓 "
+                tab_normal_sync         "#[fg=#6c7086] {index} {name}  "
+
+                tab_active              "#[bg=#8aadf4,fg=#24273a,bold] {index} {name} "
+                tab_active_fullscreen   "#[bg=#8aadf4,fg=#24273a,bold] {index} {name} 󰊓 "
+                tab_active_sync         "#[bg=#8aadf4,fg=#24273a,bold] {index} {name}  "
+
+                // Git branch indicator
+                command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
+                command_git_branch_format      "#[fg=#8aadf4]  {stdout} "
+                command_git_branch_interval    "10"
+                command_git_branch_rendermode  "static"
+
+                // Date and time
+                datetime        "#[fg=#cad3f5,bold] {format} "
+                datetime_format "%H:%M"
+                datetime_timezone "Europe/Oslo"
+            }
+        }
+        children
+    }
+}
