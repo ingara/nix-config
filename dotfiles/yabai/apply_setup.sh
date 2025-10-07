@@ -46,33 +46,46 @@ move_arc_windows() {
 arrange_dev_bsp() {
   echo "Arranging dev space in BSP layout..."
 
-  # Set dev space to BSP
+  # Step 1: Get window IDs
+  arc_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[0].id // empty')
+  readarray -t cursor_ids < <(yabai -m query --windows | jq -r '[.[] | select(.app == "Cursor")] | sort_by(.id) | .[].id')
+
+  # Exit if no windows found
+  if [ -z "$arc_id" ] || [ ${#cursor_ids[@]} -eq 0 ]; then
+    echo "  No Arc or Cursor windows found, skipping BSP arrangement"
+    return
+  fi
+
+  # Step 2: Set dev space to BSP
   yabai -m space dev --layout bsp
 
-  # Get Arc window ID (first by creation order)
-  arc_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[0].id // empty')
+  # Step 3: Ensure Arc and Cursors are in dev space
+  yabai -m window "$arc_id" --space dev 2>/dev/null
+  for cursor_id in "${cursor_ids[@]}"; do
+    yabai -m window "$cursor_id" --space dev 2>/dev/null
+  done
 
-  # Get all Cursor window IDs (sorted by creation order)
-  cursor_ids=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Cursor")] | sort_by(.id) | .[].id')
+  echo "  Positioning Arc on the left..."
+  # Step 4: Position Arc window on the left
+  yabai -m window --focus "$arc_id" 2>/dev/null
+  yabai -m window --swap first 2>/dev/null
 
-  if [ -n "$arc_id" ]; then
-    # Focus Arc first to establish it as the root window
-    yabai -m window --focus "$arc_id" 2>/dev/null
+  echo "  Creating stack on the right..."
+  # Step 5: Position first Cursor to the right of Arc
+  yabai -m window --focus "${cursor_ids[0]}" 2>/dev/null
+  yabai -m window --warp east 2>/dev/null
 
-    # Process Cursor windows
-    first_cursor=true
-    for cursor_id in $cursor_ids; do
-      if [ "$first_cursor" = true ]; then
-        # First Cursor: tile it east of Arc
-        yabai -m window --focus "$cursor_id" 2>/dev/null
-        first_cursor=false
-      else
-        # Remaining Cursors: stack on top of the first one
-        yabai -m window "$cursor_id" --stack east 2>/dev/null || \
-        yabai -m window "$cursor_id" --stack south 2>/dev/null
-      fi
-    done
-  fi
+  # Step 6: Add remaining Cursors to the stack using insertion point
+  for ((i=1; i<${#cursor_ids[@]}; i++)); do
+    echo "    Adding Cursor ${cursor_ids[$i]} to stack..."
+    # Set insertion point on first cursor before each warp
+    yabai -m window --focus "${cursor_ids[0]}" 2>/dev/null
+    yabai -m window --insert stack 2>/dev/null
+    # Warp the next cursor to the insertion point
+    yabai -m window "${cursor_ids[$i]}" --warp "${cursor_ids[0]}" 2>/dev/null
+  done
+
+  echo "  ✓ BSP arrangement complete: Arc (west) | Cursor stack (east)"
 }
 
 setup_home() {
