@@ -97,6 +97,7 @@ sketchybar --add bracket system apple.logo spaces yabai front_app \
 # Right side items (reverse order since they stack right to left)
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
+source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/spotify.sh"
 
 # Create right side bracket for media controls
