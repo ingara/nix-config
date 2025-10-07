@@ -26,6 +26,7 @@
       "hammerspoon"
       "istat-menus"
       "karabiner-elements"
+      "lookaway"
       "mac-mouse-fix"
       "notion"
       "notion-calendar"
