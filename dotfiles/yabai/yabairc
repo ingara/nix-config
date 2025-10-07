@@ -18,7 +18,7 @@ yabai -m config \
   mouse_action1 move \
   mouse_action2 resize \
   external_bar all:32:0 \
-  mouse_drop_action swap \
+  mouse_drop_action stack \
   layout stack
 
 # Default space layouts (will be overridden by apply_setup.sh based on display config)
