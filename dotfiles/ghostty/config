@@ -1,7 +1,7 @@
 theme = catppuccin-macchiato.conf
-background-opacity = 1
+background-opacity = 0.95
 # font-family = "Hack Nerd Font Mono Regular"
 # font-size = 10
 font-family = "ZedMono NFM"
-keybind = shift+enter=text:\n
+keybind = shift+enter=esc:SE
 keybind = global:ctrl+~=toggle_quick_terminal
