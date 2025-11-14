@@ -48,10 +48,8 @@ alt - c: yabai -m window --focus stack.next || yabai -m window --focus stack.fir
 # Focus specific windows
 alt - a: ~/.config/yabai/window_finders/focus_arc.sh dev
 shift + alt - a: ~/.config/yabai/window_finders/focus_arc.sh other
-alt - s: ~/.config/yabai/window_finders/focus_cursor.sh 1 main
-alt - d: ~/.config/yabai/window_finders/focus_cursor.sh 1 agent
-alt - f: ~/.config/yabai/window_finders/focus_cursor.sh 2 main
-alt - g: ~/.config/yabai/window_finders/focus_cursor.sh 2 agent
+alt - s: ~/.config/yabai/window_finders/focus_cursor.sh screening
+alt - d: ~/.config/yabai/window_finders/focus_cursor.sh screening-2
 
 # Swap windows
 shift + alt - x: yabai -m window --swap recent
@@ -127,3 +125,4 @@ cmd + ctrl - a: open /Applications/Arc.app/
 cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord
 cmd + ctrl - g: open /Applications/Ghostty.app/
 cmd + ctrl - c: open /Applications/Cursor.app/
+cmd + ctrl - r: open /System/Applications/Reminders.app/
