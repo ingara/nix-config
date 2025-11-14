@@ -12,11 +12,18 @@ return {
   lazy = false,
   keys = {
     {
-      "ff", -- try it if you didn't it is a banger keybinding for a picker
+      "ff",
+      function()
+        require("fff").find_in_git_root()
+      end,
+      desc = "FFFind files in git repo",
+    },
+    {
+      "fF",
       function()
         require("fff").find_files()
       end,
-      desc = "FFFind files",
+      desc = "FFFind files in project",
     },
   },
 }
