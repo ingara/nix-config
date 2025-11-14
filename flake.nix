@@ -40,6 +40,10 @@
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;
     };
+    homebrew-satococoa = {
+      url = "github:satococoa/homebrew-tap";
+      flake = false;
+    };
     nh = {
       url = "github:nix-community/nh";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -183,6 +187,7 @@
                   "homebrew/homebrew-cask" = inputs.homebrew-cask;
                   "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
                   "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
+                  "satococoa/homebrew-tap" = inputs.homebrew-satococoa;
                 };
               };
             }

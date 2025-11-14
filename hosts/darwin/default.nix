@@ -120,6 +120,8 @@ in
         AppleFontSmoothing = 1;
         # Finder: show all filename extensions
         AppleShowAllExtensions = true;
+
+        "com.apple.keyboard.fnState" = true; # Use F1, F2, etc. keys as standard function keys.
       };
 
       finder = {
@@ -160,6 +162,8 @@ in
         autohide-time-modifier = 0.4;
         orientation = "bottom";
         mouse-over-hilite-stack = true;
+        magnification = true;
+        largesize = 64;
       };
 
       LaunchServices = {

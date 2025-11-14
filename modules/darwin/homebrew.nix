@@ -15,6 +15,7 @@
       "1password"
       "arc"
       "chatgpt"
+      "claude"
       "cursor"
       "cursor-cli"
       "discord"
@@ -29,7 +30,6 @@
       "lookaway"
       "mac-mouse-fix"
       "notion"
-      "notion-calendar"
       "postico"
       "protonvpn"
       "qmk-toolbox"
@@ -56,6 +56,7 @@
     ];
     brews = [
       "livekit"
+      "wtp"
     ];
     taps = map (key: builtins.replaceStrings [ "homebrew-" ] [ "" ] key) (
       builtins.attrNames config.nix-homebrew.taps

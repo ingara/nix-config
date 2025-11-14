@@ -55,6 +55,14 @@ in
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         # MacOS ALT+d fzf
         bind "∂" fzf-cd-widget
+
+        # Shift+Enter for newline in zellij
+        bind \eSE 'commandline -i \n'
+
+        # wtp shell integration
+        if command -q wtp
+          wtp shell-init fish | source
+        end
       ''}
     '';
   };
@@ -76,6 +84,12 @@ in
         "kubectl"
       ];
     };
+    initExtra = lib.optionalString pkgs.stdenv.isDarwin ''
+      # wtp shell integration
+      if command -v wtp &> /dev/null; then
+        eval "$(wtp completion zsh)"
+      fi
+    '';
   };
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.starship.enable
@@ -112,19 +126,6 @@ in
 
   git = {
     enable = true;
-    userName = name;
-    userEmail = email;
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        line-numbers = true;
-        side-by-side = false;
-        pager = "less";
-        hyperlinks = true;
-        keep-plus-minus-markers = true;
-      };
-    };
     ignores = [
       ".DS_Store"
       ".direnv"
@@ -140,7 +141,11 @@ in
       key = userConfig.signingKey; # Centralized from flake config
     };
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = name;
+        email = email;
+      };
       core.editor = "nvim";
       init.defaultBranch = "main";
       pull = {
@@ -171,6 +176,19 @@ in
     includes = [
       { path = "~/.config/git/extra/aliases.gitconfig"; }
     ];
+  };
+
+  delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      line-numbers = true;
+      side-by-side = false;
+      pager = "less";
+      hyperlinks = true;
+      keep-plus-minus-markers = true;
+    };
   };
 
   bat = {
