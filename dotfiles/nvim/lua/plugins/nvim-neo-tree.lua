@@ -5,6 +5,16 @@ return {
   ---@module "neo-tree"
   ---@type neotree.Config
   opts = {
+    event_handlers = {
+      {
+        event = "neo_tree_window_after_open",
+        handler = function(args)
+          if args.position == "left" or args.position == "right" then
+            vim.cmd("wincmd p")
+          end
+        end,
+      },
+    },
     filesystem = {
       filtered_items = {
         hide_dotfiles = false,
@@ -108,6 +118,7 @@ return {
       group_empty_dirs = true, -- when true, empty directories will be grouped together
     },
     window = {
+      position = "right",
       mappings = {
         ["<esc>"] = false,
         ["s"] = "flash_jump",
