@@ -65,6 +65,15 @@ in
         end
       ''}
     '';
+    functions = {
+      n = ''
+        if test (count $argv) -eq 0
+          nvim .
+        else
+          nvim $argv
+        end
+      '';
+    };
   };
 
   zsh = {
@@ -89,6 +98,15 @@ in
       if command -v wtp &> /dev/null; then
         eval "$(wtp completion zsh)"
       fi
+    '' + ''
+      # n function for nvim
+      function n() {
+        if [ $# -eq 0 ]; then
+          nvim .
+        else
+          nvim "$@"
+        fi
+      }
     '';
   };
 

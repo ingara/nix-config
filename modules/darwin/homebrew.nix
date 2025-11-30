@@ -56,6 +56,7 @@
     ];
     brews = [
       "livekit"
+      "switchaudio-osx"
       "wtp"
     ];
     taps = map (key: builtins.replaceStrings [ "homebrew-" ] [ "" ] key) (
@@ -69,6 +70,7 @@
       "Balance Lock" = 1019371109;
       "Velja" = 1607635845;
       "Infuse • Video Player" = 1136220934;
+      "System Color Picker" = 1545870783;
     };
   };
 }
