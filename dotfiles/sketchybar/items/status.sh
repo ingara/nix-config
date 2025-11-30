@@ -18,6 +18,9 @@ volume_opts=(
   label.font="$FONT_FAMILY:Medium:12.0"
   label.color=$COLOR_LABEL
   script="$PLUGIN_DIR/volume.sh"
+  click_script="sh $PLUGIN_DIR/volume_click.sh"
+  popup.height=30
+  popup.align=right
 )
 
 battery_opts=(

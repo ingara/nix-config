@@ -23,6 +23,5 @@ if [ "$SENDER" = "volume_change" ]; then
     icon.color="$COLOR_MAGENTA"
     label="$VOLUME%"
   )
-  # sketchybar --set "$NAME" icon="$ICON" label="$VOLUME%"
   sketchybar --set "$NAME" "${settings[@]}"
 fi
