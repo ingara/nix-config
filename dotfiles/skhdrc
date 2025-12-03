@@ -28,10 +28,10 @@ fn - l : skhd -k "right"
 # 1) default: all keybindings are available
 # 2) passthrough: all keybindings are unavailable. (If some keybindings conflict with some application, we can turn off skhd)
 :: default : yabai -m config active_window_border_color 0xffffbb7d;\
-             osascript -e "display notification \"skhd enabled!\" with title \"skhd\""
+             terminal-notifier -title "skhd" -message "skhd enabled!"
 
 :: passthrough : yabai -m config active_window_border_color 0xff8d5524;\
-                 osascript -e "display notification \"skhd disabled!\" with title \"skhd\""
+                 terminal-notifier -title "skhd" -message "skhd disabled!"
 # Mode switching
 hyper - x ; passthrough
 passthrough < hyper - x ; default

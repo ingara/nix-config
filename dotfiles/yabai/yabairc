@@ -88,4 +88,4 @@ command -v sketchybar &> /dev/null && sketchybar --trigger yabai_loaded
 ~/.config/yabai/apply_setup.sh auto
 
 echo "yabai configuration loaded.."
-osascript -e "display notification \"yabai configuration loaded..!\" with title \"yabai\""
+terminal-notifier -title "yabai" -message "yabai configuration loaded!"

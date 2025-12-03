@@ -46,6 +46,7 @@
       "vial"
       "visual-studio-code"
       "whatsapp"
+      "windsurf"
       "zen"
       "zoom"
 

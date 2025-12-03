@@ -1,0 +1,33 @@
+# Pre-commit hooks for nix-config
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      # Format Nix files with nixfmt-rfc-style
+      - id: nixfmt
+        name: Format Nix files
+        entry: nixfmt
+        language: system
+        files: \.nix$
+        pass_filenames: true
+
+      # Lint Nix files with statix
+      - id: statix
+        name: Lint Nix files
+        entry: statix check
+        language: system
+        files: \.nix$
+        pass_filenames: false
+
+  # General file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']

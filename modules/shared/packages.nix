@@ -11,8 +11,9 @@ with pkgs;
   fastfetch
   fd
   git-absorb
+  gh-dash
   glow
-  btop
+  bottom
   just
   jq
   k6
@@ -31,6 +32,7 @@ with pkgs;
   ripgrep
   rustup
   tealdeer
+  terminal-notifier
   wireguard-tools
   yq-go
   zellij

@@ -122,7 +122,7 @@ setup_home() {
   # Arrange dev space in BSP
   arrange_dev_bsp
 
-  osascript -e "display notification \"Home office setup loaded!\" with title \"yabai\""
+  terminal-notifier -title "yabai" -message "Home office setup loaded!"
 }
 
 setup_office() {
@@ -160,7 +160,7 @@ setup_office() {
   # Arrange dev space in BSP
   arrange_dev_bsp
 
-  osascript -e "display notification \"Office setup loaded!\" with title \"yabai\""
+  terminal-notifier -title "yabai" -message "Office setup loaded!"
 }
 
 setup_mobile() {
@@ -183,7 +183,7 @@ setup_mobile() {
   move_app_windows "Notion" work
   move_app_windows "Notion Calendar" work
 
-  osascript -e "display notification \"Laptop setup loaded!\" with title \"yabai\""
+  terminal-notifier -title "yabai" -message "Laptop setup loaded!"
 }
 
 # Main execution

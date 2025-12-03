@@ -20,6 +20,7 @@ let
     kubectl = "kubecolor";
     br = "broot";
     vim = "nvim";
+    top = "btm"; # Use bottom instead of top
 
     # Eza stuff
     ls = "eza";
@@ -73,6 +74,11 @@ in
           nvim $argv
         end
       '';
+      # Zoxide interactive mode (fuzzy search directories)
+      zi = ''
+        set -l result (zoxide query -l | fzf --height 40% --reverse --preview 'eza -la {}')
+        and cd $result
+      '';
     };
   };
 
@@ -93,21 +99,29 @@ in
         "kubectl"
       ];
     };
-    initExtra = lib.optionalString pkgs.stdenv.isDarwin ''
-      # wtp shell integration
-      if command -v wtp &> /dev/null; then
-        eval "$(wtp completion zsh)"
-      fi
-    '' + ''
-      # n function for nvim
-      function n() {
-        if [ $# -eq 0 ]; then
-          nvim .
-        else
-          nvim "$@"
+    initExtra =
+      lib.optionalString pkgs.stdenv.isDarwin ''
+        # wtp shell integration
+        if command -v wtp &> /dev/null; then
+          eval "$(wtp completion zsh)"
         fi
-      }
-    '';
+      ''
+      + ''
+        # n function for nvim
+        function n() {
+          if [ $# -eq 0 ]; then
+            nvim .
+          else
+            nvim "$@"
+          fi
+        }
+
+        # Zoxide interactive mode (fuzzy search directories)
+        function zi() {
+          local result=$(zoxide query -l | fzf --height 40% --reverse --preview 'eza -la {}')
+          [ -n "$result" ] && cd "$result"
+        }
+      '';
   };
 
   # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.starship.enable
@@ -115,27 +129,9 @@ in
     enable = true;
     enableZshIntegration = true;
     enableFishIntegration = true;
-    enableTransience = true;
+    enableTransience = false;
 
-    settings = {
-      directory = {
-        truncation_length = 5;
-        truncation_symbol = "…/";
-        truncate_to_repo = false;
-        substitutions = {
-          "Documents" = " ";
-          "Downloads" = " ";
-          "Music" = " ";
-          "Pictures" = " ";
-        };
-      };
-
-      shell = {
-        disabled = false;
-        fish_indicator = "🐟";
-        zsh_indicator = "𝓏";
-      };
-    };
+    settings = import ./starship-settings.nix { inherit lib; };
   };
 
   gh = {
@@ -242,6 +238,11 @@ in
 
   zoxide = {
     enable = true;
+    enableFishIntegration = true;
+    enableZshIntegration = true;
+    options = [
+      "--cmd cd" # Override cd command
+    ];
   };
 
   tmux = {

@@ -119,4 +119,4 @@ sketchybar --hotload on
 sketchybar --update
 
 echo "sketchybar configuation loaded.."
-osascript -e "display notification \"sketchybar configuration loaded..!\" with title \"sketchybar\""
+terminal-notifier -title "sketchybar" -message "sketchybar configuration loaded!"
