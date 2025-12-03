@@ -157,8 +157,8 @@ in
 
     settings = {
       user = {
-        name = name;
-        email = email;
+        inherit name;
+        inherit email;
       };
       core.editor = "nvim";
       init.defaultBranch = "main";
