@@ -118,8 +118,7 @@ cmd + shift + alt - l : ~/.config/yabai/label_spaces.sh
 cmd + ctrl - s: open /Applications/Slack.app/
 cmd + ctrl - x: yabai -m window --toggle spotify || open /Applications/Spotify.app/
 cmd + ctrl - m: open /Applications/Airmail.app/
-cmd + ctrl - t: open ~/Applications/Home\ Manager\ Apps/WezTerm.app/
-# cmd + ctrl - t: open wezterm
+# cmd + ctrl - t: Quick terminal is now handled by Ghostty global keybind
 cmd + ctrl - w: open /Applications/WhatsApp.app/
 cmd + ctrl - a: open /Applications/Arc.app/
 cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord

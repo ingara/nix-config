@@ -4,4 +4,5 @@ background-opacity = 0.95
 # font-size = 10
 font-family = "ZedMono NFM"
 keybind = shift+enter=esc:SE
-keybind = global:ctrl+~=toggle_quick_terminal
+keybind = global:cmd+ctrl+t=toggle_quick_terminal
+quick-terminal-space-behavior = move
