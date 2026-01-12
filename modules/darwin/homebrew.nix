@@ -4,12 +4,12 @@
     enable = true;
     onActivation = {
       cleanup = "zap";
-      autoUpdate = true;
-      upgrade = true;
+      autoUpdate = false;
+      upgrade = false;
     };
     global = {
       brewfile = true;
-      autoUpdate = true;
+      autoUpdate = false;
     };
     casks = [
       "1password"
@@ -56,6 +56,7 @@
       "sf-symbols"
     ];
     brews = [
+      "graphite"
       "livekit"
       "switchaudio-osx"
       "wtp"
