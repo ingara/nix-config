@@ -16,6 +16,13 @@ keybinds clear-defaults=true {
         bind "p" { SwitchToMode "pane"; }
         bind "q" { Quit; }
         bind "t" { SwitchToMode "tab"; }
+        bind "u" {
+            Run "zellij-url-picker.sh" {
+                floating true
+                close_on_exit true
+            }
+            SwitchToMode "locked"
+        }
         bind "w" { SwitchToMode "resize"; }
         bind "|" { NewPane "right"; SwitchToMode "locked"; }
     }
@@ -25,6 +32,8 @@ keybinds clear-defaults=true {
         bind "Ctrl 3" { GoToTab 3; }
         bind "Ctrl 4" { GoToTab 4; }
         bind "Ctrl 5" { GoToTab 5; }
+        bind "Ctrl right" { GoToNextTab; }
+        bind "Ctrl left" { GoToPreviousTab; }
         bind "Ctrl a" { SwitchToMode "normal"; }
         bind "Ctrl h" {
             MessagePlugin "vim-zellij-navigator" {
@@ -58,8 +67,6 @@ keybinds clear-defaults=true {
                 move_mod "ctrl"
             }
         }
-        bind "Ctrl tab" { GoToNextTab; }
-        bind "Ctrl Shift tab" { GoToPreviousTab; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -210,7 +217,7 @@ keybinds clear-defaults=true {
         bind "Alt k" { MoveFocus "up"; }
         bind "Alt l" { MoveFocusOrTab "right"; }
         bind "Alt n" { NewPane; }
-        bind "Alt o" { MoveTab "right"; }
+        // bind "Alt o" { MoveTab "right"; } // Disabled for zellij.fish URL opener
         bind "Alt p" { TogglePaneInGroup; }
         bind "Alt Shift p" { ToggleGroupMarking; }
         bind "Ctrl q" { Quit; }

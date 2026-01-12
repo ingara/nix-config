@@ -66,4 +66,9 @@ with pkgs;
 
     vendorHash = "sha256-lkNvVAtq4CxQQ8Buw+waWbId0XdLRnN/w6pE6C8fEgA=";
   })
+
+  # Zellij URL picker script
+  (pkgs.writeShellScriptBin "zellij-url-picker.sh" (
+    builtins.readFile ../../dotfiles/scripts/zellij-url-picker.sh
+  ))
 ]
