@@ -3,6 +3,18 @@
 source "$HOME/.config/sketchybar/colors.sh"
 source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
 
+# Graphite icon (GitHub icon since it's a PR tool)
+GRAPHITE_ICON=":git_hub:"
+
+# Query Graphite PRs needing review
+GH_CLI="/Users/ingar/.nix-profile/bin/gh"
+
+get_graphite_pr_count() {
+  local count
+  count=$("$GH_CLI" search prs --review-requested=@me --state=open -- -author:@me draft:false -review:approved 2>/dev/null | wc -l | tr -d ' ')
+  echo "$count"
+}
+
 update() {
   # Query all apps in Dock for badges via AppleScript
   badge_data=$(osascript << 'EOF'
@@ -98,6 +110,39 @@ EOF
     fi
     has_notifications=true
   done
+
+  # Add Graphite PR notifications
+  graphite_count=$(get_graphite_pr_count)
+  item_name="notification.Graphite"
+
+  if [ "$graphite_count" -gt 0 ] 2>/dev/null; then
+    current_items[$item_name]=1
+    item_names+="$item_name "
+
+    if echo "$existing_items" | grep -q "^$item_name$"; then
+      # Update existing item
+      sketchybar --set "$item_name" \
+        icon="$GRAPHITE_ICON" \
+        label="$graphite_count" \
+        label.drawing=on
+    else
+      # Create new item
+      sketchybar --add item "$item_name" right \
+        --set "$item_name" \
+          icon="$GRAPHITE_ICON" \
+          icon.font="sketchybar-app-font:Regular:14.0" \
+          icon.color="$COLOR_LABEL" \
+          icon.padding_right=1 \
+          label="$graphite_count" \
+          label.font="SF Pro:Semibold:9.0" \
+          label.color="$COLOR_LABEL" \
+          label.padding_left=0 \
+          label.padding_right=4 \
+          label.y_offset=2 \
+          click_script="open https://app.graphite.dev/inbox"
+    fi
+    has_notifications=true
+  fi
 
   # Remove items that no longer have badges
   while IFS= read -r item; do
