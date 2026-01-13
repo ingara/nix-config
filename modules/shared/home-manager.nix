@@ -112,7 +112,7 @@ in
         "kubectl"
       ];
     };
-    initExtra =
+    initContent =
       lib.optionalString pkgs.stdenv.isDarwin ''
         # wtp shell integration
         if command -v wtp &> /dev/null; then
@@ -254,9 +254,6 @@ in
     enable = true;
     enableFishIntegration = true;
     enableZshIntegration = true;
-    options = [
-      "--cmd cd" # Override cd command
-    ];
   };
 
   tmux = {

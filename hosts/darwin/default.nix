@@ -78,7 +78,7 @@ in
 
   # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
-    claude-code-nix.packages.${pkgs.system}.claude-code
+    claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
   ];
 
   system = {
