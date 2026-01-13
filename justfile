@@ -29,8 +29,9 @@ switch *ARGS:
         export NIXPKGS_ALLOW_UNFREE=1; \
         nh darwin switch -H aarch64-darwin . {{ARGS}}; \
         printf "\033[1;33mLoading yabai scripting addition...\033[0m\n"; \
-        sudo yabai --load-sa; \
-        printf "\033[1;32mYabai scripting addition loaded!\033[0m\n"; \
+        sudo yabai --load-sa 2>/dev/null && \
+            printf "\033[1;32mYabai scripting addition loaded!\033[0m\n" || \
+            printf "\033[1;31mYabai scripting addition failed (not supported on macOS Tahoe yet)\033[0m\n"; \
         printf "\033[1;32mSwitch to new generation complete!\033[0m\n"; \
     elif [ -f /proc/version ] && grep -qi microsoft /proc/version; then \
         printf "\033[1;33mStarting NixOS WSL switch...\033[0m\n"; \
@@ -66,9 +67,18 @@ clean:
 info:
     nix flake info
 
-# Update flake inputs
+# Update all dependencies (nix flake + homebrew)
 update:
+    @just update-nix
+    @just update-brew
+
+# Update nix flake inputs
+update-nix:
     nix flake update
+
+# Upgrade all homebrew packages (taps are updated via nix flake update)
+update-brew:
+    brew upgrade && brew cleanup
 
 # Format check (don't format, just check)
 fmt-check:
@@ -81,3 +91,25 @@ lint:
 # Auto-fix linting issues with statix
 lint-fix:
     statix fix .
+
+# Restart yabai window manager
+restart-yabai:
+    launchctl kickstart -k gui/$(id -u)/org.nixos.yabai
+
+# Restart skhd hotkey daemon
+restart-skhd:
+    launchctl kickstart -k gui/$(id -u)/org.nixos.skhd
+
+# Restart sketchybar
+restart-sketchybar:
+    launchctl kickstart -k gui/$(id -u)/org.nixos.sketchybar
+
+# Restart all window management services (yabai, skhd, sketchybar)
+restart-wm:
+    @echo "Restarting yabai..."
+    @launchctl kickstart -k gui/$(id -u)/org.nixos.yabai
+    @echo "Restarting skhd..."
+    @launchctl kickstart -k gui/$(id -u)/org.nixos.skhd
+    @echo "Restarting sketchybar..."
+    @launchctl kickstart -k gui/$(id -u)/org.nixos.sketchybar
+    @echo "All services restarted!"
