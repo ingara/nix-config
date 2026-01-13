@@ -58,7 +58,11 @@ in
           sessionVariables = {
             PAGER = "less";
             LESS = "-R --quit-if-one-screen --no-init";
+            GOPRIVATE = "github.com/soolv/*";
           };
+          sessionPath = [
+            "$HOME/go/bin"
+          ];
 
           stateVersion = "23.11";
         };

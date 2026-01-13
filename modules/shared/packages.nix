@@ -13,6 +13,7 @@ with pkgs;
   git-absorb
   gh-dash
   glow
+  go
   bottom
   just
   jq

@@ -11,6 +11,7 @@ let
   name = userConfig.fullName;
   user = userConfig.username;
   inherit (userConfig) email;
+  homeDir = if pkgs.stdenv.isDarwin then "/Users/${user}" else "/home/${user}";
   aliases = {
     cat = "bat";
     g = "git";
@@ -31,6 +32,9 @@ let
     lT = "eza -T --git-ignore --level=4 --group-directories-first";
 
     cdg = "cd $(git rev-parse --show-toplevel)";
+
+    # Global just alias for soolv project
+    s = "soolv";
   };
 in
 {
@@ -46,6 +50,12 @@ in
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         eval "$(/opt/homebrew/bin/brew shellenv)"
       ''}
+      fish_add_path -g $HOME/go/bin
+      set -gx GOPRIVATE "github.com/soolv/*"
+
+      if command -q soolv
+        soolv shell-init fish | source
+      end
       # Disable greeting
       set -g fish_greeting
 
@@ -65,6 +75,9 @@ in
           wtp shell-init fish | source
         end
       ''}
+
+      # Completion for soolv (global just alias)
+      complete -c soolv -f -a "(just --justfile ${homeDir}/dev/soolv/justfile --summary 2>/dev/null | tr ' ' '\n')"
     '';
     functions = {
       n = ''
@@ -175,6 +188,7 @@ in
         smudge = "git-lfs smudge -- %f";
       };
       gpg.format = "ssh";
+      "url \"ssh://git@github.com/\"".insteadOf = "https://github.com/";
     }
     // lib.optionalAttrs pkgs.stdenv.isDarwin {
       credential.helper = "osxkeychain";
