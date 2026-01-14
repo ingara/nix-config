@@ -42,27 +42,27 @@ move_arc_windows() {
   done
 }
 
-# Arrange dev space with BSP layout: Arc west, Cursor windows stacked east
+# Arrange dev space with BSP layout: Arc west, editor windows stacked east
 arrange_dev_bsp() {
   echo "Arranging dev space in BSP layout..."
 
   # Step 1: Get window IDs
   arc_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[0].id // empty')
-  readarray -t cursor_ids < <(yabai -m query --windows | jq -r '[.[] | select(.app == "Cursor")] | sort_by(.id) | .[].id')
+  readarray -t editor_ids < <(yabai -m query --windows | jq -r '[.[] | select(.app == "Cursor" or .app == "Code" or .app == "Claude")] | sort_by(.id) | .[].id')
 
   # Exit if no windows found
-  if [ -z "$arc_id" ] || [ ${#cursor_ids[@]} -eq 0 ]; then
-    echo "  No Arc or Cursor windows found, skipping BSP arrangement"
+  if [ -z "$arc_id" ] || [ ${#editor_ids[@]} -eq 0 ]; then
+    echo "  No Arc or editor windows found, skipping BSP arrangement"
     return
   fi
 
   # Step 2: Set dev space to BSP
   yabai -m space dev --layout bsp
 
-  # Step 3: Ensure Arc and Cursors are in dev space
+  # Step 3: Ensure Arc and editors are in dev space
   yabai -m window "$arc_id" --space dev 2>/dev/null
-  for cursor_id in "${cursor_ids[@]}"; do
-    yabai -m window "$cursor_id" --space dev 2>/dev/null
+  for editor_id in "${editor_ids[@]}"; do
+    yabai -m window "$editor_id" --space dev 2>/dev/null
   done
 
   echo "  Positioning Arc on the left..."
@@ -71,21 +71,21 @@ arrange_dev_bsp() {
   yabai -m window --swap first 2>/dev/null
 
   echo "  Creating stack on the right..."
-  # Step 5: Position first Cursor to the right of Arc
-  yabai -m window --focus "${cursor_ids[0]}" 2>/dev/null
+  # Step 5: Position first editor to the right of Arc
+  yabai -m window --focus "${editor_ids[0]}" 2>/dev/null
   yabai -m window --warp east 2>/dev/null
 
-  # Step 6: Add remaining Cursors to the stack using insertion point
-  for ((i=1; i<${#cursor_ids[@]}; i++)); do
-    echo "    Adding Cursor ${cursor_ids[$i]} to stack..."
-    # Set insertion point on first cursor before each warp
-    yabai -m window --focus "${cursor_ids[0]}" 2>/dev/null
+  # Step 6: Add remaining editors to the stack using insertion point
+  for ((i=1; i<${#editor_ids[@]}; i++)); do
+    echo "    Adding editor ${editor_ids[$i]} to stack..."
+    # Set insertion point on first editor before each warp
+    yabai -m window --focus "${editor_ids[0]}" 2>/dev/null
     yabai -m window --insert stack 2>/dev/null
-    # Warp the next cursor to the insertion point
-    yabai -m window "${cursor_ids[$i]}" --warp "${cursor_ids[0]}" 2>/dev/null
+    # Warp the next editor to the insertion point
+    yabai -m window "${editor_ids[$i]}" --warp "${editor_ids[0]}" 2>/dev/null
   done
 
-  echo "  ✓ BSP arrangement complete: Arc (west) | Cursor stack (east)"
+  echo "  ✓ BSP arrangement complete: Arc (west) | Editor stack (east)"
 }
 
 setup_home() {
@@ -110,6 +110,8 @@ setup_home() {
 
   # Move windows to correct spaces (spaces auto-follow their assigned displays)
   move_app_windows "Cursor" dev
+  move_app_windows "Code" dev
+  move_app_windows "Claude" dev
   move_arc_windows other  # First Arc to dev, second Arc to other
   move_app_windows "Ghostty" terminal
   move_app_windows "WhatsApp" social
@@ -148,6 +150,8 @@ setup_office() {
 
   # Move windows to correct spaces (spaces auto-follow their assigned displays)
   move_app_windows "Cursor" dev
+  move_app_windows "Code" dev
+  move_app_windows "Claude" dev
   move_arc_windows work  # First Arc to dev, second Arc to work
   move_app_windows "Ghostty" terminal
   move_app_windows "Airmail" work
@@ -174,6 +178,8 @@ setup_mobile() {
 
   # Move windows to correct spaces (single display)
   move_app_windows "Cursor" dev
+  move_app_windows "Code" dev
+  move_app_windows "Claude" dev
   move_arc_windows work  # First Arc to dev, second Arc to work
   move_app_windows "Ghostty" terminal
   move_app_windows "Slack" social
