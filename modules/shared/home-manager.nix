@@ -33,6 +33,8 @@ let
 
     cdg = "cd $(git rev-parse --show-toplevel)";
 
+    c = "claude";
+
     # Global just alias for soolv project
     s = "soolv";
   };
@@ -67,8 +69,8 @@ in
         # MacOS ALT+d fzf
         bind "∂" fzf-cd-widget
 
-        # Shift+Enter for newline in zellij
-        bind \eSE 'commandline -i \n'
+        # Shift+Enter for newline (kitty keyboard protocol: \e[13;2u)
+        bind \e\[13\;2u 'commandline -i \n'
 
         # wtp shell integration
         if command -q wtp
