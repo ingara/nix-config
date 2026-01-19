@@ -19,4 +19,4 @@ local function weakFocus(appName)
 end
 
 hs.hotkey.bind({'command'}, 'escape', toggleApp("Alacritty"))
-hs.hotkey.bind({ 'command', 'ctrl' }, 's', focusApp("Spotify"))
+hs.hotkey.bind({ 'command', 'ctrl' }, 's', focusApp("Music"))

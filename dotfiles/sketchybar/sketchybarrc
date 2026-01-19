@@ -98,10 +98,11 @@ sketchybar --add bracket system apple.logo spaces yabai front_app \
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
 source "$ITEM_DIR/notifications.sh"
-source "$ITEM_DIR/spotify.sh"
+# source "$ITEM_DIR/spotify.sh"
+source "$ITEM_DIR/apple-music.sh"
 
 # Create right side bracket for media controls
-sketchybar --add bracket media spotify spotify.play spotify.next \
+sketchybar --add bracket media apple-music apple-music.play apple-music.next \
   --set media background.color=$COLOR_BACKGROUND_SECONDARY \
   background.corner_radius=8 \
   background.border_width=1 \

@@ -78,6 +78,7 @@ done
 # Rules
 yabai -m rule --add app="^(System Preferences|1Password|^Steam$)$" manage=off
 yabai -m rule --add app="^Spotify$" scratchpad=spotify grid=11:11:1:1:9:9
+yabai -m rule --add app="^Music$" scratchpad=music grid=11:11:1:1:9:9
 yabai -m rule --add app="^Discord$" title!="^Discord Updater$" scratchpad=discord grid=11:11:1:1:9:9
 yabai -m rule --add app="^Ghostty$" subrole="AXFloatingWindow" manage=off
 yabai -m rule --apply # https://github.com/koekeishiya/yabai/issues/2178

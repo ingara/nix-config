@@ -116,7 +116,7 @@ cmd + shift + alt - l : ~/.config/yabai/label_spaces.sh
 
 # Focus applications
 cmd + ctrl - s: open /Applications/Slack.app/
-cmd + ctrl - x: yabai -m window --toggle spotify || open /Applications/Spotify.app/
+cmd + ctrl - x: yabai -m window --toggle music || open /System/Applications/Music.app
 cmd + ctrl - m: open /Applications/Airmail.app/
 # cmd + ctrl - t: Quick terminal is now handled by Ghostty global keybind
 cmd + ctrl - w: open /Applications/WhatsApp.app/
