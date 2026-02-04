@@ -331,7 +331,8 @@ plugins {
     }
     zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
         hide_in_base_mode true
-        max_length "0"
+        max_length "80"
+        overflow_str "..."
         pipe_name "zjstatus_hints"
     }
 }
