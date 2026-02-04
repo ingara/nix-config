@@ -28,6 +28,10 @@ in
     ../../modules/darwin/homebrew.nix
   ];
 
+  # Window manager selection: "yabai", "aerospace", or "none"
+  # Change to "aerospace" to switch to AeroSpace window manager
+  myOptions.windowManager.backend = "aerospace";
+
   # The default Nix build user group ID was changed from 30000 to 350.
   # You are currently managing Nix build users with nix-darwin, but your
   # nixbld group has GID 30000, whereas we expected 350.

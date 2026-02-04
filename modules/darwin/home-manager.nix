@@ -10,10 +10,11 @@
 
 let
   user = userConfig.username;
+  wmBackend = config.myOptions.windowManager.backend or "yabai";
 in
 {
   imports = [
-    # ./dock
+    ./window-manager.nix
   ];
 
   # It me
@@ -38,7 +39,10 @@ in
       {
         imports = [
           catppuccin.homeModules.catppuccin
-          (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
+          (import ../shared/dotfiles.nix {
+            configPath = "${config.home.homeDirectory}/nix-config";
+            inherit wmBackend;
+          })
           (import ./dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
         ];
         catppuccin = {
@@ -84,17 +88,10 @@ in
       };
   };
 
+  # Window manager services (yabai/skhd) are managed by window-manager.nix
   services = {
-    skhd = {
-      enable = true;
-    };
     sketchybar = {
       enable = true;
-    };
-    yabai = {
-      enable = true;
-      package = pkgs.yabai;
-      enableScriptingAddition = true;
     };
 
     # https://mynixos.com/options/services.jankyborders
@@ -114,14 +111,6 @@ in
     sketchybar.serviceConfig = {
       StandardOutPath = "/tmp/sketchybar.log";
       StandardErrorPath = "/tmp/sketchybar.log";
-    };
-    skhd.serviceConfig = {
-      StandardOutPath = "/tmp/skhd.log";
-      StandardErrorPath = "/tmp/skhd.log";
-    };
-    yabai.serviceConfig = {
-      StandardOutPath = "/tmp/yabai.log";
-      StandardErrorPath = "/tmp/yabai.log";
     };
   };
 

@@ -1,10 +1,12 @@
-{ configPath }:
+{
+  configPath,
+  wmBackend ? "yabai",
+}:
 { config, lib, ... }:
 
 let
-  dots = {
-    "yabai" = "yabai";
-    "skhd/skhdrc" = "skhdrc";
+  # Base dotfiles (always linked)
+  baseDots = {
     "lazygit/config.yml" = "lazygit.yml";
     "nvim" = "nvim";
     "ghostty" = "ghostty";
@@ -15,6 +17,23 @@ let
     "git/extra" = "git-extra";
     "claude" = "claude";
   };
+
+  # Yabai-specific dotfiles
+  yabaiDots = {
+    "yabai" = "yabai";
+    "skhd/skhdrc" = "skhdrc";
+  };
+
+  # AeroSpace-specific dotfiles
+  aerospaceDots = {
+    "aerospace" = "aerospace";
+  };
+
+  # Combine based on selected backend
+  dots =
+    baseDots
+    // (if wmBackend == "yabai" then yabaiDots else { })
+    // (if wmBackend == "aerospace" then aerospaceDots else { });
 
   symlink = key: value: {
     source = config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}";

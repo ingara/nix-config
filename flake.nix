@@ -48,6 +48,14 @@
       url = "github:withgraphite/homebrew-tap";
       flake = false;
     };
+    homebrew-aerospace = {
+      url = "github:nikitabobko/homebrew-tap";
+      flake = false;
+    };
+    homebrew-boring-notch = {
+      url = "github:TheBoredTeam/homebrew-boring-notch";
+      flake = false;
+    };
     nh = {
       url = "github:nix-community/nh";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -193,6 +201,8 @@
                   "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
                   "satococoa/homebrew-tap" = inputs.homebrew-satococoa;
                   "withgraphite/homebrew-tap" = inputs.homebrew-graphite;
+                  "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
+                  "theboredteam/homebrew-boring-notch" = inputs.homebrew-boring-notch;
                 };
               };
             }

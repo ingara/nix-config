@@ -1,0 +1,197 @@
+# AeroSpace Configuration
+
+# Default layout (accordion = stack equivalent)
+default-root-container-layout = 'accordion'
+default-root-container-orientation = 'horizontal'
+
+# Startup behavior
+start-at-login = true
+after-startup-command = [
+  'exec-and-forget sleep 2 && ~/.config/aerospace/scripts/apply_setup.sh auto',
+  'exec-and-forget sketchybar --trigger aerospace_loaded'
+]
+
+# Callbacks for sketchybar (replaces yabai signals)
+exec-on-workspace-change = ['/bin/bash', '-c',
+  '/run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+]
+
+on-focused-monitor-changed = ['exec-and-forget sketchybar --trigger aerospace_monitor_changed']
+
+# Match current yabai gaps/padding
+# outer.top uses per-monitor config: 5px on built-in, 35px on externals (for sketchybar)
+[gaps]
+inner.horizontal = 10
+inner.vertical = 10
+outer.left = 5
+outer.right = 5
+outer.top = [{ monitor."built-in" = 5 }, 35]
+outer.bottom = 5
+
+# Workspace-to-monitor assignment with pattern-based fallbacks
+# Patterns are tried in order; first match wins
+[workspace-to-monitor-force-assignment]
+# Main workspaces → primary external monitor (LG in office, Samsung at home)
+dev = ['LG.*', 'Samsung.*', 'Odyssey.*', 'G9.*', 'main']
+terminal = ['LG.*', 'Samsung.*', 'Odyssey.*', 'G9.*', 'main']
+work = ['LG.*', 'Samsung.*', 'Odyssey.*', 'G9.*', 'main']
+
+# Social → built-in (office) or Samsung (home)
+social = ['built-in.*', 'Samsung.*', 'Odyssey.*', 'G9.*', 'main']
+
+# Other → built-in (office) or Acer (home)
+other = ['built-in.*', 'Acer.*', 'Predator.*', 'secondary']
+
+# =============================================================================
+# WINDOW RULES (replaces yabai rules)
+# =============================================================================
+
+# Floating windows (replaces manage=off)
+[[on-window-detected]]
+if.app-id = 'com.apple.systempreferences'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.agilebits.onepassword7'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.1password.1password'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.valvesoftware.steam'
+run = 'layout floating'
+
+# App-to-workspace assignments (replaces move_app_windows)
+[[on-window-detected]]
+if.app-id = 'com.todesktop.230313mzl4w4u92'  # Cursor
+run = 'move-node-to-workspace dev'
+
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = 'move-node-to-workspace dev'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Claude'
+run = 'move-node-to-workspace dev'
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout tiling', 'move-node-to-workspace terminal']
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace social'
+
+[[on-window-detected]]
+if.app-id = 'net.whatsapp.WhatsApp'
+run = 'move-node-to-workspace social'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = 'move-node-to-workspace social'
+
+[[on-window-detected]]
+if.app-id = 'it.bloop.airmail2'
+run = 'move-node-to-workspace work'
+
+[[on-window-detected]]
+if.app-id = 'notion.id'
+run = 'move-node-to-workspace work'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.iCal'
+run = 'move-node-to-workspace work'
+
+# =============================================================================
+# KEYBINDINGS (replaces skhd)
+# =============================================================================
+
+[mode.main.binding]
+# Workspace focus (alt + number maps to named workspaces)
+alt-1 = 'workspace dev'
+alt-2 = 'workspace terminal'
+alt-3 = 'workspace social'
+alt-4 = 'workspace work'
+alt-5 = 'workspace other'
+
+# Recent workspace (alt + tab)
+alt-tab = 'workspace-back-and-forth'
+
+# Window focus (alt + hjkl)
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
+alt-x = 'focus-back-and-forth'
+
+# Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
+alt-z = ['focus --boundaries-action wrap-around-the-workspace left', 'focus --boundaries-action wrap-around-the-workspace up']
+alt-c = ['focus --boundaries-action wrap-around-the-workspace right', 'focus --boundaries-action wrap-around-the-workspace down']
+
+# Swap windows (shift + alt + hjkl)
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+# Join/stack  windows (shift + cmd + hjkl)
+shift-cmd-h = 'join-with left'
+shift-cmd-j = 'join-with down'
+shift-cmd-k = 'join-with up'
+shift-cmd-l = 'join-with right'
+
+# Resize windows (ctrl + alt + hjkl)
+ctrl-alt-j = 'resize smart -50'
+ctrl-alt-k = 'resize smart +50'
+ctrl-alt-h = 'resize smart -150'
+ctrl-alt-l = 'resize smart +150'
+
+# Layout switching (ctrl + alt + z/x/c)
+ctrl-alt-z = ['layout tiles horizontal vertical', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-c = ['layout accordion horizontal vertical', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-x = ['layout floating', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+
+
+# Toggle fullscreen (alt + f)
+alt-f = 'fullscreen'
+
+# Toggle float (ctrl + alt + t)
+ctrl-alt-t = ['layout floating tiling', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+
+# Rotate layout (alt + shift + r)
+alt-shift-r = 'layout tiles horizontal vertical'
+
+# Move window to workspace (shift + alt + number)
+alt-shift-1 = ['move-node-to-workspace dev', 'workspace dev']
+alt-shift-2 = ['move-node-to-workspace terminal', 'workspace terminal']
+alt-shift-3 = ['move-node-to-workspace social', 'workspace social']
+alt-shift-4 = ['move-node-to-workspace work', 'workspace work']
+alt-shift-5 = ['move-node-to-workspace other', 'workspace other']
+
+# App launchers (cmd + ctrl + key)
+cmd-ctrl-s = 'exec-and-forget open /Applications/Slack.app'
+cmd-ctrl-m = 'exec-and-forget open /Applications/Airmail.app'
+cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
+cmd-ctrl-a = 'exec-and-forget open /Applications/Arc.app'
+cmd-ctrl-g = 'exec-and-forget open /Applications/Ghostty.app'
+cmd-ctrl-c = 'exec-and-forget open /Applications/Cursor.app'
+cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
+cmd-ctrl-x = 'exec-and-forget open /System/Applications/Music.app/'
+
+# Setup management (cmd + shift + alt + key)
+cmd-shift-alt-h = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh home'
+cmd-shift-alt-o = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh office'
+cmd-shift-alt-m = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh mobile'
+cmd-shift-alt-a = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh auto'
+cmd-shift-alt-d = 'exec-and-forget ~/.config/aerospace/scripts/detect_setup.sh | xargs -I{} terminal-notifier -title "AeroSpace" -message "Detected: {}"'
+
+# Arrange dev workspace (alt + shift + d)
+alt-shift-d = 'exec-and-forget ~/.config/aerospace/scripts/arrange_dev.sh'
+
+# Passthrough mode (hyper + x)
+cmd-alt-shift-ctrl-x = 'mode passthrough'
+
+[mode.passthrough.binding]
+cmd-alt-shift-ctrl-x = 'mode main'
