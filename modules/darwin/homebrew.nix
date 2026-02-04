@@ -14,6 +14,8 @@
     casks = [
       "1password"
       "arc"
+      "bettertouchtool"
+      "boring-notch"
       "chatgpt"
       "claude"
       "cursor"
@@ -21,11 +23,8 @@
       "discord"
       "elgato-stream-deck"
       "firefox"
-      "firefox@developer-edition"
       "ghostty"
       "google-chrome"
-      "hammerspoon"
-      "istat-menus"
       "karabiner-elements"
       "lookaway"
       "mac-mouse-fix"
@@ -41,7 +40,6 @@
       "spotify"
       "steam"
       "steermouse"
-      "tidal"
       "todoist-app"
       "vial"
       "visual-studio-code"
@@ -68,9 +66,7 @@
       Fantastical = 975937182;
       "Airmail 5" = 918858936;
       "Amphetamine" = 937984704;
-      "Spotica Menu" = 570549457;
       "Balance Lock" = 1019371109;
-      "Velja" = 1607635845;
       "Infuse • Video Player" = 1136220934;
       "System Color Picker" = 1545870783;
     };
