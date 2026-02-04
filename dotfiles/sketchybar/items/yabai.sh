@@ -18,4 +18,5 @@ yabai=(
 
 sketchybar --add item yabai left \
   --set yabai "${yabai[@]}" \
-  --subscribe yabai skhd_space_type_changed skhd_window_type_changed yabai_window_focused yabai_loaded
+  --subscribe yabai skhd_space_type_changed skhd_window_type_changed yabai_window_focused yabai_loaded \
+              aerospace_workspace_change aerospace_loaded aerospace_monitor_changed

@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-# Modern status bracket with consistent theming
-status_bracket=(
-  background.height=26
-  background.color=$COLOR_ITEM_BACKGROUND
-  background.corner_radius=6
-  background.border_width=1
-  background.border_color=$COLOR_BORDER
-  background.padding_left=$ITEM_PADDING
-  background.padding_right=$ITEM_PADDING
-)
 
 volume_opts=(
   icon="􀊢"
@@ -58,7 +48,4 @@ sketchybar \
   --add alias "Control Center,WiFi" right \
   --set "Control Center,WiFi" "${wifi_opts[@]}"
 
-# Group with bracket
-sketchybar \
-  --add bracket status "Control Center,WiFi" volume battery \
-  --set status "${status_bracket[@]}"
+# Note: The combined bracket (status + notifications) is managed by notifications.sh

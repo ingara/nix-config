@@ -151,31 +151,44 @@ EOF
     fi
   done <<< "$existing_items"
 
-  # Update bracket to include all notification items
+  # Update combined bracket (notifications + status items)
+  # Always remove existing bracket first (bracket members can't be updated)
+  sketchybar --remove status_notifications 2>/dev/null
+
   if [ "$has_notifications" = true ]; then
-    # Check if bracket exists
-    if sketchybar --query notifications_bracket &>/dev/null; then
-      # Bracket exists, just update it (bracket members can't be updated, so we need to recreate)
-      sketchybar --remove notifications_bracket
-      sketchybar --add bracket notifications_bracket $item_names \
-        --set notifications_bracket \
-          background.color="$COLOR_ITEM_BACKGROUND" \
-          background.corner_radius=6 \
-          background.height=26 \
-          background.border_width=1 \
-          background.border_color="$COLOR_BORDER"
-    else
-      # Create new bracket
-      sketchybar --add bracket notifications_bracket $item_names \
-        --set notifications_bracket \
-          background.color="$COLOR_ITEM_BACKGROUND" \
-          background.corner_radius=6 \
-          background.height=26 \
-          background.border_width=1 \
-          background.border_color="$COLOR_BORDER"
+    # Create separator item if it doesn't exist
+    if ! sketchybar --query separator.status &>/dev/null; then
+      sketchybar --add item separator.status right \
+        --set separator.status \
+          icon="│" \
+          icon.font="SF Pro:Regular:16.0" \
+          icon.color="$COLOR_LABEL_SECONDARY" \
+          icon.padding_left=2 \
+          icon.padding_right=2 \
+          label.drawing=off \
+          background.drawing=off
     fi
+
+    # Create bracket with notifications + separator + status items
+    sketchybar --add bracket status_notifications $item_names separator.status "Control Center,WiFi" volume battery \
+      --set status_notifications \
+        background.color="$COLOR_ITEM_BACKGROUND" \
+        background.corner_radius=6 \
+        background.height=26 \
+        background.border_width=1 \
+        background.border_color="$COLOR_BORDER"
   else
-    sketchybar --remove notifications_bracket 2>/dev/null
+    # Remove separator when no notifications
+    sketchybar --remove separator.status 2>/dev/null
+
+    # Create bracket with just status items
+    sketchybar --add bracket status_notifications "Control Center,WiFi" volume battery \
+      --set status_notifications \
+        background.color="$COLOR_ITEM_BACKGROUND" \
+        background.corner_radius=6 \
+        background.height=26 \
+        background.border_width=1 \
+        background.border_color="$COLOR_BORDER"
   fi
 }
 

@@ -76,30 +76,51 @@ sketchybar --default "${default[@]}"
 # -----------------------------------
 # -------- Custom Events
 # -----------------------------------
+# Yabai events
 sketchybar \
   --add event yabai_loaded              \
   --add event skhd_space_type_changed   \
   --add event skhd_window_type_changed
 
+# AeroSpace events
+sketchybar \
+  --add event aerospace_loaded              \
+  --add event aerospace_workspace_change    \
+  --add event aerospace_monitor_changed
+
 # Left side items
 source "$ITEM_DIR/apple.sh"
 source "$ITEM_DIR/spaces.sh"
-source "$ITEM_DIR/yabai.sh"
+
+# Only show yabai layout indicator when yabai is running
+if pgrep -x "yabai" > /dev/null 2>&1; then
+  source "$ITEM_DIR/yabai.sh"
+fi
+
 source "$ITEM_DIR/front_app.sh"
 
-# Create left side bracket for system items
-sketchybar --add bracket system apple.logo spaces yabai front_app \
-  --set system background.color=$COLOR_BACKGROUND_SECONDARY \
-  background.corner_radius=8 \
-  background.border_width=1 \
-  background.border_color=$COLOR_BORDER
+# Create left side bracket - include yabai item only when yabai is running
+if pgrep -x "yabai" > /dev/null 2>&1; then
+  sketchybar --add bracket system apple.logo spaces yabai front_app \
+    --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+else
+  sketchybar --add bracket system apple.logo spaces front_app \
+    --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+fi
 
 # Right side items (reverse order since they stack right to left)
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
+source "$ITEM_DIR/system-resources.sh"
 source "$ITEM_DIR/notifications.sh"
 # source "$ITEM_DIR/spotify.sh"
-source "$ITEM_DIR/apple-music.sh"
+# source "$ITEM_DIR/apple-music.sh"
 
 # Create right side bracket for media controls
 sketchybar --add bracket media apple-music apple-music.play apple-music.next \
@@ -108,9 +129,9 @@ sketchybar --add bracket media apple-music apple-music.play apple-music.next \
   background.border_width=1 \
   background.border_color=$COLOR_BORDER
 
-# Create right side bracket for info items
-sketchybar --add bracket info calendar status \
-  --set info background.color=$COLOR_BACKGROUND_SECONDARY \
+# Create right side bracket for calendar
+sketchybar --add bracket calendar_bracket calendar \
+  --set calendar_bracket background.color=$COLOR_BACKGROUND_SECONDARY \
   background.corner_radius=8 \
   background.border_width=1 \
   background.border_color=$COLOR_BORDER
