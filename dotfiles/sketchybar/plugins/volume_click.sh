@@ -3,16 +3,14 @@
 # Debug logging
 echo "$(date): volume_click.sh executed" >> /tmp/volume_click.log
 
-# Check if SwitchAudioSource is available
-SWITCH_AUDIO_SOURCE="/opt/homebrew/bin/SwitchAudioSource"
-[ -x "$SWITCH_AUDIO_SOURCE" ] || exit 0
-
-# Set CONFIG_DIR if not set
-CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/sketchybar}"
 # Set NAME if not set (default to volume)
 NAME="${NAME:-volume}"
 
-source "$CONFIG_DIR/colors.sh"
+source "$HOME/.config/sketchybar/env.sh"
+
+# Check if SwitchAudioSource is available
+SWITCH_AUDIO_SOURCE="$(command -v SwitchAudioSource)"
+[ -x "$SWITCH_AUDIO_SOURCE" ] || exit 0
 
 POPUP_OFF='sketchybar --set volume popup.drawing=off'
 

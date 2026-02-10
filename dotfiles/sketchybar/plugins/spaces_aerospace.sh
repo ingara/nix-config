@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/sketchybar/colors.sh"
-source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
+source "$HOME/.config/sketchybar/env.sh"
 
-AEROSPACE="${AEROSPACE:-$(command -v aerospace || echo /opt/homebrew/bin/aerospace)}"
-SKETCHYBAR="${SKETCHYBAR:-$(command -v sketchybar || echo /run/current-system/sw/bin/sketchybar)}"
+AEROSPACE="${AEROSPACE:-aerospace}"
+SKETCHYBAR="${SKETCHYBAR:-sketchybar}"
 
 get_space_apps() {
   local workspace="$1"

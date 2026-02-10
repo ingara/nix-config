@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/sketchybar/colors.sh"
-source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
+source "$HOME/.config/sketchybar/env.sh"
 
 # Graphite icon (GitHub icon since it's a PR tool)
 GRAPHITE_ICON=":git_hub:"
 
-# Query Graphite PRs needing review
-GH_CLI="/Users/ingar/.nix-profile/bin/gh"
-
 get_graphite_pr_count() {
   local count
-  count=$("$GH_CLI" search prs --review-requested=@me --state=open -- -author:@me draft:false -review:approved 2>/dev/null | wc -l | tr -d ' ')
+  count=$(gh search prs --review-requested=@me --state=open -- -author:@me draft:false -review:approved 2>/dev/null | wc -l | tr -d ' ')
   echo "$count"
 }
 
@@ -168,6 +164,9 @@ EOF
           label.drawing=off \
           background.drawing=off
     fi
+
+    # Ensure separator is positioned between status items and notifications
+    sketchybar --move separator.status before notifications.trigger
 
     # Create bracket with notifications + separator + status items
     sketchybar --add bracket status_notifications $item_names separator.status "Control Center,WiFi" volume battery \

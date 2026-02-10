@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/env.sh"
 
 ICON_BSP=􀻤
 ICON_STACK=􀏭

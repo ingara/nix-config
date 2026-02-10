@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/sketchybar/colors.sh"
-source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
+source "$HOME/.config/sketchybar/env.sh"
 
 get_space_apps() {
   local space_id="$1"

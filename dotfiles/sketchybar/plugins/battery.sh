@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/env.sh"
 
 PERCENTAGE="$(pmset -g batt | rg -o "\d+%" | cut -d% -f1)"
 CHARGING="$(pmset -g batt | rg 'AC Power')"

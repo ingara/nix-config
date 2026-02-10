@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Source icon_map.sh to get the __icon_map function
-source /Users/ingar/.nix-profile/bin/icon_map.sh 2>/dev/null
+source "$HOME/.config/sketchybar/env.sh"
 
 get_current_app() {
   yabai -m query --windows --space mouse | jq -r 'map(select(.["has-focus"] == true)) | .[0].app // empty'
