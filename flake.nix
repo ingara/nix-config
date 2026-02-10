@@ -68,6 +68,10 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    aerospace-scratchpad = {
+      url = "github:cristianoliveira/aerospace-scratchpad";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {

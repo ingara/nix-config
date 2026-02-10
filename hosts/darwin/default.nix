@@ -3,6 +3,7 @@
   pkgs,
   userConfig,
   claude-code-nix,
+  aerospace-scratchpad,
   ...
 }:
 
@@ -83,6 +84,7 @@ in
   # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
     claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    aerospace-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   system = {

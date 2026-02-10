@@ -13,10 +13,14 @@ after-startup-command = [
 
 # Callbacks for sketchybar (replaces yabai signals)
 exec-on-workspace-change = ['/bin/bash', '-c',
-  '/run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE; aerospace-scratchpad hook pull-window $AEROSPACE_PREV_WORKSPACE $AEROSPACE_FOCUSED_WORKSPACE'
 ]
 
 on-focused-monitor-changed = ['exec-and-forget sketchybar --trigger aerospace_monitor_changed']
+
+# Add nix-managed binaries to PATH for exec commands
+[exec.env-vars]
+PATH = '/run/current-system/sw/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 
 # Match current yabai gaps/padding
 # outer.top uses per-monitor config: 5px on built-in, 35px on externals (for sketchybar)
@@ -149,16 +153,16 @@ ctrl-alt-h = 'resize smart -150'
 ctrl-alt-l = 'resize smart +150'
 
 # Layout switching (ctrl + alt + z/x/c)
-ctrl-alt-z = ['layout tiles horizontal vertical', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
-ctrl-alt-c = ['layout accordion horizontal vertical', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
-ctrl-alt-x = ['layout floating', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-z = ['layout tiles horizontal vertical', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-c = ['layout accordion horizontal vertical', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-x = ['layout floating', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
 
 # Toggle fullscreen (alt + f)
 alt-f = 'fullscreen'
 
 # Toggle float (ctrl + alt + t)
-ctrl-alt-t = ['layout floating tiling', 'exec-and-forget /run/current-system/sw/bin/sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-t = ['layout floating tiling', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
 # Rotate layout (alt + shift + r)
 alt-shift-r = 'layout tiles horizontal vertical'
@@ -176,9 +180,9 @@ cmd-ctrl-m = 'exec-and-forget open /Applications/Airmail.app'
 cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
 cmd-ctrl-a = 'exec-and-forget open /Applications/Arc.app'
 cmd-ctrl-g = 'exec-and-forget open /Applications/Ghostty.app'
-cmd-ctrl-c = 'exec-and-forget open /Applications/Cursor.app'
 cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
-cmd-ctrl-x = 'exec-and-forget open /System/Applications/Music.app/'
+cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show Music || open /System/Applications/Music.app/'
+cmd-ctrl-c = 'exec-and-forget aerospace-scratchpad show Timepage || open -a Timepage'
 
 # Setup management (cmd + shift + alt + key)
 cmd-shift-alt-h = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh home'
