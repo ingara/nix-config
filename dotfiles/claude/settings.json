@@ -2,8 +2,19 @@
   "env": {
     "DISABLE_TELEMETRY": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "DISABLE_ERROR_REPORTING": "1"
   },
   "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:fix)",
+      "Bash(pnpm check)",
+      "Bash(pnpm test)",
+      "Bash(pnpm type-check)",
+      "WebSearch"
+    ]
+  },
   "alwaysThinkingEnabled": true
 }
