@@ -130,6 +130,9 @@ alt-k = 'focus up'
 alt-l = 'focus right'
 alt-x = 'focus-back-and-forth'
 
+# Focus/cycle editors on dev workspace (alt + v)
+alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
+
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
 alt-z = ['focus --boundaries-action wrap-around-the-workspace left', 'focus --boundaries-action wrap-around-the-workspace up']
 alt-c = ['focus --boundaries-action wrap-around-the-workspace right', 'focus --boundaries-action wrap-around-the-workspace down']
