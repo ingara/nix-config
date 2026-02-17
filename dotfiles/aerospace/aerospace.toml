@@ -133,6 +133,9 @@ alt-x = 'focus-back-and-forth'
 # Focus/cycle editors on dev workspace (alt + v)
 alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
 
+# Focus Arc on dev workspace (alt + a)
+alt-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
+
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
 alt-z = ['focus --boundaries-action wrap-around-the-workspace left', 'focus --boundaries-action wrap-around-the-workspace up']
 alt-c = ['focus --boundaries-action wrap-around-the-workspace right', 'focus --boundaries-action wrap-around-the-workspace down']
@@ -160,6 +163,8 @@ ctrl-alt-z = ['layout tiles horizontal vertical', 'exec-and-forget sketchybar --
 ctrl-alt-c = ['layout accordion horizontal vertical', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 ctrl-alt-x = ['layout floating', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
+# Flatten workspace tree - escape hatch for nested containers (ctrl + alt + f)
+ctrl-alt-f = 'flatten-workspace-tree'
 
 # Toggle fullscreen (alt + f)
 alt-f = 'fullscreen'
