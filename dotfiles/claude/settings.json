@@ -13,7 +13,9 @@
       "Bash(pnpm check)",
       "Bash(pnpm test)",
       "Bash(pnpm type-check)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr view:*)"
     ]
   },
   "alwaysThinkingEnabled": true
