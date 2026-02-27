@@ -17,7 +17,8 @@ keybinds clear-defaults=true {
         bind "q" { Quit; }
         bind "t" { SwitchToMode "tab"; }
         bind "u" {
-            Run "zellij-url-picker.sh" {
+            DumpScreen "/tmp/zellij-url-screen-dump"
+            Run "zellij-url-picker.sh" "/tmp/zellij-url-screen-dump" {
                 floating true
                 close_on_exit true
             }

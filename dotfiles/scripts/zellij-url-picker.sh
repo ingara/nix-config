@@ -3,21 +3,27 @@ set -euo pipefail
 
 # Check for --list flag
 LIST_ONLY=false
-if [[ "${1:-}" == "--list" ]]; then
-    LIST_ONLY=true
+SCREEN_FILE=""
+
+for arg in "$@"; do
+    case "$arg" in
+        --list) LIST_ONLY=true ;;
+        *) SCREEN_FILE="$arg" ;;
+    esac
+done
+
+# If no screen file provided, dump current pane
+if [ -z "$SCREEN_FILE" ]; then
+    SCREEN_FILE=$(mktemp)
+    trap "rm -f $SCREEN_FILE" EXIT
+    zellij action dump-screen "$SCREEN_FILE"
 fi
-
-# Dump current zellij screen content
-SCREEN_FILE=$(mktemp)
-trap "rm -f $SCREEN_FILE" EXIT
-
-zellij action dump-screen "$SCREEN_FILE"
 
 # Extract URLs, deduplicate, and let user pick
 if command -v rg &> /dev/null; then
-    URLS=$(rg --no-line-number --no-column -o 'https?://[^\s<>"{}|\\^`\[\]]+' "$SCREEN_FILE" | sort -u)
+    URLS=$(rg --no-line-number --no-column -o 'https?://[^\s<>"{}|\\^`\[\]]+' "$SCREEN_FILE" | sort -u || true)
 else
-    URLS=$(grep -oE 'https?://[^\s<>"{}|\\^`\[\]]+' "$SCREEN_FILE" | sort -u)
+    URLS=$(grep -oE 'https?://[^\s<>"{}|\\^`\[\]]+' "$SCREEN_FILE" | sort -u || true)
 fi
 
 if [ -z "$URLS" ]; then
