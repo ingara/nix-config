@@ -5,3 +5,4 @@ dotfiles/claude/*
 !dotfiles/claude/settings.json
 .direnv
 .claude/
+.notes/
