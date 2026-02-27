@@ -49,7 +49,6 @@ with pkgs;
   # node stuff
   nodejs_22
   corepack_22
-  nodePackages.vercel
 
   # fonts
   maple-mono.NF
