@@ -18,7 +18,7 @@ Multi-platform Nix flake managing macOS (nix-darwin), NixOS (WSL + VirtualBox), 
 
 | Host | Platform | Type | Notes |
 |---|---|---|---|
-| `aarch64-darwin` | macOS Apple Silicon | nix-darwin | AeroSpace WM (switchable), sketchybar, Homebrew casks |
+| `scadrial` | macOS Apple Silicon | nix-darwin | AeroSpace WM (switchable), sketchybar, Homebrew casks |
 | `wsl` | NixOS on WSL | NixOS system | Hostname `nixos-wsl`, Windows interop disabled |
 | `vboxnixos` | NixOS on VirtualBox | NixOS system | GNOME 3, disko disk management |
 | `komashi` | Fedora | home-manager only | KDE Plasma via plasma-manager, Flatpak apps |

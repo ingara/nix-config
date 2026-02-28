@@ -15,7 +15,7 @@ check:
 # Build configuration (auto-detects platform)
 build:
     @if [ "{{os()}}" = "macos" ]; then \
-        nix build .#darwinConfigurations.aarch64-darwin.system; \
+        nix build .#darwinConfigurations.scadrial.system; \
     elif [ -f /proc/version ] && grep -qi microsoft /proc/version; then \
         nix build .#nixosConfigurations.wsl.config.system.build.toplevel; \
     elif [ -f /etc/fedora-release ]; then \
@@ -29,7 +29,7 @@ switch *ARGS:
     @if [ "{{os()}}" = "macos" ]; then \
         printf "\033[1;33mStarting darwin switch...\033[0m\n"; \
         export NIXPKGS_ALLOW_UNFREE=1; \
-        nh darwin switch -H aarch64-darwin . {{ARGS}}; \
+        nh darwin switch -H scadrial . {{ARGS}}; \
         WM_BACKEND=$(grep -o 'myOptions.windowManager.backend = "[^"]*"' hosts/darwin/default.nix | cut -d'"' -f2); \
         if [ "$WM_BACKEND" = "yabai" ]; then \
             printf "\033[1;33mLoading yabai scripting addition...\033[0m\n"; \
@@ -54,7 +54,7 @@ switch *ARGS:
 
 # Build specific configuration
 build-darwin:
-    nix build .#darwinConfigurations.aarch64-darwin.system
+    nix build .#darwinConfigurations.scadrial.system
 
 build-wsl:
     nix build .#nixosConfigurations.wsl.config.system.build.toplevel
