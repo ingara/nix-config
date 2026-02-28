@@ -6,6 +6,7 @@
   nix-flatpak,
   plasma-manager,
   userConfig,
+  hasGui,
   claude-code-nix,
   ...
 }:
@@ -209,7 +210,9 @@ in
       pkgs
       lib
       userConfig
+      hasGui
       ;
+    gitCredentialHelper = "store";
     sshSignProgram = "/opt/1Password/op-ssh-sign";
   };
 

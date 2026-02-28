@@ -12,6 +12,8 @@
     ../../../modules/nixos/disko-config.nix
   ];
 
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
   networking.hostName = "vboxnixos";
 
   # Use the systemd-boot EFI boot loader
@@ -101,6 +103,13 @@
       enable = true;
     };
   };
+
+  fonts.packages = with pkgs; [
+    jetbrains-mono
+    font-awesome
+    noto-fonts
+    noto-fonts-color-emoji
+  ];
 
   # VirtualBox specific packages
   environment.systemPackages = with pkgs; [

@@ -12,6 +12,7 @@ in
 {
   imports = [
     ../../modules/shared
+    ../../modules/nixos
   ];
 
   # Set your time zone
@@ -30,8 +31,6 @@ in
       experimental-features = nix-command flakes
     '';
   };
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Programs
   programs = {
@@ -66,15 +65,8 @@ in
     ];
   };
 
-  fonts.packages = with pkgs; [
-    jetbrains-mono
-    font-awesome
-    noto-fonts
-    noto-fonts-emoji
-  ];
-
   environment.systemPackages = with pkgs; [
-    gitAndTools.gitFull
+    gitFull
     neovim
   ];
 

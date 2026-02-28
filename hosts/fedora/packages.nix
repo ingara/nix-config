@@ -1,23 +1,12 @@
 { pkgs }:
 
 with pkgs;
-[
-  bat
-  bottom
-  eza
-  fastfetch
-  fd
-  gh
-  git
-  jq
-  just
-  lazygit
-  neovim
-  ripgrep
-  tealdeer
-  zellij
-
-  # desktop theming
+let
+  shared-packages = import ../../modules/shared/packages.nix { inherit pkgs; };
+in
+shared-packages
+++ [
+  # KDE theming
   (catppuccin-kde.override {
     flavour = [ "macchiato" ];
     accents = [ "mauve" ];
@@ -27,7 +16,4 @@ with pkgs;
 
   # KDE widgets
   application-title-bar
-
-  # fonts
-  maple-mono.NF
 ]

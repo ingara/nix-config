@@ -195,6 +195,7 @@
           inherit system;
           specialArgs = inputs // {
             inherit userConfig;
+            hasGui = true;
           };
           modules = [
             home-manager.darwinModules.home-manager
@@ -228,26 +229,32 @@
           system = "x86_64-linux";
           specialArgs = inputs // {
             inherit userConfig;
+            hasGui = true;
           };
           modules = [
             disko.nixosModules.disko
             catppuccin.nixosModules.catppuccin
             home-manager.nixosModules.home-manager
-            {
+            ({ pkgs, ... }: {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 users.${user} = {
                   imports = [
-                    ./modules/nixos/home-manager.nix
+                    ./modules/linux/home-manager.nix
+                    ./modules/desktop
+                    ./modules/desktop/gtk.nix
+                    ./modules/desktop/polybar.nix
                     catppuccin.homeModules.catppuccin
                   ];
                 };
                 extraSpecialArgs = {
                   inherit userConfig;
+                  hasGui = true;
+                  sshSignProgram = "${pkgs._1password-gui}/bin/op-ssh-sign";
                 };
               };
-            }
+            })
             ./hosts/nixos/vbox
           ];
         };
@@ -256,6 +263,7 @@
           system = "x86_64-linux";
           specialArgs = inputs // {
             inherit userConfig;
+            hasGui = false;
           };
           modules = [
             nixos-wsl.nixosModules.wsl
@@ -267,12 +275,14 @@
                 useUserPackages = true;
                 users.${user} = {
                   imports = [
-                    ./modules/nixos/home-manager.nix
+                    ./modules/linux/home-manager.nix
                     catppuccin.homeModules.catppuccin
                   ];
                 };
                 extraSpecialArgs = {
                   inherit userConfig;
+                  hasGui = false;
+                  sshSignProgram = null;
                 };
               };
             }
@@ -286,6 +296,7 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = inputs // {
             inherit userConfig;
+            hasGui = true;
           };
           modules = [ ./hosts/fedora ];
         };

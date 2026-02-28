@@ -6,6 +6,15 @@ let
 in
 shared-packages
 ++ [
+  colima
+  terminal-notifier
+
+  # Better userland for macOS
+  coreutils
+  findutils
+  gnugrep
+  gnused
+
   dockutil
   pkgs.nerd-fonts.hack
   pkgs.nerd-fonts.caskaydia-cove

@@ -3,7 +3,9 @@
   pkgs,
   lib,
   userConfig,
+  hasGui ? true,
   sshSignProgram ? null,
+  gitCredentialHelper ? null,
   ...
 }:
 
@@ -194,14 +196,11 @@ in
       gpg.format = "ssh";
       "url \"ssh://git@github.com/\"".insteadOf = "https://github.com/";
     }
-    // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      credential.helper = "osxkeychain";
-      "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+    // lib.optionalAttrs (gitCredentialHelper != null) {
+      credential.helper = gitCredentialHelper;
     }
-    // lib.optionalAttrs pkgs.stdenv.isLinux {
-      credential.helper = "store";
-      "gpg \"ssh\"".program =
-        if sshSignProgram != null then sshSignProgram else "${pkgs._1password-gui}/bin/op-ssh-sign";
+    // lib.optionalAttrs (sshSignProgram != null) {
+      "gpg \"ssh\"".program = sshSignProgram;
     };
 
     # Include all git config files from git-extra directory
@@ -248,7 +247,7 @@ in
     enable = false;
   };
   wezterm = {
-    enable = true;
+    enable = hasGui;
     extraConfig = ''
       local config = require('extra.main')
       return config

@@ -80,6 +80,8 @@ in
               lib
               userConfig
               ;
+            gitCredentialHelper = "osxkeychain";
+            sshSignProgram = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
           };
 
         # Marked broken Oct 20, 2022 check later to remove this

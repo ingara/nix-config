@@ -3,6 +3,7 @@
   lib,
   pkgs,
   userConfig,
+  hasGui ? true,
   ...
 }:
 
@@ -22,7 +23,7 @@
   programs._1password.enable = true;
 
   # Enable 1Password GUI (Linux only - macOS uses Homebrew)
-  programs._1password-gui = lib.mkIf pkgs.stdenv.isLinux {
+  programs._1password-gui = lib.mkIf (pkgs.stdenv.isLinux && hasGui) {
     enable = true;
     polkitPolicyOwners = [ userConfig.username ];
   };

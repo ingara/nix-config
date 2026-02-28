@@ -3,7 +3,6 @@
 with pkgs;
 [
   chafa
-  colima
   curlie
   docker
   dust
@@ -33,16 +32,10 @@ with pkgs;
   ripgrep
   rustup
   tealdeer
-  terminal-notifier
   wireguard-tools
   yq-go
   zellij
 
-  # Better userland for macOS
-  coreutils
-  findutils
-  gnugrep
-  gnused
   lazygit
   wget
 

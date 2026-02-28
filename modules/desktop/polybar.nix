@@ -1,36 +1,5 @@
+{ pkgs, ... }:
 {
-  config,
-  pkgs,
-  lib,
-  userConfig,
-  ...
-}:
-let
-  user = userConfig.username;
-in
-{
-  imports = [
-    (import ../shared/dotfiles.nix { configPath = "${config.home.homeDirectory}/nix-config"; })
-  ];
-  home = {
-    enableNixpkgsReleaseCheck = false;
-    username = "${user}";
-    homeDirectory = "/home/${user}";
-    packages = pkgs.callPackage ./packages.nix { };
-    file = { };
-    stateVersion = "23.11";
-  };
-  programs = import ../shared/home-manager.nix {
-    inherit
-      config
-      pkgs
-      lib
-      userConfig
-      ;
-  };
-  gtk = {
-    enable = true;
-  };
   services = {
     polybar = {
       enable = true;
