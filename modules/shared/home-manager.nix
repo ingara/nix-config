@@ -3,6 +3,7 @@
   pkgs,
   lib,
   userConfig,
+  sshSignProgram ? null,
   ...
 }:
 
@@ -99,6 +100,7 @@ in
 
   zsh = {
     enable = true;
+    dotDir = "${config.xdg.configHome}/zsh";
     autocd = false;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
@@ -198,7 +200,8 @@ in
     }
     // lib.optionalAttrs pkgs.stdenv.isLinux {
       credential.helper = "store";
-      "gpg \"ssh\"".program = "${pkgs._1password-gui}/bin/op-ssh-sign";
+      "gpg \"ssh\"".program =
+        if sshSignProgram != null then sshSignProgram else "${pkgs._1password-gui}/bin/op-ssh-sign";
     };
 
     # Include all git config files from git-extra directory

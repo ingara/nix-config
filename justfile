@@ -18,6 +18,8 @@ build:
         nix build .#darwinConfigurations.aarch64-darwin.system; \
     elif [ -f /proc/version ] && grep -qi microsoft /proc/version; then \
         nix build .#nixosConfigurations.wsl.config.system.build.toplevel; \
+    elif [ -f /etc/fedora-release ]; then \
+        nix build .#homeConfigurations.komashi.activationPackage; \
     else \
         nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel; \
     fi
@@ -40,6 +42,10 @@ switch *ARGS:
         printf "\033[1;33mStarting NixOS WSL switch...\033[0m\n"; \
         nh os switch --hostname wsl . {{ARGS}}; \
         printf "\033[1;32mNixOS WSL switch complete!\033[0m\n"; \
+    elif [ -f /etc/fedora-release ]; then \
+        printf "\033[1;33mStarting Fedora home-manager switch...\033[0m\n"; \
+        nix run home-manager -- switch --flake .#komashi {{ARGS}}; \
+        printf "\033[1;32mFedora home-manager switch complete!\033[0m\n"; \
     else \
         printf "\033[1;33mStarting NixOS switch...\033[0m\n"; \
         nh os switch --hostname vboxnixos . {{ARGS}}; \
@@ -56,6 +62,12 @@ build-wsl:
 build-vbox:
     nix build .#nixosConfigurations.vboxnixos.config.system.build.toplevel
 
+build-fedora:
+    nix build .#homeConfigurations.komashi.activationPackage
+
+switch-fedora *ARGS:
+    nix run home-manager -- switch --flake .#komashi {{ARGS}}
+
 # Enter development shell with tools
 dev:
     nix develop
@@ -70,10 +82,11 @@ clean:
 info:
     nix flake info
 
-# Update all dependencies (nix flake + homebrew)
+# Update all dependencies (nix flake + homebrew if available)
 update:
     @just update-nix
-    @just update-brew
+    @command -v brew >/dev/null 2>&1 && just update-brew || true
+    @command -v flatpak >/dev/null 2>&1 && just update-flatpak || true
 
 # Update nix flake inputs
 update-nix:
@@ -82,6 +95,10 @@ update-nix:
 # Upgrade all homebrew packages (taps are updated via nix flake update)
 update-brew:
     brew upgrade && brew cleanup
+
+# Update all flatpak packages
+update-flatpak:
+    flatpak update -y
 
 # Format check (don't format, just check)
 fmt-check:
