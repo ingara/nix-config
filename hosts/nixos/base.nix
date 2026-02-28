@@ -18,10 +18,6 @@ in
   # Set your time zone
   time.timeZone = "Europe/Oslo";
 
-  networking = {
-    useDHCP = lib.mkForce true;
-  };
-
   # Turn on flag for proprietary software
   nix = {
     nixPath = [ "nixos-config=/home/${user}/.local/share/src/nixos-config:/etc/nixos" ];
@@ -70,5 +66,4 @@ in
     neovim
   ];
 
-  system.stateVersion = "23.11"; # Don't change this
 }
