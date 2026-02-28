@@ -68,6 +68,14 @@ build-fedora:
 switch-fedora *ARGS:
     nix run home-manager -- switch --flake .#komashi {{ARGS}}
 
+# Deploy to Lumar (Hetzner server)
+deploy-lumar:
+    nix run github:serokell/deploy-rs -- .#lumar --skip-checks
+
+# SSH into Lumar
+ssh-lumar:
+    ssh lumar
+
 # Enter development shell with tools
 dev:
     nix develop
