@@ -79,6 +79,10 @@
       url = "github:cristianoliveira/aerospace-scratchpad";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {
@@ -90,6 +94,7 @@
       nixpkgs,
       disko,
       nixos-wsl,
+      deploy-rs,
       ...
     }@inputs:
     let
@@ -143,7 +148,7 @@
         };
     in
     {
-      devShells = nixpkgs.lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ] (
+      devShells = nixpkgs.lib.genAttrs [ "aarch64-darwin" "x86_64-linux" "aarch64-linux" ] (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -215,6 +220,31 @@
           hasGui = false;
           hostPath = ./hosts/nixos/wsl;
           extraModules = [ nixos-wsl.nixosModules.wsl ];
+        };
+
+        lumar = mkNixosHost {
+          system = "aarch64-linux";
+          hasGui = false;
+          hostPath = ./hosts/nixos/lumar;
+          extraModules = [ disko.nixosModules.disko ];
+          hmImports = [
+            (
+              { lib, ... }:
+              {
+                programs.git.signing.key = lib.mkForce "/home/ingar/.ssh/signing_key";
+              }
+            )
+          ];
+        };
+      };
+
+      deploy.nodes.lumar = {
+        hostname = "lumar";
+        profiles.system = {
+          sshUser = "root";
+          user = "root";
+          path = deploy-rs.lib.aarch64-linux.activate.nixos self.nixosConfigurations.lumar;
+          remoteBuild = true;
         };
       };
 
