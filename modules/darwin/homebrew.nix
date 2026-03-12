@@ -56,7 +56,6 @@
       "sf-symbols"
     ];
     brews = [
-      "dash0"
       "graphite"
       "livekit"
       "switchaudio-osx"

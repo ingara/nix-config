@@ -43,8 +43,6 @@ let
 
     c = "claude";
 
-    
-    s = "example-tool";
   };
 in
 {
@@ -62,11 +60,6 @@ in
           eval "$(/opt/homebrew/bin/brew shellenv)"
         ''}
         fish_add_path -g $HOME/go/bin
-        set -gx GOPRIVATE "github.com/example/*"
-
-        if command -q example-tool
-          example-tool shell-init fish | source
-        end
         # Disable greeting
         set -g fish_greeting
 
@@ -104,8 +97,6 @@ in
           end
         ''}
 
-        # Completion for example-tool (global just alias)
-        complete -c example-tool -f -a "(just --justfile ${homeDir}/dev/example-tool/justfile --summary 2>/dev/null | tr ' ' '\n')"
       '';
       functions = {
         n = ''

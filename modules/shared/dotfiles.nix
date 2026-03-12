@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 let
-  configPath = "${config.home.homeDirectory}/nix-config";
+  configPath = config.myOptions.dotfiles.repoRoot;
   inherit (config.myOptions.dotfiles) wmBackend;
   mutable = config.myOptions.mutableDotfiles;
 

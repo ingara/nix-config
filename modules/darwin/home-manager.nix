@@ -27,18 +27,6 @@ in
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "backup";
-    sharedModules = [
-      ../shared/options.nix
-      {
-        myOptions = {
-          hasGui = lib.mkDefault config.myOptions.hasGui;
-          mutableDotfiles = lib.mkDefault config.myOptions.mutableDotfiles;
-          zellijAutoAttach = lib.mkDefault config.myOptions.zellijAutoAttach;
-          sshSignProgram = lib.mkDefault config.myOptions.sshSignProgram;
-          gitCredentialHelper = lib.mkDefault config.myOptions.gitCredentialHelper;
-        };
-      }
-    ];
     users.${user} =
       {
         pkgs,
@@ -73,7 +61,6 @@ in
           sessionVariables = {
             PAGER = "less";
             LESS = "-R --quit-if-one-screen --no-init";
-            GOPRIVATE = "github.com/example/*";
           };
           sessionPath = [
             "$HOME/go/bin"

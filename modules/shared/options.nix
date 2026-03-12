@@ -16,7 +16,14 @@
       };
       signingKey = lib.mkOption {
         type = lib.types.str;
-        default = "SIGNING_KEY_PLACEHOLDER";
+        default = "";
+      };
+    };
+    dotfiles = {
+      repoRoot = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "Root path of the nix-config repo, used for dotfile symlinks";
       };
     };
     hasGui = lib.mkOption {
