@@ -234,6 +234,7 @@ in
     "com.slack.Slack"
     "com.visualstudio.code"
     "community.pathofbuilding.PathOfBuilding"
+    "com.github.iwalton3.jellyfin-media-player"
   ];
 
   # Norwerty keyboard layout (US QWERTY with Norwegian characters)
