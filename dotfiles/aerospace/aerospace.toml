@@ -189,7 +189,7 @@ cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
 cmd-ctrl-a = 'exec-and-forget open /Applications/Arc.app'
 cmd-ctrl-g = 'exec-and-forget open /Applications/Ghostty.app'
 cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
-cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show Music || open /System/Applications/Music.app/'
+cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show TIDAL || open /Applications/TIDAL.app/'
 cmd-ctrl-c = 'exec-and-forget aerospace-scratchpad show Timepage || open -a Timepage'
 
 # Setup management (cmd + shift + alt + key)

@@ -40,6 +40,7 @@
       "spotify"
       "steam"
       "tailscale-app"
+      "tidal"
       "steermouse"
       "todoist-app"
       "upscayl"
