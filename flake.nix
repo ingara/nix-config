@@ -145,7 +145,7 @@
           modules = [
             ./modules/shared/options.nix
             {
-              myOptions.dotfiles.repoRoot = "/home/user/nix-config";
+              myOptions.dotfiles.repoRoot = nixpkgs.lib.mkDefault "/home/user/nix-config";
             }
             catppuccin.nixosModules.catppuccin
             home-manager.nixosModules.home-manager
@@ -209,7 +209,7 @@
           modules = [
             ./modules/shared/options.nix
             {
-              myOptions.dotfiles.repoRoot = "/Users/user/nix-config";
+              myOptions.dotfiles.repoRoot = nixpkgs.lib.mkDefault "/Users/user/nix-config";
             }
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
@@ -260,7 +260,7 @@
             ./modules/shared/options.nix
             {
               myOptions.hasGui = true;
-              myOptions.dotfiles.repoRoot = "/home/user/nix-config";
+              myOptions.dotfiles.repoRoot = nixpkgs.lib.mkDefault "/home/user/nix-config";
             }
             ./hosts/fedora
           ]
