@@ -375,6 +375,18 @@ web_client {
 // Default: default
 // 
 theme "catppuccin-macchiato"
+
+themes {
+    catppuccin-macchiato {
+        pane_focused_frame {
+            base "#a6da95"  // green - bright and obvious
+            bold true
+        }
+        pane_normal_frame {
+            base "#494d64"  // surface1 - very subdued
+        }
+    }
+}
  
 // Choose the base input mode of zellij.
 // Default: normal
