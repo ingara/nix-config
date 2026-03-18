@@ -39,6 +39,8 @@ with pkgs;
   lazygit
   wget
 
+  python3
+
   # node stuff
   nodejs_22
   corepack_22
