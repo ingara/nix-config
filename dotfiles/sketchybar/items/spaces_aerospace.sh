@@ -2,7 +2,7 @@
 
 ##### AeroSpace Workspace Indicators #####
 # Format: "workspace_id:display_label"
-WORKSPACES=("dev:[dev]" "terminal:[term]" "social:[chat]" "work:[work]" "other:[other]")
+WORKSPACES=("dev:[dev]" "terminal:[term]" "work:[work]" "social:[chat]" "other:[other]")
 
 for ws in "${WORKSPACES[@]}"; do
   ws_id="${ws%%:*}"
