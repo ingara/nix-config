@@ -237,6 +237,26 @@ in
     "com.github.iwalton3.jellyfin-media-player"
   ];
 
+  xdg.desktopEntries.awakened-poe-trade = {
+    name = "Awakened PoE Trade";
+    exec = "env XDG_SESSION_TYPE=x11 ${config.home.homeDirectory}/Applications/Awakened-PoE-Trade.AppImage --sandbox --force-device-scale-factor=1";
+    terminal = false;
+    type = "Application";
+    categories = [ "Game" "Utility" ];
+  };
+
+  xdg.configFile."autostart/1password.desktop".text = ''
+    [Desktop Entry]
+    Name=1Password
+    Exec=/opt/1Password/1password --silent
+    Terminal=false
+    Type=Application
+    Icon=1password
+    StartupWMClass=1Password
+    Comment=Password manager and secure wallet
+    X-GNOME-Autostart-enabled=true
+  '';
+
   # Norwerty keyboard layout (US QWERTY with Norwegian characters)
   # https://tobiasvl.github.io/norwerty/
   xdg.configFile."xkb/symbols/norwerty".text = ''
