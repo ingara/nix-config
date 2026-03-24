@@ -22,6 +22,7 @@
       "cursor-cli"
       "discord"
       "elgato-stream-deck"
+      "figma"
       "firefox"
       "ghostty"
       "google-chrome"
