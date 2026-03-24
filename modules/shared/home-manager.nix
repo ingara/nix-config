@@ -185,6 +185,7 @@ in
 
       signing = {
         signByDefault = true;
+        format = "ssh";
         key = userConfig.signingKey;
       };
 
@@ -207,7 +208,6 @@ in
           clean = "git-lfs clean -- %f";
           smudge = "git-lfs smudge -- %f";
         };
-        gpg.format = "ssh";
         "url \"ssh://git@github.com/\"".insteadOf = "https://github.com/";
       }
       // lib.optionalAttrs (gitCredentialHelper != null) {
