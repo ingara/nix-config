@@ -66,4 +66,9 @@ with pkgs;
   (pkgs.writeShellScriptBin "zellij-url-picker.sh" (
     builtins.readFile ../../dotfiles/scripts/zellij-url-picker.sh
   ))
+
+  # Zellij session display for zjstatus (SSH-aware)
+  (pkgs.writeShellScriptBin "zellij-session-display.sh" (
+    builtins.readFile ../../dotfiles/scripts/zellij-session-display.sh
+  ))
 ]
