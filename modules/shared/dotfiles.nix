@@ -11,7 +11,6 @@ let
     "nvim" = "nvim";
     "ghostty" = "ghostty";
     "zellij" = "zellij";
-    "alacritty" = "alacritty";
     "sketchybar" = "sketchybar";
     "wezterm/extra" = "wezterm/extra";
     "git/extra" = "git-extra";

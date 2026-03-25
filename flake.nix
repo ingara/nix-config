@@ -26,10 +26,6 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
-    homebrew-services = {
-      url = "github:homebrew/homebrew-services";
-      flake = false;
-    };
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -55,14 +51,6 @@
       url = "github:TheBoredTeam/homebrew-boring-notch";
       flake = false;
     };
-    homebrew-dash0 = {
-      url = "github:dash0hq/dash0-cli";
-      flake = false;
-    };
-    nh = {
-      url = "github:nix-community/nh";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -83,10 +71,6 @@
       url = "github:cristianoliveira/aerospace-scratchpad";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    deploy-rs = {
-      url = "github:serokell/deploy-rs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
   outputs =
     {
@@ -98,7 +82,6 @@
       nixpkgs,
       disko,
       nixos-wsl,
-      deploy-rs,
       ...
     }@inputs:
     let

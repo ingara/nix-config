@@ -13,8 +13,10 @@ with pkgs;
   glow
   graphite-cli
   go
+  broot
   bottom
   just
+  kubecolor
   jq
   k6
   magic-wormhole
