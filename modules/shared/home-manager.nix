@@ -187,6 +187,9 @@ in
         signByDefault = true;
         format = "ssh";
         key = userConfig.signingKey;
+      }
+      // lib.optionalAttrs (sshSignProgram != null) {
+        signer = sshSignProgram;
       };
 
       settings = {
@@ -212,9 +215,6 @@ in
       }
       // lib.optionalAttrs (gitCredentialHelper != null) {
         credential.helper = gitCredentialHelper;
-      }
-      // lib.optionalAttrs (sshSignProgram != null) {
-        "gpg \"ssh\"".program = sshSignProgram;
       };
 
       # Include all git config files from git-extra directory
