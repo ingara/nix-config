@@ -287,7 +287,7 @@
             {
               default = pkgs.mkShell {
                 buildInputs = with pkgs; [
-                  nixfmt-rfc-style
+                  nixfmt
                   statix
                   just
                   git
