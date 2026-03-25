@@ -54,6 +54,7 @@ in
           bat.enable = true;
           fish.enable = true;
         };
+
         home = {
           enableNixpkgsReleaseCheck = false;
           packages = pkgs.callPackage ./packages.nix { };
