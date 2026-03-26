@@ -61,7 +61,10 @@ in
   };
 
   # Tailscale mesh VPN — access services across machines privately
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    extraUpFlags = [ "--ssh" ];
+  };
 
   environment.systemPackages = with pkgs; [
     gitFull
