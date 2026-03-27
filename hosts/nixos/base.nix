@@ -63,7 +63,7 @@ in
   # Tailscale mesh VPN — access services across machines privately
   services.tailscale = {
     enable = true;
-    extraUpFlags = [ "--ssh" ];
+    extraSetFlags = [ "--ssh" ];
   };
 
   environment.systemPackages = with pkgs; [
