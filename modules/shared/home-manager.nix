@@ -274,6 +274,12 @@ in
       enableZshIntegration = true;
     };
 
+    mise = {
+      enable = true;
+      enableFishIntegration = true;
+      enableZshIntegration = true;
+    };
+
     tmux = {
       enable = true;
 
