@@ -1,0 +1,22 @@
+base: lua51
+lua_versions:
+  - luajit
+globals:
+  # Neovim
+  vim:
+    any: true
+  jit:
+    any: true
+  # LazyVim
+  Snacks:
+    any: true
+  LazyVim:
+    any: true
+  # Hammerspoon
+  hs:
+    any: true
+  spoon:
+    any: true
+  # Wezterm
+  wezterm:
+    any: true

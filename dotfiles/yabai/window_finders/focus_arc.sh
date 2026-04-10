@@ -15,13 +15,13 @@
 
 target="${1:-dev}"
 
-if [[ "$target" == "dev" ]]; then
+if [[ $target == "dev" ]]; then
   # First Arc window by ID (earliest created)
   window_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[0].id // empty')
-elif [[ "$target" == "other" ]]; then
+elif [[ $target == "other" ]]; then
   # Second Arc window by ID
   window_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[1].id // empty')
-elif [[ "$target" =~ ^[0-9]+$ ]]; then
+elif [[ $target =~ ^[0-9]+$ ]]; then
   # Nth Arc window (0-indexed, sorted by creation order)
   window_id=$(yabai -m query --windows | jq -r --argjson n "$target" '[.[] | select(.app == "Arc")] | sort_by(.id) | .[$n].id // empty')
 fi

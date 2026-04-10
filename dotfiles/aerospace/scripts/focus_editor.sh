@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 EDITOR_PATTERN='\|(Code|Cursor|Claude)$'
 
 current_ws=$(aerospace list-workspaces --focused)
@@ -7,8 +7,8 @@ editor_ids=()
 while IFS= read -r line; do
   [ -z "$line" ] && continue
   editor_ids+=("$(echo "$line" | cut -d'|' -f1)")
-done <<< "$(aerospace list-windows --workspace dev --format '%{window-id}|%{app-name}' \
-  | grep -E "$EDITOR_PATTERN")"
+done <<<"$(aerospace list-windows --workspace dev --format '%{window-id}|%{app-name}' |
+  grep -E "$EDITOR_PATTERN")"
 
 if [ ${#editor_ids[@]} -eq 0 ]; then
   aerospace workspace dev
@@ -31,7 +31,7 @@ fi
 
 for i in "${!editor_ids[@]}"; do
   if [ "${editor_ids[$i]}" = "$focused_id" ]; then
-    next=$(( (i + 1) % ${#editor_ids[@]} ))
+    next=$(((i + 1) % ${#editor_ids[@]}))
     aerospace focus --window-id "${editor_ids[$next]}"
     exit 0
   fi

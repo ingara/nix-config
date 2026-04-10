@@ -1,6 +1,7 @@
 # nix-config
 
-Multi-platform Nix configuration for macOS (nix-darwin), NixOS (VirtualBox + WSL), and Fedora (home-manager only).
+Multi-platform Nix configuration for macOS (nix-darwin), NixOS (VirtualBox +
+WSL), and Fedora (home-manager only).
 
 ## What's Included
 
@@ -13,12 +14,12 @@ Multi-platform Nix configuration for macOS (nix-darwin), NixOS (VirtualBox + WSL
 
 ## Platforms
 
-| Platform | Configuration |
-|----------|---------------|
-| macOS (Apple Silicon) | `scadrial` |
-| NixOS VirtualBox | `vboxnixos` |
-| NixOS WSL | `wsl` |
-| Fedora | `komashi` |
+| Platform              | Configuration |
+| --------------------- | ------------- |
+| macOS (Apple Silicon) | `scadrial`    |
+| NixOS VirtualBox      | `vboxnixos`   |
+| NixOS WSL             | `wsl`         |
+| Fedora                | `komashi`     |
 
 ## Setup
 
@@ -37,7 +38,8 @@ cd nix-config
 
 ### Customization
 
-Edit user identity in `modules/shared/options.nix` or override via your own module:
+Edit user identity in `modules/shared/options.nix` or override via your own
+module:
 
 ```nix
 myOptions.user = {
@@ -113,11 +115,13 @@ just dev            # Enter development shell
 - `modules/nixos/` — NixOS system-level configuration
 - `modules/linux/` — Linux home-manager base
 - `modules/desktop/` — opt-in Linux desktop extras (GTK, polybar)
-- `dotfiles/` — config files symlinked out-of-store for instant edits without rebuild
+- `dotfiles/` — config files symlinked out-of-store for instant edits without
+  rebuild
 
 ## Using as a Library
 
-This flake exports builder functions that you can use from your own private flake:
+This flake exports builder functions that you can use from your own private
+flake:
 
 ```nix
 let
@@ -130,4 +134,5 @@ in {
 }
 ```
 
-Available builders: `mkDarwinHost`, `mkNixosHost`, `mkHeadlessServer`, `mkFedoraHome`.
+Available builders: `mkDarwinHost`, `mkNixosHost`, `mkHeadlessServer`,
+`mkFedoraHome`.

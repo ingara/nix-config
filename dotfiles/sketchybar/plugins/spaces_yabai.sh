@@ -9,7 +9,8 @@ get_space_apps() {
 
 update_space() {
   local space_num="${NAME#space.}"
-  local apps=$(get_space_apps "$space_num")
+  local apps
+  apps=$(get_space_apps "$space_num")
   local app_icons=""
   local app_count=0
 
@@ -23,7 +24,7 @@ update_space() {
       fi
       app_count=$((app_count + 1))
     fi
-  done <<< "$apps"
+  done <<<"$apps"
 
   if [ "$SELECTED" = "true" ]; then
     sketchybar --set "$NAME" \

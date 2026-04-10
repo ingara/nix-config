@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034  # variables are sourced by other scripts
 # Catppuccin Macchiato Color Palette
 COLOR_CYAN=0xFF91D7E3
 COLOR_BLACK=0xFF1E2030

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 POPUP_OFF='sketchybar --set apple.logo popup.drawing=off'
 POPUP_CLICK_SCRIPT="sketchybar --set apple.logo popup.drawing=toggle"
@@ -7,7 +7,7 @@ apple_logo=(
   icon="􀣺"
   icon.font="$ICON_FONT:Black:16.0"
   icon.color="$COLOR_ACCENT"
-  padding_right=$ITEM_SPACING
+  "padding_right=$ITEM_SPACING"
   label.drawing=off
   click_script="$POPUP_CLICK_SCRIPT"
   popup.height=35

@@ -8,15 +8,19 @@ default-root-container-orientation = 'horizontal'
 start-at-login = true
 after-startup-command = [
   'exec-and-forget sleep 2 && ~/.config/aerospace/scripts/apply_setup.sh auto',
-  'exec-and-forget sketchybar --trigger aerospace_loaded'
+  'exec-and-forget sketchybar --trigger aerospace_loaded',
 ]
 
 # Callbacks for sketchybar (replaces yabai signals)
-exec-on-workspace-change = ['/bin/bash', '-c',
-  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE; aerospace-scratchpad hook pull-window $AEROSPACE_PREV_WORKSPACE $AEROSPACE_FOCUSED_WORKSPACE'
+exec-on-workspace-change = [
+  '/bin/bash',
+  '-c',
+  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE; aerospace-scratchpad hook pull-window $AEROSPACE_PREV_WORKSPACE $AEROSPACE_FOCUSED_WORKSPACE',
 ]
 
-on-focused-monitor-changed = ['exec-and-forget sketchybar --trigger aerospace_monitor_changed']
+on-focused-monitor-changed = [
+  'exec-and-forget sketchybar --trigger aerospace_monitor_changed',
+]
 
 # Add nix-managed binaries to PATH for exec commands
 [exec.env-vars]
@@ -69,7 +73,7 @@ run = 'layout floating'
 
 # App-to-workspace assignments (replaces move_app_windows)
 [[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92'  # Cursor
+if.app-id = 'com.todesktop.230313mzl4w4u92' # Cursor
 run = 'move-node-to-workspace dev'
 
 [[on-window-detected]]
@@ -137,8 +141,14 @@ alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
 alt-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
 
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
-alt-z = ['focus --boundaries-action wrap-around-the-workspace left', 'focus --boundaries-action wrap-around-the-workspace up']
-alt-c = ['focus --boundaries-action wrap-around-the-workspace right', 'focus --boundaries-action wrap-around-the-workspace down']
+alt-z = [
+  'focus --boundaries-action wrap-around-the-workspace left',
+  'focus --boundaries-action wrap-around-the-workspace up',
+]
+alt-c = [
+  'focus --boundaries-action wrap-around-the-workspace right',
+  'focus --boundaries-action wrap-around-the-workspace down',
+]
 
 # Swap windows (shift + alt + hjkl)
 alt-shift-h = 'move left'
@@ -159,9 +169,18 @@ ctrl-alt-h = 'resize smart -150'
 ctrl-alt-l = 'resize smart +150'
 
 # Layout switching (ctrl + alt + z/x/c)
-ctrl-alt-z = ['layout tiles horizontal vertical', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-alt-c = ['layout accordion horizontal vertical', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-alt-x = ['layout floating', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-z = [
+  'layout tiles horizontal vertical',
+  'exec-and-forget sketchybar --trigger aerospace_workspace_change',
+]
+ctrl-alt-c = [
+  'layout accordion horizontal vertical',
+  'exec-and-forget sketchybar --trigger aerospace_workspace_change',
+]
+ctrl-alt-x = [
+  'layout floating',
+  'exec-and-forget sketchybar --trigger aerospace_workspace_change',
+]
 
 # Flatten workspace tree - escape hatch for nested containers (ctrl + alt + f)
 ctrl-alt-f = 'flatten-workspace-tree'
@@ -170,7 +189,10 @@ ctrl-alt-f = 'flatten-workspace-tree'
 alt-f = 'fullscreen'
 
 # Toggle float (ctrl + alt + t)
-ctrl-alt-t = ['layout floating tiling', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-alt-t = [
+  'layout floating tiling',
+  'exec-and-forget sketchybar --trigger aerospace_workspace_change',
+]
 
 # Rotate layout (alt + shift + r)
 alt-shift-r = 'layout tiles horizontal vertical'

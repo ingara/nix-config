@@ -3,13 +3,13 @@
 # Modern Spotify controls with consistent styling
 spotify_opts=(
   update_freq=5
-  padding_left=$ITEM_SPACING
+  "padding_left=$ITEM_SPACING"
   icon="􀑪"
   icon.font="$ICON_FONT:Semibold:15.0"
-  icon.color=$COLOR_SUCCESS
-  icon.padding_right=$ITEM_PADDING
+  "icon.color=$COLOR_SUCCESS"
+  "icon.padding_right=$ITEM_PADDING"
   label.font="$FONT_FAMILY:Medium:13.0"
-  label.color=$COLOR_LABEL
+  "label.color=$COLOR_LABEL"
   label="Not Playing"
   label.max_chars=40
   scroll_texts=off
@@ -22,10 +22,10 @@ play_opts=(
   update_freq=5
   icon="􀊄"
   icon.font="$ICON_FONT:Semibold:14.0"
-  icon.color=$COLOR_ACCENT
+  "icon.color=$COLOR_ACCENT"
   label.width=0
-  padding_left=$ITEM_PADDING
-  padding_right=$ITEM_PADDING
+  "padding_left=$ITEM_PADDING"
+  "padding_right=$ITEM_PADDING"
   click_script="osascript -e 'tell application \"Spotify\" to playpause'"
 )
 
@@ -33,10 +33,10 @@ next_opts=(
   update_freq=5
   icon="􀊐"
   icon.font="$ICON_FONT:Semibold:14.0"
-  icon.color=$COLOR_ACCENT
+  "icon.color=$COLOR_ACCENT"
   label.width=0
-  padding_left=$ITEM_PADDING
-  padding_right=$ITEM_SPACING
+  "padding_left=$ITEM_PADDING"
+  "padding_right=$ITEM_SPACING"
   click_script="osascript -e 'tell application \"Spotify\" to next track'"
 )
 

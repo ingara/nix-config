@@ -29,7 +29,6 @@ with pkgs;
   nixd
   nixfmt
   osc
-  pre-commit
   statix
   ripgrep
   rustup

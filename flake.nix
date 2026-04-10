@@ -75,6 +75,10 @@
       url = "github:cristianoliveira/aerospace-scratchpad";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {
@@ -86,9 +90,20 @@
       nixpkgs,
       disko,
       nixos-wsl,
+      treefmt-nix,
       ...
     }@inputs:
     let
+      supportedSystems = [
+        "aarch64-darwin"
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forEachSystem = nixpkgs.lib.genAttrs supportedSystems;
+      treefmtEval = forEachSystem (
+        system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix
+      );
+
       # Propagate system-level myOptions to home-manager
       mkSharedModules =
         { config, lib }:
@@ -259,36 +274,37 @@
           ;
       };
 
-      devShells =
-        nixpkgs.lib.genAttrs
-          [
-            "aarch64-darwin"
-            "x86_64-linux"
-            "aarch64-linux"
-          ]
-          (
-            system:
-            let
-              pkgs = nixpkgs.legacyPackages.${system};
-            in
-            {
-              default = pkgs.mkShell {
-                buildInputs = with pkgs; [
-                  nixfmt
-                  statix
-                  just
-                  git
-                  bash
-                  lefthook
-                ];
+      devShells = forEachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              nixfmt
+              statix
+              just
+              git
+              bash
+              lefthook
+            ];
 
-                shellHook = ''
-                  echo "🚀 Nix config development environment loaded!"
-                  just
-                '';
-              };
-            }
-          );
+            shellHook = ''
+              echo "🚀 Nix config development environment loaded!"
+              just
+            '';
+          };
+        }
+      );
+
+      # `nix fmt` entrypoint — runs treefmt with all formatters + linters.
+      formatter = forEachSystem (system: treefmtEval.${system}.config.build.wrapper);
+
+      # `nix flake check` validates formatting.
+      checks = forEachSystem (system: {
+        formatting = treefmtEval.${system}.config.build.check self;
+      });
 
       # Standalone configurations with placeholder identity
       darwinConfigurations.scadrial = mkDarwinHost { };

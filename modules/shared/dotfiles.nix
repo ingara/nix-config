@@ -33,7 +33,7 @@ let
     // (if wmBackend == "yabai" then yabaiDots else { })
     // (if wmBackend == "aerospace" then aerospaceDots else { });
 
-  symlink = key: value: {
+  symlink = _key: value: {
     source =
       if mutable then
         config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}"

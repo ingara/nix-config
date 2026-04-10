@@ -1,7 +1,5 @@
 {
   config,
-  pkgs,
-  lib,
   inputs,
   ...
 }:
@@ -30,8 +28,6 @@ in
     users.${user} =
       {
         pkgs,
-        config,
-        lib,
         ...
       }:
       {

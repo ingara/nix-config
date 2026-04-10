@@ -67,6 +67,6 @@ update() {
 }
 
 case "$SENDER" in
-  "forced") exit 0 ;;
-  *) update ;;
+"forced") exit 0 ;;
+*) update ;;
 esac

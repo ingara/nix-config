@@ -23,7 +23,7 @@ yabai -m space 3 --label social
 yabai -m space 4 --label work
 
 # Check if space 5 exists (multi-monitor setup)
-if yabai -m query --spaces | jq -e '.[4]' > /dev/null 2>&1; then
+if yabai -m query --spaces | jq -e '.[4]' >/dev/null 2>&1; then
   yabai -m space 5 --label other
   echo "✓ Labeled 5 spaces: dev, terminal, social, work, other"
 else

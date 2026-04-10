@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Debug logging
-echo "$(date): volume_click.sh executed" >> /tmp/volume_click.log
+echo "$(date): volume_click.sh executed" >>/tmp/volume_click.log
 
 # Set NAME if not set (default to volume)
 NAME="${NAME:-volume}"
@@ -32,18 +32,18 @@ toggle_devices() {
 
     # Determine icon based on device type
     case "$device" in
-      *"AirPods"*|*"Headphones"*|*"Beats"*)
-        device_icon="􀟰"
-        ;;
-      *"Speaker"*|*"MacBook"*)
-        device_icon="􀟯"
-        ;;
-      *"Display"*|*"Monitor"*|*"TV"*)
-        device_icon="􀡴"
-        ;;
-      *)
-        device_icon="􀝎"
-        ;;
+    *"AirPods"* | *"Headphones"* | *"Beats"*)
+      device_icon="􀟰"
+      ;;
+    *"Speaker"* | *"MacBook"*)
+      device_icon="􀟯"
+      ;;
+    *"Display"* | *"Monitor"* | *"TV"*)
+      device_icon="􀡴"
+      ;;
+    *)
+      device_icon="􀝎"
+      ;;
     esac
 
     # Set color based on whether this is the current device
@@ -57,13 +57,13 @@ toggle_devices() {
 
     # Add device item to args
     args+=(
-      --add item volume.device.$COUNTER popup."$NAME"
-      --set volume.device.$COUNTER
-        icon="$device_icon"
-        icon.color="$icon_color"
-        label="$device"
-        label.color="$label_color"
-        click_script="$SWITCH_AUDIO_SOURCE -s \"$device\" && sketchybar --trigger volume_change; $POPUP_OFF"
+      --add item "volume.device.$COUNTER" popup."$NAME"
+      --set "volume.device.$COUNTER"
+      icon="$device_icon"
+      icon.color="$icon_color"
+      label="$device"
+      label.color="$label_color"
+      click_script="$SWITCH_AUDIO_SOURCE -s \"$device\" && sketchybar --trigger volume_change; $POPUP_OFF"
     )
 
     COUNTER=$((COUNTER + 1))
@@ -72,7 +72,7 @@ $($SWITCH_AUDIO_SOURCE -a -t output)
 EOF
 
   # Execute all commands atomically
-  sketchybar -m "${args[@]}" > /dev/null
+  sketchybar -m "${args[@]}" >/dev/null
 }
 
 toggle_devices

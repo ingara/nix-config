@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 source "$HOME/.config/sketchybar/env.sh"
 
@@ -33,7 +33,7 @@ case "${PERCENTAGE}" in
   ;;
 esac
 
-if [[ "$CHARGING" != "" ]]; then
+if [[ $CHARGING != "" ]]; then
   ICON=􀢋
 fi
 

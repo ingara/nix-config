@@ -6,14 +6,14 @@ update() {
   PLAYING=1
   TRACK=""
   ARTIST=""
-  
+
   # Check if Spotify is running
-  if ! pgrep -f "Spotify" > /dev/null 2>&1; then
+  if ! pgrep -f "Spotify" >/dev/null 2>&1; then
     sketchybar --set "$NAME" label="Spotify Not Running" drawing=off
     sketchybar --set spotify.play drawing=off
     return
   fi
-  
+
   # Get playback state and track info
   if [ -z "$INFO" ]; then
     if [ "$(osascript -e 'tell application "Spotify" to player state' 2>/dev/null)" == 'playing' ]; then
@@ -45,14 +45,14 @@ update() {
 
 handle_click() {
   case "$NAME" in
-    "spotify") osascript -e 'tell application "Spotify" to playpause' ;;
-    "spotify.play") osascript -e 'tell application "Spotify" to playpause' ;;
-    "spotify.next") osascript -e 'tell application "Spotify" to next track' ;;
+  "spotify") osascript -e 'tell application "Spotify" to playpause' ;;
+  "spotify.play") osascript -e 'tell application "Spotify" to playpause' ;;
+  "spotify.next") osascript -e 'tell application "Spotify" to next track' ;;
   esac
 }
 
 case "$SENDER" in
-  "mouse.clicked") handle_click ;;
-  "forced") exit 0 ;;
-  *) update ;;
+"mouse.clicked") handle_click ;;
+"forced") exit 0 ;;
+*) update ;;
 esac

@@ -22,6 +22,7 @@
       "cursor-cli"
       "discord"
       "elgato-stream-deck"
+      "fedora-media-writer"
       "figma"
       "firefox"
       "ghostty"

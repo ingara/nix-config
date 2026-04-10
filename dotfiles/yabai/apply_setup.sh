@@ -9,7 +9,7 @@
 #   auto   - Auto-detect based on connected displays
 
 # Ensure spaces are labeled before proceeding
-~/.config/yabai/label_spaces.sh > /dev/null 2>&1
+~/.config/yabai/label_spaces.sh >/dev/null 2>&1
 
 # Utility function to move all windows of an app to a space
 # The space parameter implicitly handles display relocation
@@ -24,7 +24,7 @@ move_app_windows() {
 
 # Move Arc windows individually: first to dev, second to specified space
 move_arc_windows() {
-  local second_arc_space="${1:-work}"  # Where to put second Arc (default: work)
+  local second_arc_space="${1:-work}" # Where to put second Arc (default: work)
 
   # Get Arc windows sorted by ID (creation order)
   arc_windows=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[].id')
@@ -76,7 +76,7 @@ arrange_dev_bsp() {
   yabai -m window --warp east 2>/dev/null
 
   # Step 6: Add remaining editors to the stack using insertion point
-  for ((i=1; i<${#editor_ids[@]}; i++)); do
+  for ((i = 1; i < ${#editor_ids[@]}; i++)); do
     echo "    Adding editor ${editor_ids[$i]} to stack..."
     # Set insertion point on first editor before each warp
     yabai -m window --focus "${editor_ids[0]}" 2>/dev/null
@@ -92,7 +92,7 @@ setup_home() {
   echo "Applying home office setup (clamshell mode, both external monitors)..."
 
   # Ensure space 5 exists for secondary display
-  if ! yabai -m query --spaces | jq -e '.[4]' > /dev/null 2>&1; then
+  if ! yabai -m query --spaces | jq -e '.[4]' >/dev/null 2>&1; then
     yabai -m space --create
   fi
 
@@ -112,7 +112,7 @@ setup_home() {
   move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
-  move_arc_windows other  # First Arc to dev, second Arc to other
+  move_arc_windows other # First Arc to dev, second Arc to other
   move_app_windows "Ghostty" terminal
   move_app_windows "WhatsApp" social
   move_app_windows "Messages" social
@@ -131,7 +131,7 @@ setup_office() {
   echo "Applying office setup (external monitor as main)..."
 
   # Ensure space 5 exists for secondary display
-  if ! yabai -m query --spaces | jq -e '.[4]' > /dev/null 2>&1; then
+  if ! yabai -m query --spaces | jq -e '.[4]' >/dev/null 2>&1; then
     yabai -m space --create
   fi
 
@@ -152,7 +152,7 @@ setup_office() {
   move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
-  move_arc_windows work  # First Arc to dev, second Arc to work
+  move_arc_windows work # First Arc to dev, second Arc to work
   move_app_windows "Ghostty" terminal
   move_app_windows "Airmail" work
   move_app_windows "Notion" work
@@ -180,7 +180,7 @@ setup_mobile() {
   move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
-  move_arc_windows work  # First Arc to dev, second Arc to work
+  move_arc_windows work # First Arc to dev, second Arc to work
   move_app_windows "Ghostty" terminal
   move_app_windows "Slack" social
   move_app_windows "WhatsApp" social

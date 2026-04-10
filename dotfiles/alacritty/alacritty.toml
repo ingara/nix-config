@@ -16,16 +16,6 @@ size = 12.0
 # italic = { family = "PragmataProMono Nerd Font", style = "Italic" }
 # normal = { family = "PragmataProMono Nerd Font", style = "Regular" }
 
-# [[hints.enabled]]
-# command = "open"
-# hyperlinks = true
-# post_processing = true
-# regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-<>\"\\s{-}\\^⟨⟩`]+"
-#
-#[hints.enabled.mouse]
-#enabled = true
-#mods = "Command"
-
 [window]
 decorations = "none"
 opacity = 0.99

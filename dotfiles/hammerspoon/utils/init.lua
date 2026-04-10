@@ -2,7 +2,7 @@
 
 local spaces = require("hs.spaces")
 
-M = {}
+local M = {}
 
 local function resizeWindowToScreenFrame(win)
 	local scrFrame = hs.screen.mainScreen():frame()
@@ -38,7 +38,7 @@ local function displayWindowInMainScreen(win)
 end
 
 local function displayWindowInActiveScreen(win)
-  local activeSpaceId = hs.spaces.activeSpaceOnScreen()
+	local activeSpaceId = hs.spaces.activeSpaceOnScreen()
 
 	spaces.moveWindowToSpace(win, activeSpaceId)
 end
@@ -47,11 +47,11 @@ local function visualizeAppInScreenFrame(app, onActiveScreen)
 	local win = getAppMainWindow(app)
 
 	resizeWindowToScreenFrame(win)
-  if onActiveScreen then
-    displayWindowInActiveScreen(win)
-  else
-    displayWindowInMainScreen(win)
-  end
+	if onActiveScreen then
+		displayWindowInActiveScreen(win)
+	else
+		displayWindowInMainScreen(win)
+	end
 
 	if win:isFullScreen() then
 		win:toggleFullScreen()

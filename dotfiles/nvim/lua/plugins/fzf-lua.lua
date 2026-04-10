@@ -7,9 +7,7 @@ return {
     {
       "<C-p>",
       function()
-        require("fzf-lua").lsp_live_workspace_symbols({
-          regex_filter = symbols_filter,
-        })
+        require("fzf-lua").lsp_live_workspace_symbols({})
       end,
       desc = "Goto Symbol (Workspace)",
     },

@@ -9,8 +9,8 @@ system_resources_opts=(
   updates=on
   drawing=off
   icon="􀧓"
-  icon.color=$COLOR_WARNING
-  label.color=$COLOR_WARNING
+  "icon.color=$COLOR_WARNING"
+  "label.color=$COLOR_WARNING"
   click_script="open -a 'Activity Monitor'"
   script="$PLUGIN_DIR/system-resources.sh"
 )

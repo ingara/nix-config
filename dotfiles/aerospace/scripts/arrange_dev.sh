@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Arrange dev workspace: Arc (left tiles) | Editors (right vertical accordion)
 # Strategy: stash editors in temp workspace, bring them back one at a time,
 # use join-with to create the group, then move to add to it.
@@ -17,7 +17,7 @@ fi
 editor_array=()
 while IFS= read -r id; do
   [ -n "$id" ] && editor_array+=("$id")
-done <<< "$editor_ids"
+done <<<"$editor_ids"
 
 if [ ${#editor_array[@]} -lt 2 ]; then
   aerospace flatten-workspace-tree
@@ -58,7 +58,7 @@ aerospace join-with left
 
 # Bring remaining editors back and MOVE (not join) them into the container
 # move does deepMoveIn — adds to the container without nesting
-for ((i=2; i<${#editor_array[@]}; i++)); do
+for ((i = 2; i < ${#editor_array[@]}; i++)); do
   aerospace workspace _arrange_tmp
   aerospace focus --window-id "${editor_array[$i]}"
   aerospace move-node-to-workspace dev

@@ -16,9 +16,7 @@ let
 
   # Use centralized user configuration from myOptions
   name = userConfig.fullName;
-  user = userConfig.username;
   inherit (userConfig) email;
-  homeDir = if pkgs.stdenv.isDarwin then "/Users/${user}" else "/home/${user}";
   aliases = {
     cat = "bat";
     g = "git";
@@ -180,7 +178,6 @@ in
         ".envrc"
         "flake.lock"
         "flake.nix"
-        ".pre-commit-config.yaml"
       ];
 
       signing = {

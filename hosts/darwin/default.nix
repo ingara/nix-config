@@ -15,10 +15,6 @@ let
   # bash/zsh:
   #   $ printf '%d\n' "$(( 0x700000000 | 0x31 ))"
   #   30064771121
-  keycodes = {
-    backspace = 30064771114;
-    pipe = 30064771121;
-  };
 in
 {
   imports = [

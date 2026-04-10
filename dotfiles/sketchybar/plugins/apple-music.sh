@@ -8,7 +8,7 @@ update() {
   ARTIST=""
 
   # Check if Music is running
-  if ! pgrep -f "Music" > /dev/null 2>&1; then
+  if ! pgrep -f "Music" >/dev/null 2>&1; then
     sketchybar --set "$NAME" label="Music Not Running" drawing=off
     sketchybar --set apple-music.play drawing=off
     return
@@ -39,14 +39,14 @@ update() {
 
 handle_click() {
   case "$NAME" in
-    "apple-music") osascript -e 'tell application "Music" to playpause' ;;
-    "apple-music.play") osascript -e 'tell application "Music" to playpause' ;;
-    "apple-music.next") osascript -e 'tell application "Music" to next track' ;;
+  "apple-music") osascript -e 'tell application "Music" to playpause' ;;
+  "apple-music.play") osascript -e 'tell application "Music" to playpause' ;;
+  "apple-music.next") osascript -e 'tell application "Music" to next track' ;;
   esac
 }
 
 case "$SENDER" in
-  "mouse.clicked") handle_click ;;
-  "forced") exit 0 ;;
-  *) update ;;
+"mouse.clicked") handle_click ;;
+"forced") exit 0 ;;
+*) update ;;
 esac

@@ -18,7 +18,8 @@ update_space() {
   local is_focused=false
   [ "$ws_id" = "$focused_ws" ] && is_focused=true
 
-  local apps=$(get_space_apps "$ws_id")
+  local apps
+  apps=$(get_space_apps "$ws_id")
   local app_icons=""
   local app_count=0
 
@@ -32,7 +33,7 @@ update_space() {
       fi
       app_count=$((app_count + 1))
     fi
-  done <<< "$apps"
+  done <<<"$apps"
 
   if [ "$is_focused" = true ]; then
     $SKETCHYBAR --set "$NAME" \

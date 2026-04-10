@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-
 volume_opts=(
   icon="􀊢"
   icon.font="$ICON_FONT:Semibold:14.0"
-  icon.color=$COLOR_ACCENT
+  "icon.color=$COLOR_ACCENT"
   label.font="$FONT_FAMILY:Medium:12.0"
-  label.color=$COLOR_LABEL
+  "label.color=$COLOR_LABEL"
   script="$PLUGIN_DIR/volume.sh"
   click_script="sh $PLUGIN_DIR/volume_click.sh"
   popup.height=30
@@ -16,18 +15,18 @@ volume_opts=(
 battery_opts=(
   icon="􀋨"
   icon.font="$ICON_FONT:Semibold:14.0"
-  icon.color=$COLOR_SUCCESS
+  "icon.color=$COLOR_SUCCESS"
   label.font="$FONT_FAMILY:Medium:12.0"
-  label.color=$COLOR_LABEL
+  "label.color=$COLOR_LABEL"
   update_freq=120
   script="$PLUGIN_DIR/battery.sh"
 )
 
 wifi_opts=(
-  alias.color=$COLOR_ACCENT
+  "alias.color=$COLOR_ACCENT"
   alias.scale=0.9
-  icon.padding_left=$ITEM_PADDING
-  icon.padding_right=$ITEM_PADDING
+  "icon.padding_left=$ITEM_PADDING"
+  "icon.padding_right=$ITEM_PADDING"
   label.width=0
   label.padding_left=0
   label.padding_right=0

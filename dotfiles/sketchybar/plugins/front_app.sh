@@ -14,7 +14,7 @@ fi
 
 if [ -n "$current_app" ]; then
   __icon_map "$current_app"
-  
+
   if [ -n "$icon_result" ]; then
     sketchybar --set "$NAME" icon="$icon_result" label="$current_app"
   else

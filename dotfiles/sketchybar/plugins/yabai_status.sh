@@ -23,14 +23,14 @@ update_status() {
     icon="$ICON_FLOAT" label='Float' color="$FLOAT_LAYOUT_COLOR"
   else
     space_type="$(yabai -m query --spaces --space | jq -r '.type')"
-    if [[ "$space_type" == 'float' ]]; then
+    if [[ $space_type == 'float' ]]; then
       icon="$ICON_FLOAT" label='FLOAT' color="$FLOAT_LAYOUT_COLOR"
     else
       stack_index="$(echo "$window_info" | jq '.["stack-index"]')"
-      if [[ "$stack_index" == 0 ]]; then
-        if [[ "$space_type" == 'bsp' ]]; then
+      if [[ $stack_index == 0 ]]; then
+        if [[ $space_type == 'bsp' ]]; then
           icon="$ICON_BSP" label='BSP' color="$BSP_LAYOUT_COLOR"
-        elif [[ "$space_type" == 'stack' ]]; then
+        elif [[ $space_type == 'stack' ]]; then
           icon="$ICON_STACK" label='STACK' color="$STACK_LAYOUT_COLOR"
         fi
       else
