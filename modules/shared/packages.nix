@@ -27,6 +27,7 @@ with pkgs;
   ngrok
   nh
   nixd
+  opencode
   nixfmt
   osc
   statix
