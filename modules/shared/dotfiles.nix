@@ -14,6 +14,7 @@ let
     "sketchybar" = "sketchybar";
     "wezterm/extra" = "wezterm/extra";
     "git/extra" = "git-extra";
+    "claude/statusline-command.sh" = "claude/statusline-command.sh";
   };
 
   # Yabai-specific dotfiles
