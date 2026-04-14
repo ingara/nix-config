@@ -71,6 +71,23 @@ in
           set -gx SSH_AUTH_SOCK ~/.ssh/agent.sock
         ''}
 
+        ${lib.optionalString pkgs.stdenv.isLinux ''
+          # Kill orphaned zellij servers whose sockets have disappeared.
+          # Nix upgrades can change the binary path, orphaning old servers.
+          # See: https://github.com/zellij-org/zellij/issues/3775
+          if not set -q ZELLIJ
+            for pid in (pgrep -f 'zellij --server' 2>/dev/null)
+              set -l args (string split0 -- < /proc/$pid/cmdline 2>/dev/null)
+              set -l idx (contains -i -- '--server' $args)
+              and set -l socket $args[(math $idx + 1)]
+              if test -n "$socket"; and not test -S "$socket"
+                echo "Killing orphaned zellij server (PID $pid)"
+                kill $pid
+              end
+            end
+          end
+        ''}
+
         ${lib.optionalString zellijAutoAttach ''
           # Auto-attach to zellij session (create if needed)
           if status is-interactive; and not set -q ZELLIJ
