@@ -50,6 +50,9 @@ social = ['built-in.*', 'Samsung.*', 'Odyssey.*', 'G9.*', 'main']
 # Other → built-in (office) or Acer (home)
 other = ['built-in.*', 'Acer.*', 'Predator.*', 'secondary']
 
+# Pin scratchpad workspace to prevent it drifting between monitors
+'.scratchpad' = 'main'
+
 # =============================================================================
 # WINDOW RULES (replaces yabai rules)
 # =============================================================================
@@ -139,6 +142,12 @@ alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
 
 # Focus Arc on dev workspace (alt + a)
 alt-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
+
+# Focus WezTerm (alt + t)
+alt-t = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|WezTerm$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a WezTerm'
+
+# Focus Slack (alt + s)
+alt-s = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|Slack$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a Slack'
 
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
 alt-z = [
