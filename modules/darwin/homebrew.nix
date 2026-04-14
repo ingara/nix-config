@@ -15,8 +15,6 @@
       "1password"
       "arc"
       "bettertouchtool"
-      "boring-notch"
-      "chatgpt"
       "claude"
       "cursor"
       "cursor-cli"
@@ -44,12 +42,10 @@
       "tailscale-app"
       "tidal"
       "steermouse"
-      "todoist-app"
       "upscayl"
       "vial"
       "visual-studio-code"
       "whatsapp"
-      "windsurf"
       "zen"
       "zoom"
 
@@ -60,7 +56,6 @@
     ];
     brews = [
       "graphite"
-      "livekit"
       "switchaudio-osx"
       "wtp"
     ];
@@ -68,8 +63,6 @@
       builtins.attrNames config.nix-homebrew.taps
     );
     masApps = {
-      Fantastical = 975937182;
-      "Airmail 5" = 918858936;
       "Amphetamine" = 937984704;
       "Balance Lock" = 1019371109;
       "Infuse • Video Player" = 1136220934;
