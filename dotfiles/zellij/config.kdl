@@ -37,6 +37,8 @@ keybinds clear-defaults=true {
         bind "Ctrl left" { GoToPreviousTab; }
         bind "Ctrl Shift right" { MoveTab "right"; }
         bind "Ctrl Shift left" { MoveTab "left"; }
+        bind "Alt a" { GoToPreviousTab; }
+        bind "Alt d" { GoToNextTab; }
         bind "Ctrl a" { SwitchToMode "normal"; }
         bind "Ctrl h" {
             MessagePlugin "vim-zellij-navigator" {
@@ -129,7 +131,7 @@ keybinds clear-defaults=true {
         bind "j" { GoToNextTab; }
         bind "k" { GoToPreviousTab; }
         bind "l" { GoToNextTab; }
-        bind "n" { NewTab; SwitchToMode "normal"; }
+        bind "n" { NewTab; SwitchToMode "locked"; }
         bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
         bind "s" { ToggleActiveSyncTab; SwitchToMode "normal"; }
         bind "Ctrl t" { SwitchToMode "normal"; }
