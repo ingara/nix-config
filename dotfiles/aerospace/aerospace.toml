@@ -140,14 +140,8 @@ alt-x = 'focus-back-and-forth'
 # Focus/cycle editors on dev workspace (alt + v)
 alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
 
-# Focus Arc on dev workspace (alt + a)
-alt-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
-
 # Focus WezTerm (alt + t)
 alt-t = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|WezTerm$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a WezTerm'
-
-# Focus Slack (alt + s)
-alt-s = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|Slack$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a Slack'
 
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
 alt-z = [
@@ -214,10 +208,12 @@ alt-shift-4 = ['move-node-to-workspace work', 'workspace work']
 alt-shift-5 = ['move-node-to-workspace other', 'workspace other']
 
 # App launchers (cmd + ctrl + key)
-cmd-ctrl-s = 'exec-and-forget open /Applications/Slack.app'
+# Arc: focus existing window on dev workspace, or switch to dev workspace if not running
+cmd-ctrl-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
+# Slack: focus existing window, or launch if not running
+cmd-ctrl-s = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|Slack$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a Slack'
 cmd-ctrl-m = 'exec-and-forget open /Applications/Airmail.app'
 cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
-cmd-ctrl-a = 'exec-and-forget open /Applications/Arc.app'
 cmd-ctrl-g = 'exec-and-forget open /Applications/Ghostty.app'
 cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
 cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show TIDAL || open /Applications/TIDAL.app/'
