@@ -19,6 +19,7 @@
       "cursor"
       "cursor-cli"
       "discord"
+      "element"
       "elgato-stream-deck"
       "fedora-media-writer"
       "figma"
