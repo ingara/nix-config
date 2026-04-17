@@ -5,7 +5,7 @@
     onActivation = {
       cleanup = "zap";
       autoUpdate = false;
-      upgrade = false;
+      upgrade = true;
     };
     global = {
       brewfile = true;
