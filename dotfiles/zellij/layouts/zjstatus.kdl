@@ -14,7 +14,7 @@ layout {
                 border_format   "#[fg=#6c7086]{char}"
                 border_position "top"
 
-                hide_frame_for_single_pane "true"
+                hide_frame_for_single_pane "false"
 
                 // Mode indicators - Catppuccin Macchiato (hints come from zjstatus-hints plugin)
                 mode_locked        "#[bg=#6e738d,fg=#24273a,bold]  LOCKED "
