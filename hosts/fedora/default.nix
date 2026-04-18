@@ -44,8 +44,6 @@ in
     homeDirectory = "/home/${user}";
     packages = pkgs.callPackage ./packages.nix { } ++ [
       inputs.claude-code-nix.packages.x86_64-linux.default
-      # plasma-manager scripts call `qdbus` but Fedora Plasma 6 ships `qdbus-qt6`
-      (pkgs.writeShellScriptBin "qdbus" ''exec /usr/bin/qdbus-qt6 "$@"'')
     ];
 
     sessionVariables = {
@@ -110,115 +108,6 @@ in
       { layout = "norwerty"; }
     ];
 
-    panels = [
-      # ── Top bar (macOS-style menu bar) ──
-      {
-        location = "top";
-        height = 28;
-        alignment = "center";
-        lengthMode = "fill";
-        floating = false;
-        screen = "all";
-        widgets = [
-          { appMenu.compactView = true; }
-
-          {
-            pager.general = {
-              displayedText = "desktopNumber";
-              showWindowOutlines = true;
-              navigationWrapsAround = true;
-            };
-          }
-
-          {
-            applicationTitleBar = {
-              layout = {
-                elements = [ "windowTitle" ];
-                horizontalAlignment = "left";
-                showDisabledElements = "deactivated";
-                verticalAlignment = "center";
-              };
-              windowTitle = {
-                source = "appName";
-                hideEmptyTitle = true;
-                font = {
-                  bold = false;
-                  fit = "fixedSize";
-                  size = 12;
-                };
-                margins = {
-                  left = 10;
-                  right = 5;
-                  top = 0;
-                  bottom = 0;
-                };
-              };
-              behavior.activeTaskSource = "activeTask";
-              overrideForMaximized.enable = false;
-            };
-          }
-
-          { panelSpacer.expanding = true; }
-
-          {
-            systemTray.items = {
-              shown = [
-                "org.kde.plasma.battery"
-                "org.kde.plasma.bluetooth"
-                "org.kde.plasma.networkmanagement"
-                "org.kde.plasma.volume"
-              ];
-            };
-          }
-
-          {
-            digitalClock = {
-              time.format = "24h";
-              time.showSeconds = "never";
-              date = {
-                enable = true;
-                format = "shortDate";
-                position = "besideTime";
-              };
-              calendar.firstDayOfWeek = "monday";
-            };
-          }
-        ];
-      }
-
-      # ── Bottom dock (macOS-style floating dock) ──
-      {
-        location = "bottom";
-        height = 56;
-        alignment = "center";
-        lengthMode = "fit";
-        floating = true;
-        hiding = "dodgewindows";
-        opacity = "translucent";
-        screen = "all";
-        widgets = [
-          {
-            iconTasks = {
-              launchers = [
-                "applications:app.zen_browser.zen.desktop"
-                "applications:steam.desktop"
-                "applications:com.slack.Slack.desktop"
-                "applications:com.discordapp.Discord.desktop"
-                "applications:com.mitchellh.ghostty.desktop"
-              ];
-              appearance.indicateAudioStreams = true;
-              behavior = {
-                grouping.method = "byProgramName";
-                sortingMethod = "manually";
-                minimizeActiveTaskOnClick = true;
-                middleClickAction = "newInstance";
-                showTasks.onlyInCurrentScreen = true;
-              };
-            };
-          }
-        ];
-      }
-    ];
   };
 
   qt = {
@@ -242,7 +131,10 @@ in
     exec = "env XDG_SESSION_TYPE=x11 ${config.home.homeDirectory}/Applications/Awakened-PoE-Trade.AppImage --sandbox --force-device-scale-factor=1";
     terminal = false;
     type = "Application";
-    categories = [ "Game" "Utility" ];
+    categories = [
+      "Game"
+      "Utility"
+    ];
   };
 
   xdg.configFile."autostart/1password.desktop".text = ''

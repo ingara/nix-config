@@ -15,6 +15,4 @@ shared-packages
   })
   papirus-icon-theme
 
-  # KDE widgets
-  application-title-bar
 ]
