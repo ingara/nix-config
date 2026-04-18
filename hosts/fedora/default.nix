@@ -127,6 +127,14 @@ in
     "im.riot.Riot" # Element (Matrix client)
   ];
 
+  # Disable AirPlay (RAOP) sound outputs from appearing in PipeWire
+  # https://discussion.fedoraproject.org/t/airplay-audio-outputs-discovery-enabled-by-default/166328
+  xdg.configFile."pipewire/pipewire.conf.d/90-disable-raop.conf".text = ''
+    context.properties = {
+        module.raop = false
+    }
+  '';
+
   xdg.desktopEntries.awakened-poe-trade = {
     name = "Awakened PoE Trade";
     exec = "env XDG_SESSION_TYPE=x11 ${config.home.homeDirectory}/Applications/Awakened-PoE-Trade.AppImage --sandbox --force-device-scale-factor=1";
