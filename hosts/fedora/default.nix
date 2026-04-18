@@ -124,6 +124,7 @@ in
     "com.visualstudio.code"
     "community.pathofbuilding.PathOfBuilding"
     "com.github.iwalton3.jellyfin-media-player"
+    "im.riot.Riot" # Element (Matrix client)
   ];
 
   xdg.desktopEntries.awakened-poe-trade = {
