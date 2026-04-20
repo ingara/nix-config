@@ -43,6 +43,8 @@ let
   };
 in
 {
+  imports = [ ./opencode.nix ];
+
   options.myOptions.dotfiles = {
     wmBackend = lib.mkOption {
       type = lib.types.enum [

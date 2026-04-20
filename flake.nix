@@ -123,6 +123,7 @@
               zellijAutoAttach = lib.mkDefault config.myOptions.zellijAutoAttach;
               sshSignProgram = lib.mkDefault config.myOptions.sshSignProgram;
               gitCredentialHelper = lib.mkDefault config.myOptions.gitCredentialHelper;
+              opencode.hostClass = lib.mkDefault config.myOptions.opencode.hostClass;
             };
           }
         ];

@@ -26,6 +26,21 @@
         description = "Root path of the nix-config repo, used for dotfile symlinks";
       };
     };
+    opencode = {
+      hostClass = lib.mkOption {
+        type = lib.types.enum [
+          "workstation"
+          "server"
+        ];
+        default = "workstation";
+        description = ''
+          Selects which opencode permission profile is symlinked to
+          ~/.config/opencode/opencode.json. "server" adds outbound
+          network/exec denies (ssh/scp/rsync/nc) and shutdown/reboot denies
+          on top of the workstation profile.
+        '';
+      };
+    };
     hasGui = lib.mkOption {
       type = lib.types.bool;
       default = false;
