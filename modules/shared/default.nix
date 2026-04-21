@@ -14,7 +14,9 @@ _:
   nixpkgs = {
     config = {
       allowUnfree = true;
-      allowBroken = true;
+      # allowBroken intentionally not set — let upstream "broken" markers
+      # surface as eval errors so we can deal with them case-by-case
+      # rather than silently shipping packages flagged broken.
       allowInsecure = false;
       allowUnsupportedSystem = true;
     };

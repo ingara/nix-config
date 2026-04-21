@@ -19,6 +19,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew = {
+      # Note: nix-homebrew declares no nixpkgs input, so no `follows` needed
       url = "github:zhaofengli/nix-homebrew";
     };
 
@@ -60,6 +61,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak = {
+      # Note: nix-flatpak declares no inputs at all, so no `follows` needed
       url = "github:gmodena/nix-flatpak";
     };
     plasma-manager = {
