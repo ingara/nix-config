@@ -56,10 +56,10 @@ in
     enable = true;
     package = pkgs.nixVersions.latest;
     settings = {
-      trusted-users = [
-        "@admin"
-        "${user}"
-      ];
+      # Only the primary user is trusted for privileged Nix operations
+      # (custom substituters, signing store paths, unsandboxed builds).
+      # Removed `@admin` so a second admin user couldn't poison the store.
+      trusted-users = [ "${user}" ];
       experimental-features = [
         "nix-command"
         "flakes"
@@ -178,4 +178,34 @@ in
       };
     };
   };
+
+  # macOS Application Layer Firewall. Codifies the firewall on-state so
+  # it survives reinstalls / replicates to new machines. Stealth mode
+  # silently drops ICMP / port scans (side effect: `ping` to this Mac
+  # from other devices fails — Bonjour/AirDrop/screen-share still work
+  # because they use TCP/multicast UDP, not ICMP).
+  #
+  # No declarative logging knob: macOS 15+ removed
+  # `socketfilterfw --setloggingmode`; ALF events go to unified logging
+  # by default. Query with:
+  #   log show --last 1h --predicate 'subsystem == "com.apple.alf"' --info
+  networking.applicationFirewall = {
+    enable = true;
+    allowSigned = true; # signed Apple/system processes may accept incoming
+    allowSignedApp = true; # signed downloaded apps may accept incoming
+    blockAllIncoming = false;
+    enableStealthMode = true;
+  };
+
+  # FileVault check — warns at activation if full-disk encryption is OFF.
+  # FileVault can't be enabled declaratively (needs a user password); this
+  # nag motivates re-enabling if it ever lapses. Lives in `postActivation`
+  # because nix-darwin only invokes a fixed list of activation-script
+  # keys (custom names like `checkFileVault` are silently ignored, unlike
+  # NixOS).
+  system.activationScripts.postActivation.text = ''
+    if ! /usr/bin/fdesetup status 2>/dev/null | grep -q "FileVault is On"; then
+      echo "WARNING: FileVault is not enabled" >&2
+    fi
+  '';
 }
