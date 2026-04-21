@@ -161,6 +161,8 @@ let
         "nix flake show *" = "allow";
         "nix flake metadata" = "allow";
         "nix flake metadata *" = "allow";
+        "nix flake check" = "allow";
+        "nix flake check *" = "allow";
         "nix-info" = "allow";
         "nix-info *" = "allow";
         "nix eval *" = "allow";
@@ -169,6 +171,17 @@ let
         "nix search *" = "allow";
         "nix why-depends *" = "allow";
         "nixpkgs-fmt --check *" = "allow";
+
+        # --- tailscale (read-only) ---
+        "tailscale status" = "allow";
+        "tailscale status *" = "allow";
+        "tailscale ping *" = "allow";
+        "tailscale dns status" = "allow";
+
+        # --- npm registry (read-only metadata) ---
+        # `npm view <pkg>` queries the registry without installing.
+        # Useful for version / integrity / dependency lookups.
+        "npm view *" = "allow";
 
         # --- gh (read-only) ---
         # `gh api` is denied below — too easy to mutate state via -X DELETE
