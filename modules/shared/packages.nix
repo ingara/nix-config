@@ -2,6 +2,7 @@
 
 with pkgs;
 [
+  awscli2
   chafa
   curlie
   dust
