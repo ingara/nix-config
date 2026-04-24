@@ -50,6 +50,14 @@ let
       };
     };
 
+    # Vertex location for Gemini models. Opencode's base `google-vertex`
+    # adapter defaults to `us-central1`, but Gemini preview models
+    # (e.g. `gemini-3.1-pro-preview`) are served only on the global
+    # endpoint. The `google-vertex-anthropic` sibling already defaults to
+    # `global`, so this aligns both. Project is resolved separately via
+    # `GOOGLE_CLOUD_PROJECT` in the caller's environment.
+    provider."google-vertex".options.location = "global";
+
     permission = {
       # Reads outside the workspace prompt for approval.
       external_directory = "ask";
