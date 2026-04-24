@@ -32,6 +32,24 @@ let
   # Base profile (workstation)
   # ---------------------------------------------------------------------------
   baseSettings = {
+    # MCP servers — same set on every host. Additional servers (typically
+    # private/internal endpoints) can be added by other modules via
+    # `programs.opencode.settings.mcp.<name> = { ... }` and will merge
+    # into this attrset.
+    #
+    # Tools surface in opencode's catalog as `<server>_<tool>` (run /mcp
+    # in opencode to see exact names). For aggregator MCP servers (e.g.
+    # MCPJungle), the upstream tool naming convention `<source>__<tool>`
+    # is preserved and prefixed with the opencode server name.
+    mcp = {
+      # Context7 — library-docs lookup for code-aware questions.
+      # https://github.com/upstash/context7
+      context7 = {
+        type = "remote";
+        url = "https://mcp.context7.com/mcp";
+      };
+    };
+
     permission = {
       # Reads outside the workspace prompt for approval.
       external_directory = "ask";
