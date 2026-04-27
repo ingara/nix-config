@@ -30,6 +30,7 @@
       "lookaway"
       "mac-mouse-fix"
       "notion"
+      "obsidian"
       "postico"
       "protonvpn"
       "qmk-toolbox"
