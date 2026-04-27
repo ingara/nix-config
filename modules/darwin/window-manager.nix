@@ -14,6 +14,7 @@ in
       type = lib.types.enum [
         "yabai"
         "aerospace"
+        "omniwm"
         "none"
       ];
       default = "yabai";
@@ -35,7 +36,9 @@ in
     };
 
     # AeroSpace via homebrew (only when aerospace backend)
-    homebrew.casks = lib.mkIf (cfg.backend == "aerospace") [ "aerospace" ];
+    homebrew.casks =
+      lib.optionals (cfg.backend == "aerospace") [ "aerospace" ]
+      ++ lib.optionals (cfg.backend == "omniwm") [ "omniwm" ];
 
     # Launchd logging for yabai/skhd (only when yabai backend)
     launchd.user.agents = lib.mkIf (cfg.backend == "yabai") {

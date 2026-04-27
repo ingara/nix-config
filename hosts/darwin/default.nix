@@ -29,9 +29,8 @@ in
     gitCredentialHelper = "osxkeychain";
   };
 
-  # Window manager selection: "yabai", "aerospace", or "none"
-  # Change to "aerospace" to switch to AeroSpace window manager
-  myOptions.windowManager.backend = "aerospace";
+  # Window manager selection: "yabai", "aerospace", "omniwm", or "none"
+  myOptions.windowManager.backend = "omniwm";
 
   # The default Nix build user group ID was changed from 30000 to 350.
   # You are currently managing Nix build users with nix-darwin, but your

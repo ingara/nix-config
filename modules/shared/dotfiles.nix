@@ -28,11 +28,17 @@ let
     "aerospace" = "aerospace";
   };
 
+  # OmniWM-specific dotfiles
+  omniwmDots = {
+    "omniwm/settings.toml" = "omniwm/settings.toml";
+  };
+
   # Combine based on selected backend
   dots =
     baseDots
     // (if wmBackend == "yabai" then yabaiDots else { })
-    // (if wmBackend == "aerospace" then aerospaceDots else { });
+    // (if wmBackend == "aerospace" then aerospaceDots else { })
+    // (if wmBackend == "omniwm" then omniwmDots else { });
 
   symlink = _key: value: {
     source =
@@ -50,6 +56,7 @@ in
       type = lib.types.enum [
         "yabai"
         "aerospace"
+        "omniwm"
         "none"
       ];
       default = "none";

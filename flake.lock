@@ -387,6 +387,22 @@
         "type": "github"
       }
     },
+    "homebrew-omniwm": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776811039,
+        "narHash": "sha256-wAa2jvYqmb4LtU5vTwY1sgu9A7TUxlYdwAUCOdYo1BI=",
+        "owner": "BarutSRB",
+        "repo": "homebrew-tap",
+        "rev": "30784e862fa4c183f2ad067217e78349be6db6b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BarutSRB",
+        "repo": "homebrew-tap",
+        "type": "github"
+      }
+    },
     "homebrew-satococoa": {
       "flake": false,
       "locked": {
@@ -675,6 +691,7 @@
         "homebrew-dash0": "homebrew-dash0",
         "homebrew-felixkratz": "homebrew-felixkratz",
         "homebrew-graphite": "homebrew-graphite",
+        "homebrew-omniwm": "homebrew-omniwm",
         "homebrew-satococoa": "homebrew-satococoa",
         "homebrew-services": "homebrew-services",
         "nh": "nh",

@@ -56,6 +56,10 @@
       url = "github:TheBoredTeam/homebrew-boring-notch";
       flake = false;
     };
+    homebrew-omniwm = {
+      url = "github:BarutSRB/homebrew-tap";
+      flake = false;
+    };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -231,6 +235,7 @@
                     "withgraphite/homebrew-tap" = inputs.homebrew-graphite;
                     "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
                     "theboredteam/homebrew-boring-notch" = inputs.homebrew-boring-notch;
+                    "BarutSRB/homebrew-tap" = inputs.homebrew-omniwm;
                   };
                 };
               }

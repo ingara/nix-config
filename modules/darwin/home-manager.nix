@@ -79,8 +79,9 @@ in
     };
 
     # https://mynixos.com/options/services.jankyborders
+    # Disabled when using omniwm — it has built-in borders ([borders] in settings.toml)
     jankyborders = {
-      enable = true;
+      enable = wmBackend != "omniwm";
       style = "round";
       width = 3.0;
       hidpi = true;
