@@ -134,6 +134,15 @@ let
         "jq *" = "allow";
         "yq *" = "allow";
 
+        # --- HTTP (read-only) ---
+        # `xh` (HTTPie-compatible) takes the verb as a positional arg, so
+        # `xh GET *` cannot be tricked into POST/PUT/DELETE by flag reordering
+        # the way `curl -X POST` can. Mutating verbs fall through to `*: ask`.
+        # Prefer `xh` over `curl` for fetching raw source/API responses.
+        "xh GET *" = "allow";
+        "xh HEAD *" = "allow";
+        "xh OPTIONS *" = "allow";
+
         # --- Git (read-only) ---
         "git status" = "allow";
         "git status *" = "allow";

@@ -4,7 +4,6 @@ with pkgs;
 [
   awscli2
   chafa
-  curlie
   dust
   eza
   fastfetch
@@ -40,6 +39,7 @@ with pkgs;
 
   lazygit
   wget
+  xh
 
   python3
 
