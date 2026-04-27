@@ -29,9 +29,14 @@ let
   };
 
   # OmniWM-specific dotfiles
-  omniwmDots = {
-    "omniwm/settings.toml" = "omniwm/settings.toml";
-  };
+  #
+  # `omniwm/settings.toml` is intentionally NOT symlinked: OmniWM rewrites the
+  # file via atomic rename(2) on every GUI save, which replaces our symlink
+  # with a real file and breaks home-manager activation on the next switch.
+  # GUI is the source of truth until upstream lands either an
+  # incremental-export flag (see BarutSRB/OmniWM#109, #169) or swaps the
+  # atomic write for `FileManager.replaceItemAt` (not yet filed).
+  omniwmDots = { };
 
   # Combine based on selected backend
   dots =
