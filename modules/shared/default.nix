@@ -1,6 +1,8 @@
 _:
 
 {
+  imports = [ ./claude-code.nix ];
+
   environment = {
     variables = {
       EDITOR = "nvim";
