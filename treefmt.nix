@@ -42,9 +42,6 @@
         "*.md"
       ];
     };
-
-    # Deno TS (fmt)
-    deno.enable = true;
   };
 
   # Custom formatters not bundled with treefmt-nix.
@@ -57,13 +54,6 @@
       "public/selene.toml"
     ];
     includes = [ "*.lua" ];
-  };
-
-  # Deno lint: TS linter.
-  settings.formatter.deno-lint = {
-    command = lib.getExe pkgs.deno;
-    options = [ "lint" ];
-    includes = [ "*.ts" ];
   };
 
   # treefmt's default walker is `git ls-files`, so .gitignore'd paths are
