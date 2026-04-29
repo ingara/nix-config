@@ -15,7 +15,7 @@ _:
 
 {
   imports = [
-    ./cli-tools.nix
+    ./cli-tools
     ./fish.nix
     ./zsh.nix
     ./starship.nix

@@ -321,9 +321,7 @@
         vboxnixos = mkNixosHost {
           hostPath = ./hosts/nixos/vbox;
           hmImports = [
-            ./modules/desktop
-            ./modules/desktop/gtk.nix
-            ./modules/desktop/polybar.nix
+            ./modules/shared/home/desktop
           ];
           extraModules = [ disko.nixosModules.disko ];
         };
