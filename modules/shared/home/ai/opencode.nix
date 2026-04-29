@@ -6,7 +6,7 @@
 # based on `myOptions.opencode.hostClass`:
 #
 #   workstation (default) — laptop / interactive use
-#   server                — non-interactive servers (lumar, mythos)
+#   server                — non-interactive / headless hosts.
 #                           Adds outbound network/exec denies (ssh/scp/rsync/nc),
 #                           shutdown/reboot denies, and read-only systemctl/docker
 #                           inspection allowlists on top of the workstation profile.
