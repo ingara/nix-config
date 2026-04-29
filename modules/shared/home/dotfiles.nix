@@ -50,11 +50,11 @@ let
       if mutable then
         config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}"
       else
-        ../../dotfiles + "/${value}";
+        ../../../dotfiles + "/${value}";
   };
 in
 {
-  imports = [ ./opencode.nix ];
+  imports = [ ./ai/opencode.nix ];
 
   options.myOptions.dotfiles = {
     wmBackend = lib.mkOption {

@@ -13,8 +13,8 @@ in
     inputs.catppuccin.homeModules.catppuccin
     inputs.nix-flatpak.homeManagerModules.nix-flatpak
     inputs.plasma-manager.homeModules.plasma-manager
-    ../../modules/shared/dotfiles.nix
-    ../../modules/shared/home-manager.nix
+    ../../modules/shared/home/dotfiles.nix
+    ../../modules/shared/home
   ];
 
   myOptions = {

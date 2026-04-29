@@ -8,8 +8,8 @@ let
 in
 {
   imports = [
-    ../shared/dotfiles.nix
-    ../shared/home-manager.nix
+    ../shared/home/dotfiles.nix
+    ../shared/home
   ];
 
   home = {

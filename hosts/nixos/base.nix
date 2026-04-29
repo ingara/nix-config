@@ -9,7 +9,7 @@ let
 in
 {
   imports = [
-    ../../modules/shared
+    ../../modules/shared/system
     ../../modules/nixos
   ];
 

@@ -1,3 +1,8 @@
+# Darwin platform entry point — user account, home-manager wiring, and
+# imports of darwin-only concerns (window manager, status/border bar).
+#
+# Homebrew lives in `./homebrew.nix`; it's imported from `public/hosts/darwin`
+# rather than from here so the HM-less darwin test builds can skip it.
 {
   config,
   inputs,
@@ -11,6 +16,7 @@ in
 {
   imports = [
     ./window-manager.nix
+    ./bar.nix
   ];
 
   # It me
@@ -33,9 +39,9 @@ in
       {
         imports = [
           inputs.catppuccin.homeModules.catppuccin
-          ../shared/dotfiles.nix
+          ../shared/home/dotfiles.nix
           ./dotfiles.nix
-          ../shared/home-manager.nix
+          ../shared/home
         ];
 
         myOptions.dotfiles.wmBackend = wmBackend;
@@ -70,33 +76,6 @@ in
         # https://github.com/nix-community/home-manager/issues/3344
         manual.manpages.enable = false;
       };
-  };
-
-  # Window manager services (yabai/skhd) are managed by window-manager.nix
-  services = {
-    sketchybar = {
-      enable = true;
-    };
-
-    # https://mynixos.com/options/services.jankyborders
-    # Disabled when using omniwm — it has built-in borders ([borders] in settings.toml)
-    jankyborders = {
-      enable = wmBackend != "omniwm";
-      style = "round";
-      width = 3.0;
-      hidpi = true;
-      #active_color= "0xffcdd6f4";  # Lavender
-      active_color = "0xffee99a0"; # Maroon
-      inactive_color = "0xff45475a"; # Surface0
-      order = "above";
-    };
-  };
-
-  launchd.user.agents = {
-    sketchybar.serviceConfig = {
-      StandardOutPath = "/tmp/sketchybar.log";
-      StandardErrorPath = "/tmp/sketchybar.log";
-    };
   };
 
   # Fully declarative dock using the latest from Nix Store
