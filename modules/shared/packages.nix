@@ -38,6 +38,7 @@ with pkgs;
   zellij
 
   lazygit
+  uv
   wget
   xh
 
