@@ -38,14 +38,47 @@ if [ "$LIST_ONLY" = true ]; then
   exit 0
 fi
 
-# Use fzf to pick URL
-SELECTED=$(echo "$URLS" | fzf --prompt='Open URL: ' --height=40% --reverse)
+is_ssh() { [ -n "${SSH_CONNECTION:-}${SSH_TTY:-}" ]; }
 
-if [ -n "$SELECTED" ]; then
-  # Open URL in default browser
-  if [[ $OSTYPE == "darwin"* ]]; then
-    open "$SELECTED"
-  elif [[ $OSTYPE == "linux-gnu"* ]]; then
-    xdg-open "$SELECTED"
+copy_url() {
+  local url=$1
+  if is_ssh; then
+    # OSC52: ship to the local terminal's clipboard through the SSH hop.
+    printf '\033]52;c;%s\a' "$(printf '%s' "$url" | base64 | tr -d '\n')" >/dev/tty
+  elif [[ $OSTYPE == darwin* ]]; then
+    printf '%s' "$url" | pbcopy
+  elif command -v wl-copy &>/dev/null; then
+    printf '%s' "$url" | wl-copy
+  elif command -v xclip &>/dev/null; then
+    printf '%s' "$url" | xclip -selection clipboard
+  else
+    echo "No clipboard tool available" >&2
+    return 1
   fi
+}
+
+open_url() {
+  local url=$1
+  if [[ $OSTYPE == darwin* ]]; then
+    open "$url"
+  elif [[ $OSTYPE == linux-gnu* ]]; then
+    xdg-open "$url"
+  fi
+}
+
+# Enter = default action (open locally, copy over SSH); Ctrl-Y = force copy.
+RESULT=$(echo "$URLS" | fzf \
+  --prompt='URL (enter=open/copy, C-y=copy): ' \
+  --height=40% --reverse --expect=ctrl-y)
+KEY=$(printf '%s\n' "$RESULT" | head -n1)
+SELECTED=$(printf '%s\n' "$RESULT" | tail -n +2)
+
+[ -z "$SELECTED" ] && exit 0
+
+if [ "$KEY" = "ctrl-y" ] || is_ssh; then
+  copy_url "$SELECTED"
+  echo "Copied: $SELECTED"
+  sleep 1.5
+else
+  open_url "$SELECTED"
 fi
