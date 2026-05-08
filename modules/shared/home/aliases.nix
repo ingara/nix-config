@@ -26,4 +26,5 @@ _: {
   zj = "zellij -l welcome";
 
   c = "claude";
+  oc = "opencode";
 }
