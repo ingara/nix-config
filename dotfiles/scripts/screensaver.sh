@@ -16,7 +16,7 @@ show_menu() {
 run_screensaver() {
   case "$1" in
   1) cbonsai -li --wait=10 --life=80 --time=0.1 ;;
-  2) lavat ;;
+  2) lavat -g -c CBA6F7 -k FAB387 ;;
   esac
 }
 
