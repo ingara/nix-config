@@ -27,4 +27,5 @@ _: {
 
   c = "claude";
   oc = "opencode";
+  ss = "screensaver.sh";
 }

@@ -42,6 +42,10 @@ with pkgs;
   wget
   xh
 
+  # terminal eye candy
+  cbonsai
+  lavat
+
   python3
 
   # node stuff
@@ -68,6 +72,11 @@ with pkgs;
   # Zellij URL picker script
   (pkgs.writeShellScriptBin "zellij-url-picker.sh" (
     builtins.readFile ../../dotfiles/scripts/zellij-url-picker.sh
+  ))
+
+  # Terminal screensaver selector
+  (pkgs.writeShellScriptBin "screensaver.sh" (
+    builtins.readFile ../../dotfiles/scripts/screensaver.sh
   ))
 
   # Zellij session display for zjstatus (SSH-aware)
