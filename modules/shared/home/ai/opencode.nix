@@ -20,6 +20,7 @@
 # for why some patterns are `deny` rather than `ask`.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -468,7 +469,11 @@ in
 {
   programs.opencode = {
     enable = true;
-    package = pkgs.opencode;
+    # Track opencode via its own flake input (see public/flake.nix) rather
+    # than nixpkgs.opencode — the channel typically trails upstream by
+    # 1–2 weeks. Upstream's `nix/opencode.nix` is the authoritative
+    # derivation; bump via `just update`.
+    package = inputs.opencode.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
     settings = finalSettings;
   };
 }

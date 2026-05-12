@@ -87,6 +87,16 @@
       url = "github:cristianoliveira/aerospace-scratchpad";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # opencode iterates faster than nixos-unstable's Hydra cadence — the
+    # channel routinely trails upstream by 1–2 weeks. Pin the input here
+    # so `just update` bumps opencode to whatever upstream's `dev` branch
+    # tags. Upstream maintains the Nix derivation (`nix/opencode.nix`)
+    # and pins node_modules by FOD hash. Built from source locally
+    # (~30s–1m, Bun build). Consumed in `modules/shared/home/ai/opencode.nix`.
+    opencode = {
+      url = "github:sst/opencode";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";

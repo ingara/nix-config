@@ -60,6 +60,7 @@ in
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
+                  extraSpecialArgs = { inherit inputs; };
                   sharedModules = mkSharedHmOptionsModule { inherit config lib; };
                   users.${config.myOptions.user.username} = {
                     imports = [
@@ -104,6 +105,7 @@ in
                 # HM wiring on darwin. Users are declared inside
                 # `../hosts/darwin`; here we just inject sharedModules
                 # so the myOptions propagation trick reaches every user.
+                home-manager.extraSpecialArgs = { inherit inputs; };
                 home-manager.sharedModules = mkSharedHmOptionsModule { inherit config lib; };
               }
             )
