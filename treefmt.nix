@@ -62,7 +62,7 @@
   settings.global.excludes = [
     "flake.lock"
     "public/flake.lock"
-    "secrets/secrets.yaml" # sops-encrypted
+    "secrets/*.yaml" # sops-encrypted (ciphertext lines exceed yamllint max)
     "dotfiles/claude/settings.json" # runtime-mutable by Claude Code
     "public/dotfiles/nvim/scratch_config.json"
     "public/dotfiles/nvim/.neoconf.json"
