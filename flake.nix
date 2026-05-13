@@ -20,10 +20,6 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    catppuccin = {
-      url = "github:catppuccin/nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";

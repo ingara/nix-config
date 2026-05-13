@@ -3,21 +3,31 @@
 # Powerline-style prompt inspired by powerlevel10k classic preset.
 # Settings (format string + segment attrs) live inline as a `let`
 # binding so moving the file doesn't require threading through a
-# sibling helper. Colors are Catppuccin Mocha palette; segments use
-# a shared pill-edge helper to keep the render consistent across
-# language-version/git segments.
-{ lib, ... }:
+# sibling helper. Colors come from the active base16 palette via
+# `config.lib.stylix.colors`; segments use a shared pill-edge helper
+# to keep the render consistent across language-version/git segments.
+{ config, lib, ... }:
 
 let
-  # Catppuccin Mocha colors
-  bg = "#313244"; # Surface0
-  fg_overlay = "#6c7086"; # Overlay0 (for separators)
-  fg_blue = "#89b4fa"; # Blue
-  fg_mauve = "#cba6f7"; # Mauve
-  fg_yellow = "#f9e2af"; # Yellow
-  fg_green = "#a6e3a1"; # Green
-  fg_red = "#f38ba8"; # Red
-  fg_text = "#cdd6f4"; # Text
+  c = config.lib.stylix.colors.withHashtag;
+
+  # base16 mapping (matches stylix's standard slot semantics):
+  #   bg          base01  — lighter background, used as pill body
+  #   fg_overlay  base03  — comments/separators
+  #   fg_blue     base0D
+  #   fg_mauve    base0E
+  #   fg_yellow   base0A
+  #   fg_green    base0B
+  #   fg_red      base08
+  #   fg_text     base05
+  bg = c.base01;
+  fg_overlay = c.base03;
+  fg_blue = c.base0D;
+  fg_mauve = c.base0E;
+  fg_yellow = c.base0A;
+  fg_green = c.base0B;
+  fg_red = c.base08;
+  fg_text = c.base05;
 
   # Separator character
   sep = "/";

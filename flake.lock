@@ -106,26 +106,6 @@
         "type": "github"
       }
     },
-    "catppuccin": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1778406663,
-        "narHash": "sha256-jGOtlDJAe0MFoOErIxSFs3TQZ7WaCpUt1qnjJ0HhLfw=",
-        "owner": "catppuccin",
-        "repo": "nix",
-        "rev": "a0fa2f1b901473d8aefb2e3026396e3562c1782c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "catppuccin",
-        "repo": "nix",
-        "type": "github"
-      }
-    },
     "claude-code-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -483,11 +463,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1778652459,
-        "narHash": "sha256-VU30N6Kl1wI1fepu/DjbL/I0omjM2hOO8WwDT8im9bg=",
+        "lastModified": 1778661083,
+        "narHash": "sha256-EngAQjZfVqkPPlg5svIUyhh1iE6g7W8G1LICvJW6eOk=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "c46ea20493fd155d1651be6a1eb1810c83fe6f52",
+        "rev": "846bc5a95bfe80d964c803fd18271346f9c9933b",
         "type": "github"
       },
       "original": {
@@ -499,11 +479,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1778647073,
-        "narHash": "sha256-LMAdjlLerhR6bHUxhugH8BchRv3kwOmxLO3Lbm0XTrM=",
+        "lastModified": 1778661042,
+        "narHash": "sha256-iTDp+oZnJ/AZE972pLi2oRP2c3zYqCbqybA7e9ekBHI=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "9138e6389d1c7388115d632cf9f8d3e722e7feef",
+        "rev": "13378e4b7363b296e27ea169331650f7668fab1b",
         "type": "github"
       },
       "original": {
@@ -750,11 +730,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1778655304,
-        "narHash": "sha256-pS0zg6Y97lUdUjwHJMtrLU6vFOsfsRqcQ0incZCFxU4=",
+        "lastModified": 1778660590,
+        "narHash": "sha256-DzrbxAML/p75KTRxHWDF6sFFVC1g6vOtnaadL4jURsc=",
         "owner": "sst",
         "repo": "opencode",
-        "rev": "e9a29e4908fa1d28213e5b4788611e9cde1a92f2",
+        "rev": "596f241db55f9f21d3c893e7cef135586e19cafa",
         "type": "github"
       },
       "original": {
@@ -877,7 +857,6 @@
     "root": {
       "inputs": {
         "aerospace-scratchpad": "aerospace-scratchpad",
-        "catppuccin": "catppuccin",
         "claude-code-nix": "claude-code-nix",
         "darwin": "darwin",
         "deploy-rs": "deploy-rs",

@@ -15,9 +15,20 @@ let
 in
 {
   imports = [
+    inputs.stylix.darwinModules.stylix
     ./window-manager.nix
     ./bar.nix
   ];
+
+  # System-level Stylix (currently the only consumer is the jankyborders
+  # target, which lives at the nix-darwin SYSTEM scope, not HM). HM-side
+  # Stylix wiring is below in `home-manager.users.${user}`.
+  stylix = {
+    enable = true;
+    base16Scheme = "${inputs.tinted-schemes}/base16/${config.myOptions.theme.scheme}.yaml";
+    polarity = config.myOptions.theme.polarity;
+    targets.jankyborders.enable = true;
+  };
 
   # It me
   users.users.${user} = {
@@ -33,14 +44,11 @@ in
     backupFileExtension = "backup";
     users.${user} =
       {
-        config,
         pkgs,
         ...
       }:
       {
         imports = [
-          inputs.catppuccin.homeModules.catppuccin
-          inputs.stylix.homeModules.stylix
           ../shared/home/dotfiles.nix
           ./dotfiles.nix
           ../shared/home
@@ -48,42 +56,21 @@ in
 
         myOptions.dotfiles.wmBackend = wmBackend;
 
-        catppuccin = {
-          flavor = "macchiato";
-          enable = true;
+        # System-level Stylix (above) propagates `enable`, `base16Scheme`,
+        # `polarity` into HM via stylix's home-manager-integration module.
+        # We only declare HM-specific target toggles here.
+        stylix.targets = {
           starship.enable = true;
           tmux.enable = true;
-          fzf.enable = true;
-          delta.enable = true;
-          bat.enable = true;
           fish.enable = true;
-        };
-
-        # Stylix wiring lives here but is disabled — Phase 3 of the
-        # global-theme migration flips this on and removes catppuccin.
-        # Until then the targets evaluate but do not apply, so catppuccin
-        # remains the visible source of truth.
-        #
-        # jankyborders is a nix-darwin SYSTEM target (not HM); its wiring
-        # lives alongside `services.jankyborders` and gets enabled
-        # together with Stylix's darwinModule in Phase 3.5.
-        stylix = {
-          enable = false;
-          base16Scheme = config.lib.myTheme.schemeYaml;
-          polarity = config.lib.myTheme.polarity;
-          targets = {
-            starship.enable = true;
-            tmux.enable = true;
-            fish.enable = true;
-            fzf.enable = true;
-            bat.enable = true;
-            wezterm.enable = true;
-            ghostty.enable = true;
-            zellij.enable = true;
-            # Nvim is driven by our own theme.lua generator; skip Stylix's
-            # neovim target.
-            neovim.enable = false;
-          };
+          fzf.enable = true;
+          bat.enable = true;
+          wezterm.enable = true;
+          ghostty.enable = true;
+          zellij.enable = true;
+          # Nvim is driven by our own theme.lua generator; skip Stylix's
+          # neovim target.
+          neovim.enable = false;
         };
 
         home = {

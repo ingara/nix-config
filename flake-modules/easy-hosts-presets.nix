@@ -52,7 +52,6 @@ in
       {
         nixos = {
           modules = [
-            inputs.catppuccin.nixosModules.catppuccin
             inputs.home-manager.nixosModules.home-manager
             (
               { config, lib, ... }:
@@ -61,6 +60,9 @@ in
                 home-manager = {
                   useGlobalPkgs = false;
                   useUserPackages = true;
+                  # Move pre-existing files that HM doesn't recognize aside
+                  # instead of erroring; matches the Darwin entry point.
+                  backupFileExtension = "backup";
                   extraSpecialArgs = { inherit inputs; };
                   sharedModules = mkSharedHmOptionsModule { inherit config lib; };
                   users.${config.myOptions.user.username} =
@@ -68,16 +70,22 @@ in
                     {
                       imports = [
                         ../modules/linux/home-manager.nix
-                        inputs.catppuccin.homeModules.catppuccin
                         inputs.stylix.homeModules.stylix
                       ];
 
-                      # Stylix wiring (disabled until Phase 3 cutover).
-                      # Headless servers still benefit from theming:
-                      # shell tools running server-side embed 24-bit ANSI
-                      # colors into the SSH session output.
+                      # Headless servers benefit from theming too: shell
+                      # tools running server-side embed 24-bit ANSI colors
+                      # into the SSH session output, so consistency with
+                      # the workstation requires matching palettes.
+                      #
+                      # `autoEnable = false` — Stylix would otherwise
+                      # auto-enable GUI-ish targets (GTK, dconf, etc.)
+                      # whose activation hooks need a dbus session and
+                      # fail on headless machines (`GDBus.Error:
+                      # org.freedesktop.DBus.Error.ServiceUnknown`).
                       stylix = {
-                        enable = false;
+                        enable = true;
+                        autoEnable = false;
                         base16Scheme = config.lib.myTheme.schemeYaml;
                         polarity = config.lib.myTheme.polarity;
                         targets = {

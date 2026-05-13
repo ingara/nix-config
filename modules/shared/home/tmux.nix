@@ -1,11 +1,10 @@
 # Tmux multiplexer configuration.
 #
 # Plugins cover pane navigation, prefix-highlight, sidebar, fzf, battery,
-# URL finder. Catppuccin status modules are configured here; the catppuccin
-# theme itself is toggled on per-host via the catppuccin homeModule in
-# `modules/darwin/home-manager.nix` / `modules/linux/home-manager.nix`.
-# The vim-tmux-navigator binding detects nested vim processes so C-hjkl
-# transparently selects panes or moves cursor inside vim.
+# URL finder. Theme/status colors come from `stylix.targets.tmux`
+# (wired per-platform). The vim-tmux-navigator binding detects nested
+# vim processes so C-hjkl transparently selects panes or moves cursor
+# inside vim.
 { pkgs, ... }:
 
 {
@@ -47,17 +46,6 @@
       set-option -g default-shell $SHELL
 
       set -g status-position bottom
-
-      set -g @catppuccin_status_modules_left ""
-      set -g @catppuccin_status_modules_right "date_time uptime battery application session"
-      set -g @catppuccin_status_justify "left"
-
-      set -g @catppuccin_window_left_separator ""
-      set -g @catppuccin_window_right_separator " "
-      set -g @catppuccin_window_middle_separator " █"
-      set -g @catppuccin_window_number_position "right"
-      set -g @catppuccin_window_current_fill "number"
-      set -g @catppuccin_window_default_fill "number"
 
       # vim/fzf tmux integration
       # https://github.com/christoomey/vim-tmux-navigator/issues/295#issuecomment-1021591011

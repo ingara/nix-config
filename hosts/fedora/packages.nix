@@ -7,12 +7,6 @@ in
 shared-packages
 ++ [
   docker
-  # KDE theming
-  (catppuccin-kde.override {
-    flavour = [ "macchiato" ];
-    accents = [ "mauve" ];
-
-  })
+  # KDE icon theme — Plasma colorscheme + cursors come from stylix.
   papirus-icon-theme
-
 ]

@@ -9,7 +9,8 @@ config.font = wezterm.font("ZedMono Nerd Font")
 -- config.font = wezterm.font("Hack Nerd Font")
 -- config.font = wezterm.font("VictorMono Nerd Font")
 config.font_size = 13
-config.color_scheme = "Catppuccin Macchiato"
+-- color_scheme is set by Stylix's wezterm target (generates and selects
+-- a "stylix" scheme matching myOptions.theme.scheme).
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 config.window_background_opacity = 1
 config.send_composed_key_when_left_alt_is_pressed = true

@@ -25,5 +25,6 @@ _:
     ./theme.nix
     ./nvim-theme.nix
     ./sketchybar.nix
+    ./terminal-themes.nix
   ];
 }
