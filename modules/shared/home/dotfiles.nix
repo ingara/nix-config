@@ -5,53 +5,147 @@ let
   inherit (config.myOptions.dotfiles) wmBackend;
   mutable = config.myOptions.mutableDotfiles;
 
-  # Base dotfiles (always linked)
-  baseDots = {
+  # Names to skip at every level of a recursive dotfile traversal.
+  # These are repo-housekeeping files that currently leak into
+  # ~/.config/<app>/ as a side effect of whole-dir symlinks; filter them
+  # out now that we enumerate per-file.
+  defaultSkip = [
+    "LICENSE"
+    "README.md"
+    ".git"
+    ".gitignore"
+    ".gitattributes"
+    ".DS_Store"
+    "stylua.toml"
+    "selene.toml"
+    "lua.yml"
+    ".luarc.json"
+  ];
+
+  # Recurse a source dir, returning a list of file paths relative to the
+  # source dir root. Filters out skip names at every level.
+  listFilesRec =
+    skip: srcPath:
+    let
+      entries = builtins.readDir srcPath;
+      visit =
+        name: type:
+        if builtins.elem name skip then
+          [ ]
+        else if type == "directory" then
+          map (sub: "${name}/${sub}") (listFilesRec skip "${srcPath}/${name}")
+        else if type == "regular" || type == "symlink" then
+          [ name ]
+        else
+          [ ];
+    in
+    lib.concatLists (lib.mapAttrsToList visit entries);
+
+  # Build xdg.configFile entries for every file under a dotfile source dir.
+  #   srcRel       — path relative to public/dotfiles/ (e.g. "nvim", "git-extra")
+  #   xdgRel       — path relative to ~/.config/    (e.g. "nvim", "git/extra")
+  #   skip         — basenames to skip at any depth (default: defaultSkip)
+  #   extraExclude — source-relative paths to skip entirely (e.g.
+  #                  [ "colors.sh" ] for sketchybar — Nix-generated)
+  mkPerFileDots =
+    {
+      srcRel,
+      xdgRel,
+      skip ? defaultSkip,
+      extraExclude ? [ ],
+    }:
+    let
+      absSrc = ../../../dotfiles + "/${srcRel}";
+      files = builtins.filter (f: !(builtins.elem f extraExclude)) (listFilesRec skip absSrc);
+      entry = file: {
+        name = "${xdgRel}/${file}";
+        value = {
+          source =
+            if mutable then
+              config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${srcRel}/${file}"
+            else
+              ../../../dotfiles + "/${srcRel}/${file}";
+        };
+      };
+    in
+    builtins.listToAttrs (map entry files);
+
+  # Single-file dotfile entries (xdg-relative key, dotfile-relative value).
+  # For literal file-to-file mappings where the source isn't a directory.
+  baseSingleDots = {
     "lazygit/config.yml" = "lazygit.yml";
-    "nvim" = "nvim";
-    "ghostty" = "ghostty";
-    "zellij" = "zellij";
-    "sketchybar" = "sketchybar";
-    "wezterm/extra" = "wezterm/extra";
-    "git/extra" = "git-extra";
     "claude/statusline-command.sh" = "claude/statusline-command.sh";
   };
 
-  # Yabai-specific dotfiles
-  yabaiDots = {
-    "yabai" = "yabai";
+  yabaiSingleDots = {
     "skhd/skhdrc" = "skhdrc";
   };
 
-  # AeroSpace-specific dotfiles
-  aerospaceDots = {
-    "aerospace" = "aerospace";
+  # Per-app per-file dotfile blocks. Each maps a whole source dir into
+  # individual xdg.configFile entries.
+  baseFileDots =
+    mkPerFileDots {
+      srcRel = "nvim";
+      xdgRel = "nvim";
+    }
+    // mkPerFileDots {
+      srcRel = "ghostty";
+      xdgRel = "ghostty";
+    }
+    // mkPerFileDots {
+      srcRel = "zellij";
+      xdgRel = "zellij";
+    }
+    // mkPerFileDots {
+      srcRel = "sketchybar";
+      xdgRel = "sketchybar";
+      # colors.sh becomes Nix-generated in Phase 2.2 of the global-theme
+      # work — exclude here so the symlink doesn't collide with the
+      # generated file.
+      extraExclude = [ "colors.sh" ];
+    }
+    // mkPerFileDots {
+      srcRel = "wezterm/extra";
+      xdgRel = "wezterm/extra";
+    }
+    // mkPerFileDots {
+      srcRel = "git-extra";
+      xdgRel = "git/extra";
+    };
+
+  yabaiFileDots = mkPerFileDots {
+    srcRel = "yabai";
+    xdgRel = "yabai";
   };
 
-  # OmniWM-specific dotfiles
-  #
+  aerospaceFileDots = mkPerFileDots {
+    srcRel = "aerospace";
+    xdgRel = "aerospace";
+  };
+
   # `omniwm/settings.toml` is intentionally NOT symlinked: OmniWM rewrites the
   # file via atomic rename(2) on every GUI save, which replaces our symlink
   # with a real file and breaks home-manager activation on the next switch.
   # GUI is the source of truth until upstream lands either an
   # incremental-export flag (see BarutSRB/OmniWM#109, #169) or swaps the
   # atomic write for `FileManager.replaceItemAt` (not yet filed).
-  omniwmDots = { };
+  omniwmFileDots = { };
 
-  # Combine based on selected backend
-  dots =
-    baseDots
-    // (if wmBackend == "yabai" then yabaiDots else { })
-    // (if wmBackend == "aerospace" then aerospaceDots else { })
-    // (if wmBackend == "omniwm" then omniwmDots else { });
-
-  symlink = _key: value: {
+  singleSymlink = _key: value: {
     source =
       if mutable then
         config.lib.file.mkOutOfStoreSymlink "${configPath}/dotfiles/${value}"
       else
         ../../../dotfiles + "/${value}";
   };
+
+  singleDots = baseSingleDots // (if wmBackend == "yabai" then yabaiSingleDots else { });
+
+  fileDots =
+    baseFileDots
+    // (if wmBackend == "yabai" then yabaiFileDots else { })
+    // (if wmBackend == "aerospace" then aerospaceFileDots else { })
+    // (if wmBackend == "omniwm" then omniwmFileDots else { });
 in
 {
   imports = [ ./ai/opencode.nix ];
@@ -69,6 +163,6 @@ in
   };
 
   config = {
-    xdg.configFile = lib.mapAttrs symlink dots;
+    xdg.configFile = (lib.mapAttrs singleSymlink singleDots) // fileDots;
   };
 }
