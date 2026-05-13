@@ -24,6 +24,14 @@
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    tinted-schemes = {
+      url = "github:tinted-theming/schemes";
+      flake = false;
+    };
     nix-homebrew = {
       # Note: nix-homebrew declares no nixpkgs input, so no `follows` needed
       url = "github:zhaofengli/nix-homebrew";
