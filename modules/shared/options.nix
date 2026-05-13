@@ -78,7 +78,7 @@
           "catppuccin-frappe"
           "catppuccin-latte"
         ];
-        default = "catppuccin-macchiato";
+        default = "rose-pine";
         description = ''
           Active base16 color scheme. Drives Stylix across every themed
           surface (terminals, editors, status bars, GTK/Qt, KDE Plasma,
