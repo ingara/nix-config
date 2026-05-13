@@ -29,7 +29,7 @@ in
 
   # Enable home-manager
   home-manager = {
-    useGlobalPkgs = true;
+    useGlobalPkgs = false;
     backupFileExtension = "backup";
     users.${user} =
       {

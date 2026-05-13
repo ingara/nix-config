@@ -21,6 +21,7 @@ let
     { config, lib }:
     [
       ../modules/shared/options.nix
+      ../modules/shared/nixpkgs.nix
       {
         myOptions = {
           user = {
@@ -58,7 +59,7 @@ in
               {
                 myOptions.dotfiles.repoRoot = lib.mkDefault "/home/user/nix-config";
                 home-manager = {
-                  useGlobalPkgs = true;
+                  useGlobalPkgs = false;
                   useUserPackages = true;
                   extraSpecialArgs = { inherit inputs; };
                   sharedModules = mkSharedHmOptionsModule { inherit config lib; };
