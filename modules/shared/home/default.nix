@@ -23,5 +23,7 @@ _:
     ./wezterm.nix
     ./tmux.nix
     ./theme.nix
+    ./nvim-theme.nix
+    ./sketchybar.nix
   ];
 }
