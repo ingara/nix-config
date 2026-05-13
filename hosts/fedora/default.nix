@@ -11,6 +11,7 @@ in
 {
   imports = [
     inputs.catppuccin.homeModules.catppuccin
+    inputs.stylix.homeModules.stylix
     inputs.nix-flatpak.homeManagerModules.nix-flatpak
     inputs.plasma-manager.homeModules.plasma-manager
     ../../modules/shared/home/dotfiles.nix
@@ -37,6 +38,25 @@ in
     fish.enable = true;
     kvantum.enable = true;
     cursors.enable = true;
+  };
+
+  # Stylix wiring (disabled until Phase 3 cutover — see global-theme work).
+  stylix = {
+    enable = false;
+    base16Scheme = config.lib.myTheme.schemeYaml;
+    polarity = config.lib.myTheme.polarity;
+    targets = {
+      starship.enable = true;
+      tmux.enable = true;
+      fish.enable = true;
+      fzf.enable = true;
+      bat.enable = true;
+      wezterm.enable = true;
+      ghostty.enable = true;
+      zellij.enable = true;
+      kde.enable = true;
+      neovim.enable = false;
+    };
   };
 
   home = {

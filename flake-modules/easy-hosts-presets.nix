@@ -63,12 +63,33 @@ in
                   useUserPackages = true;
                   extraSpecialArgs = { inherit inputs; };
                   sharedModules = mkSharedHmOptionsModule { inherit config lib; };
-                  users.${config.myOptions.user.username} = {
-                    imports = [
-                      ../modules/linux/home-manager.nix
-                      inputs.catppuccin.homeModules.catppuccin
-                    ];
-                  };
+                  users.${config.myOptions.user.username} =
+                    { config, ... }:
+                    {
+                      imports = [
+                        ../modules/linux/home-manager.nix
+                        inputs.catppuccin.homeModules.catppuccin
+                        inputs.stylix.homeModules.stylix
+                      ];
+
+                      # Stylix wiring (disabled until Phase 3 cutover).
+                      # Headless servers still benefit from theming:
+                      # shell tools running server-side embed 24-bit ANSI
+                      # colors into the SSH session output.
+                      stylix = {
+                        enable = false;
+                        base16Scheme = config.lib.myTheme.schemeYaml;
+                        polarity = config.lib.myTheme.polarity;
+                        targets = {
+                          starship.enable = true;
+                          tmux.enable = true;
+                          fish.enable = true;
+                          fzf.enable = true;
+                          bat.enable = true;
+                          neovim.enable = false;
+                        };
+                      };
+                    };
                 };
               }
             )

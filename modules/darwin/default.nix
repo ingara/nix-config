@@ -33,12 +33,14 @@ in
     backupFileExtension = "backup";
     users.${user} =
       {
+        config,
         pkgs,
         ...
       }:
       {
         imports = [
           inputs.catppuccin.homeModules.catppuccin
+          inputs.stylix.homeModules.stylix
           ../shared/home/dotfiles.nix
           ./dotfiles.nix
           ../shared/home
@@ -55,6 +57,33 @@ in
           delta.enable = true;
           bat.enable = true;
           fish.enable = true;
+        };
+
+        # Stylix wiring lives here but is disabled — Phase 3 of the
+        # global-theme migration flips this on and removes catppuccin.
+        # Until then the targets evaluate but do not apply, so catppuccin
+        # remains the visible source of truth.
+        #
+        # jankyborders is a nix-darwin SYSTEM target (not HM); its wiring
+        # lives alongside `services.jankyborders` and gets enabled
+        # together with Stylix's darwinModule in Phase 3.5.
+        stylix = {
+          enable = false;
+          base16Scheme = config.lib.myTheme.schemeYaml;
+          polarity = config.lib.myTheme.polarity;
+          targets = {
+            starship.enable = true;
+            tmux.enable = true;
+            fish.enable = true;
+            fzf.enable = true;
+            bat.enable = true;
+            wezterm.enable = true;
+            ghostty.enable = true;
+            zellij.enable = true;
+            # Nvim is driven by our own theme.lua generator; skip Stylix's
+            # neovim target.
+            neovim.enable = false;
+          };
         };
 
         home = {
