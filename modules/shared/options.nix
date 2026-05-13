@@ -61,5 +61,43 @@
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
+    theme = {
+      scheme = lib.mkOption {
+        type = lib.types.enum [
+          "rose-pine"
+          "rose-pine-moon"
+          "rose-pine-dawn"
+          "tokyo-night-dark"
+          "tokyo-night-storm"
+          "tokyo-night-moon"
+          "tokyo-night-light"
+          "kanagawa"
+          "kanagawa-dragon"
+          "catppuccin-macchiato"
+          "catppuccin-mocha"
+          "catppuccin-frappe"
+          "catppuccin-latte"
+        ];
+        default = "catppuccin-macchiato";
+        description = ''
+          Active base16 color scheme. Drives Stylix across every themed
+          surface (terminals, editors, status bars, GTK/Qt, KDE Plasma,
+          cursors). Scheme names map 1:1 to YAML files in
+          inputs.tinted-schemes/base16/<name>.yaml.
+        '';
+      };
+      polarity = lib.mkOption {
+        type = lib.types.enum [
+          "light"
+          "dark"
+          "either"
+        ];
+        default = "dark";
+        description = ''
+          Forces light or dark variants where the target app supports
+          both, or "either" to let Stylix pick.
+        '';
+      };
+    };
   };
 }

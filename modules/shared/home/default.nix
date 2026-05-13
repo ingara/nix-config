@@ -22,5 +22,6 @@ _:
     ./git.nix
     ./wezterm.nix
     ./tmux.nix
+    ./theme.nix
   ];
 }
