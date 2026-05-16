@@ -181,9 +181,22 @@ in
     # Zellij theme is structured KDL; render via HM's toKDL generator.
     "zellij/themes/stylix.kdl".text = lib.hm.generators.toKDL { } zellijThemeAttrs;
 
-    # zjstatus status-bar layout — KDL with hex colors hardcoded into
-    # `#[bg=…,fg=…]` segments. Template through stylix.colors so mode
-    # indicators / tabs / git branch / clock follow the active scheme.
+    # zjstatus status-bar layout — uses *named* ANSI colors (`blue`,
+    # `magenta`, …) instead of hex. The terminal resolves them against
+    # its palette at render time, and ghostty's palette is templated by
+    # stylix above. Net effect: status-bar colors track the active
+    # scheme automatically, even for resurrected sessions whose
+    # session-layout.kdl was cached under a previous scheme — the names
+    # are what's baked, not the resolved values.
+    #
+    # Three modes use base16 slots that have no 16-color ANSI
+    # equivalent (base04 LOCKED, base0F SCROLL, base09 SEARCH) and fall
+    # back to visually-near substitutes (`bright_black`, `bright_red`,
+    # `yellow`).
+    #
+    # git branch and clock widgets are intentionally absent — starship
+    # shows both on every prompt; duplicating them in the status bar is
+    # just extra surface area.
     "zellij/layouts/zjstatus.kdl".text = ''
       layout {
           default_tab_template {
@@ -191,51 +204,41 @@ in
                   plugin location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
                       format_left   "{mode}{pipe_zjstatus_hints}"
                       format_center "{tabs}"
-                      format_right  "{command_git_branch}{datetime}{command_session}"
+                      format_right  "{command_session}"
                       format_space  ""
                       format_hide_on_overlength "true"
                       format_precedence "lcr"
 
                       border_enabled  "false"
                       border_char     "─"
-                      border_format   "#[fg=${c.base03}]{char}"
+                      border_format   "#[fg=bright_black]{char}"
                       border_position "top"
 
                       hide_frame_for_single_pane "false"
 
-                      // Mode indicators — colors track myOptions.theme.scheme
-                      mode_locked        "#[bg=${c.base04},fg=${c.base00},bold]  LOCKED "
-                      mode_normal        "#[bg=${c.base0D},fg=${c.base00},bold]  NORMAL "
-                      mode_pane          "#[bg=${c.base0B},fg=${c.base00},bold]  PANE "
-                      mode_tab           "#[bg=${c.base0E},fg=${c.base00},bold]  TAB "
-                      mode_resize        "#[bg=${c.base0A},fg=${c.base00},bold]  RESIZE "
-                      mode_move          "#[bg=${c.base0C},fg=${c.base00},bold]  MOVE "
-                      mode_scroll        "#[bg=${c.base0F},fg=${c.base00},bold]  SCROLL "
-                      mode_enter_search  "#[bg=${c.base09},fg=${c.base00},bold]  SEARCH "
-                      mode_search        "#[bg=${c.base09},fg=${c.base00},bold]  SEARCH "
-                      mode_rename_tab    "#[bg=${c.base0E},fg=${c.base00},bold]  RENAME TAB "
-                      mode_rename_pane   "#[bg=${c.base0B},fg=${c.base00},bold]  RENAME PANE "
-                      mode_session       "#[bg=${c.base08},fg=${c.base00},bold]  SESSION "
-                      mode_prompt        "#[bg=${c.base0A},fg=${c.base00},bold]  PROMPT "
+                      mode_locked        "#[bg=bright_black,fg=black,bold]  LOCKED "
+                      mode_normal        "#[bg=blue,fg=black,bold]  NORMAL "
+                      mode_pane          "#[bg=green,fg=black,bold]  PANE "
+                      mode_tab           "#[bg=magenta,fg=black,bold]  TAB "
+                      mode_resize        "#[bg=yellow,fg=black,bold]  RESIZE "
+                      mode_move          "#[bg=cyan,fg=black,bold]  MOVE "
+                      mode_scroll        "#[bg=bright_red,fg=black,bold]  SCROLL "
+                      mode_enter_search  "#[bg=yellow,fg=black,bold]  SEARCH "
+                      mode_search        "#[bg=yellow,fg=black,bold]  SEARCH "
+                      mode_rename_tab    "#[bg=magenta,fg=black,bold]  RENAME TAB "
+                      mode_rename_pane   "#[bg=green,fg=black,bold]  RENAME PANE "
+                      mode_session       "#[bg=red,fg=black,bold]  SESSION "
+                      mode_prompt        "#[bg=yellow,fg=black,bold]  PROMPT "
 
-                      pipe_zjstatus_hints_format "#[fg=${c.base03},bold] {output} "
+                      pipe_zjstatus_hints_format "#[fg=bright_black,bold] {output} "
 
-                      tab_normal              "#[fg=${c.base03}] {index} {name} "
-                      tab_normal_fullscreen   "#[fg=${c.base03}] {index} {name} 󰊓 "
-                      tab_normal_sync         "#[fg=${c.base03}] {index} {name}  "
+                      tab_normal              "#[fg=bright_black] {index} {name} "
+                      tab_normal_fullscreen   "#[fg=bright_black] {index} {name} 󰊓 "
+                      tab_normal_sync         "#[fg=bright_black] {index} {name}  "
 
-                      tab_active              "#[bg=${c.base0D},fg=${c.base00},bold] {index} {name} "
-                      tab_active_fullscreen   "#[bg=${c.base0D},fg=${c.base00},bold] {index} {name} 󰊓 "
-                      tab_active_sync         "#[bg=${c.base0D},fg=${c.base00},bold] {index} {name}  "
-
-                      command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
-                      command_git_branch_format      "#[fg=${c.base0D}]  {stdout} "
-                      command_git_branch_interval    "10"
-                      command_git_branch_rendermode  "static"
-
-                      datetime        "#[fg=${c.base05},bold] {format} "
-                      datetime_format "%H:%M"
-                      datetime_timezone "Europe/Oslo"
+                      tab_active              "#[bg=blue,fg=black,bold] {index} {name} "
+                      tab_active_fullscreen   "#[bg=blue,fg=black,bold] {index} {name} 󰊓 "
+                      tab_active_sync         "#[bg=blue,fg=black,bold] {index} {name}  "
 
                       command_session_command     "zellij-session-display.sh"
                       command_session_format      "{stdout}"
@@ -249,11 +252,13 @@ in
     '';
 
     # Sourced by zellij-session-display.sh to color the session segment.
-    # Static names; values track the active scheme via stylix.colors.
+    # Named ANSI colors — resolved against the terminal palette at
+    # render time, so scheme changes apply without regenerating this
+    # file.
     "zellij/session-colors.sh".text = ''
-      LOCAL_BG=${c.base0D}
-      SSH_BG=${c.base0E}
-      BASE_BG=${c.base00}
+      LOCAL_BG=blue
+      SSH_BG=magenta
+      BASE_BG=black
     '';
   };
 }
