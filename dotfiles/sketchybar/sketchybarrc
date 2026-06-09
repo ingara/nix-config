@@ -1,0 +1,144 @@
+# This is a demo config to showcase some of the most important commands.
+# It is meant to be changed and configured, as it is intentionally kept sparse.
+# For a (much) more advanced configuration example see my dotfiles:
+# https://github.com/FelixKratz/dotfiles
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
+
+# Consistent spacing and typography
+ITEM_SPACING=8
+ITEM_PADDING=4
+BRACKET_PADDING=6
+
+# Typography system
+FONT_FAMILY="SF Pro"
+FONT_MONO="SF Mono"
+ICON_FONT="SF Pro"
+
+source "$CONFIG_DIR/colors.sh"
+
+# Setting up and starting the helper process
+HELPER=git.felix.helper
+killall sketchybar-cpu-helper
+
+sketchybar-cpu-helper $HELPER > /dev/null 2>&1 &
+
+##### Bar Appearance #####
+# Configuring the general appearance of the bar.
+# These are only some of the options available. For all options see:
+# https://felixkratz.github.io/SketchyBar/config/bar
+# If you are looking for other colors, see the color picker:
+# https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
+
+sketchybar --bar position=top \
+  height=32 \
+  y_offset=2 \
+  blur_radius=50 \
+  padding_left=$BRACKET_PADDING \
+  padding_right=$BRACKET_PADDING \
+  margin=10 \
+  corner_radius=8 \
+  color=$COLOR_BACKGROUND \
+  border_width=0 \
+  shadow=on
+
+##### Changing Defaults #####
+# We now change some default values, which are applied to all further items.
+# For a full list of all available item properties see:
+# https://felixkratz.github.io/SketchyBar/config/items
+
+default=(
+  updates=when_shown
+  padding_left=$ITEM_SPACING
+  padding_right=$ITEM_SPACING
+  icon.font="$ICON_FONT:Semibold:15.0"
+  label.font="$FONT_FAMILY:Medium:13.0"
+  icon.color=$COLOR_ICON
+  icon.highlight_color=$COLOR_ICON_HIGHLIGHT
+  icon.padding_left=$ITEM_PADDING
+  icon.padding_right=$ITEM_PADDING
+  label.color=$COLOR_LABEL
+  label.padding_left=$ITEM_PADDING
+  label.padding_right=$ITEM_PADDING
+  background.corner_radius=6
+  background.padding_left=$ITEM_PADDING
+  background.padding_right=$ITEM_PADDING
+  popup.background.border_width=1
+  popup.background.corner_radius=8
+  popup.background.border_color="$COLOR_POPUP_BORDER"
+  popup.background.color="$COLOR_POPUP_BACKGROUND"
+  popup.blur_radius=30
+  popup.background.shadow.drawing=on
+)
+sketchybar --default "${default[@]}"
+
+# -----------------------------------
+# -------- Custom Events
+# -----------------------------------
+# Yabai events
+sketchybar \
+  --add event yabai_loaded              \
+  --add event skhd_space_type_changed   \
+  --add event skhd_window_type_changed
+
+# AeroSpace events
+sketchybar \
+  --add event aerospace_loaded              \
+  --add event aerospace_workspace_change    \
+  --add event aerospace_monitor_changed
+
+# Left side items
+source "$ITEM_DIR/apple.sh"
+source "$ITEM_DIR/spaces.sh"
+
+# Only show yabai layout indicator when yabai is running
+if pgrep -x "yabai" > /dev/null 2>&1; then
+  source "$ITEM_DIR/yabai.sh"
+fi
+
+source "$ITEM_DIR/front_app.sh"
+
+# Create left side bracket - include yabai item only when yabai is running
+if pgrep -x "yabai" > /dev/null 2>&1; then
+  sketchybar --add bracket system apple.logo spaces yabai front_app \
+    --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+else
+  sketchybar --add bracket system apple.logo spaces front_app \
+    --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+fi
+
+# Right side items (reverse order since they stack right to left)
+source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/status.sh"
+source "$ITEM_DIR/system-resources.sh"
+source "$ITEM_DIR/notifications.sh"
+# source "$ITEM_DIR/spotify.sh"
+# source "$ITEM_DIR/apple-music.sh"
+
+# Create right side bracket for media controls
+sketchybar --add bracket media apple-music apple-music.play apple-music.next \
+  --set media background.color=$COLOR_BACKGROUND_SECONDARY \
+  background.corner_radius=8 \
+  background.border_width=1 \
+  background.border_color=$COLOR_BORDER
+
+# Create right side bracket for calendar
+sketchybar --add bracket calendar_bracket calendar \
+  --set calendar_bracket background.color=$COLOR_BACKGROUND_SECONDARY \
+  background.corner_radius=8 \
+  background.border_width=1 \
+  background.border_color=$COLOR_BORDER
+
+##### Force all scripts to run the first time (never do this in a script) #####
+sketchybar --hotload on
+sketchybar --update
+
+echo "sketchybar configuation loaded.."
+terminal-notifier -title "sketchybar" -message "sketchybar configuration loaded!"

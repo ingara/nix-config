@@ -1,0 +1,9 @@
+cmd + ctrl - s : open -a Slack
+cmd + ctrl - x : yabai -m window --toggle music || open /System/Applications/Music.app
+cmd + ctrl - m : open -a Airmail
+cmd + ctrl - w : open -a WhatsApp
+cmd + ctrl - a : open -a Arc
+cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord
+cmd + ctrl - g : open -a Ghostty
+cmd + ctrl - c : open -a Cursor
+cmd + ctrl - r : open /System/Applications/Reminders.app

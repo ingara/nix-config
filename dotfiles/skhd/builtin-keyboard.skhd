@@ -1,0 +1,23 @@
+.device builtin { vendor: 0x0, product: 0x0 }
+
+.remap backslash [device builtin] : backspace
+.remap backspace [device builtin] : backslash
+
+.remap caps_lock [device builtin] {
+    tap             : escape
+    hold            : lctrl
+    timeout         : 120ms
+    permissive_hold : on
+}
+
+:: tabl @
+.remap tab [device builtin] {
+    tap             : tab
+    hold            : tabl
+    timeout         : 200ms
+    retro_tap       : on
+}
+
+tabl < s : open -a Slack
+tabl < g : open -a Ghostty
+tabl < w : open -a WhatsApp

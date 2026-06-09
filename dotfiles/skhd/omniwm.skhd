@@ -1,0 +1,5 @@
+# Window focus (WASD)
+alt - a : omniwmctl command focus left
+alt - d : omniwmctl command focus right
+alt - w : omniwmctl command focus up
+alt - s : omniwmctl command focus down

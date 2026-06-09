@@ -1,0 +1,9 @@
+{
+  "hashes": {
+    "opencode-darwin-arm64": "sha256-IQM4PXViwXg8tm1j0xYw/5BEjRrekPihh3eNGMS57l8=",
+    "opencode-darwin-x64": "sha256-G+G0/4h08PCEjoi/TeOUOk//OlHIsqdckQ+39xDnzQM=",
+    "opencode-linux-arm64": "sha256-03Czj0TkePx/LugO3qoZoigS9Zh73YLo3wnZQRu7q34=",
+    "opencode-linux-x64": "sha256-oi35alYuZ84kR0bZkFbsrJ5m3fjmnI15iH4dYw9NnDE="
+  },
+  "version": "1.16.2"
+}
