@@ -16,6 +16,8 @@
       "arc"
       "bettertouchtool"
       "claude"
+      "codex-app" # OpenAI Codex desktop app (GUI; CLI comes from codex-cli-nix)
+      "conductor"
       "cursor"
       "cursor-cli"
       "discord"
@@ -68,8 +70,10 @@
     masApps = {
       "Amphetamine" = 937984704;
       "Balance Lock" = 1019371109;
+      "Canary Mail App" = 1236045954;
       "Infuse • Video Player" = 1136220934;
       "System Color Picker" = 1545870783;
+      "Timepage" = 989178902;
     };
   };
 }

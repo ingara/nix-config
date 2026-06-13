@@ -104,6 +104,7 @@ in
     homeDirectory = "/home/${user}";
     packages = pkgs.callPackage ./packages.nix { } ++ [
       inputs.claude-code-nix.packages.x86_64-linux.default
+      inputs.codex-cli-nix.packages.x86_64-linux.default
     ];
 
     sessionVariables = {
@@ -111,6 +112,10 @@ in
       VISUAL = "nvim";
       PAGER = "less";
       CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+      # Codex defaults to ~/.codex and ignores XDG (openai/codex#1980);
+      # CODEX_HOME relocates its whole state dir. Mirrors the system-level
+      # darwin/nixos setting in shared/system/ai/codex.nix.
+      CODEX_HOME = "$HOME/.config/codex";
     };
 
     sessionPath = [

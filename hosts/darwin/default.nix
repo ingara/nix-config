@@ -21,6 +21,7 @@ in
     ../../modules/darwin
     ../../modules/shared/system
     ../../modules/darwin/homebrew.nix
+    inputs.nix-rosetta-builder.darwinModules.default
   ];
 
   myOptions = {
@@ -63,37 +64,10 @@ in
         "nix-command"
         "flakes"
       ];
-      # Let the linux-builder VM fetch build inputs straight from the binary
+      # Let the builder VM fetch build inputs straight from the binary
       # caches instead of copying them through this host — faster, and keeps
       # the Mac's store out of the offload path.
       builders-use-substitutes = true;
-    };
-
-    # aarch64-linux remote builder, run as a lightweight NixOS guest under
-    # Apple Virtualization. nix-darwin registers it in `buildMachines`, so this
-    # darwin host can REALIZE aarch64-linux derivations locally. That's what
-    # makes cross-platform IFD resolve during remote aarch64-linux server
-    # deploys — e.g. catppuccin and tmux-agent-sidebar read a `Cargo.lock` out of
-    # an aarch64-linux fetch AT EVAL TIME; without a Linux builder that fetch
-    # can only succeed while it happens to sit in the local store, so a GC turns
-    # every server deploy into a "platform mismatch" eval failure. It also lets
-    # us build full Linux closures here instead of relying solely on deploy-rs's
-    # on-target build. The guest image is substitutable from cache, so there's
-    # no chicken-and-egg bootstrap. Defaults to `systems = [ "aarch64-linux" ]`
-    # on Apple Silicon, which matches both servers.
-    linux-builder = {
-      enable = true;
-      # Persist the guest store across runs so repeat evals reuse already-
-      # fetched IFD sources (ephemeral would re-fetch on every boot).
-      ephemeral = false;
-      maxJobs = 4;
-      config.virtualisation = {
-        cores = 6;
-        darwin-builder = {
-          diskSize = 40 * 1024;
-          memorySize = 8 * 1024;
-        };
-      };
     };
 
     gc = {
@@ -107,6 +81,39 @@ in
     };
   };
 
+  # Linux remote builder, run as a NixOS guest under vz (Apple
+  # Virtualization.framework) via lima. It registers in `buildMachines`, so
+  # this darwin host can REALIZE aarch64-linux derivations locally. That's
+  # what makes cross-platform IFD resolve during remote aarch64-linux server
+  # deploys — e.g. catppuccin and tmux-agent-sidebar read a `Cargo.lock` out of
+  # an aarch64-linux fetch AT EVAL TIME; without a Linux builder that fetch
+  # can only succeed while it happens to sit in the local store, so a GC turns
+  # every server deploy into a "platform mismatch" eval failure. It also lets
+  # us build full Linux closures here instead of relying solely on deploy-rs's
+  # on-target build, and adds x86_64-linux via Rosetta.
+  #
+  # This replaces nix-darwin's built-in `nix.linux-builder`: that module is
+  # qemu-only, and qemu 11.0.0's HVF path asserts on the SME control register
+  # (`hvf_arch_init_vcpu`, SMCR_EL1) on M3/M4 hosts, so its VM can never boot.
+  # Worse, its launchd daemon is `KeepAlive=true`, so the broken VM became a
+  # ~10s crash-restart loop (constant CPU + image rebuilds; see WATCHLIST
+  # "qemu HVF/SME" entry in the private repo). vz sidesteps qemu entirely —
+  # the same call already made for colima (modules/darwin/colima.nix).
+  #
+  # The guest image is an aarch64-linux build, so the FIRST build needs some
+  # other Linux builder (remote server, or `nix.linux-builder` if qemu works);
+  # after that the VM rebuilds itself.
+  nix-rosetta-builder = {
+    # Match the old linux-builder sizing.
+    cores = 6;
+    memory = "8GiB";
+    diskSize = "40GiB";
+    # Boot the VM on demand and power it off after idling (default 180 min)
+    # instead of running it 24/7 — builds are bursty here, and an always-on
+    # guest is paying RAM + battery for nothing between deploys.
+    onDemand = true;
+  };
+
   environment.shells = [ pkgs.fish ];
   programs.fish.enable = true;
   users.users.${user}.shell = pkgs.fish;
@@ -114,6 +121,7 @@ in
   # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
     inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex
     inputs.aerospace-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 

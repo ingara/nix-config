@@ -3,6 +3,7 @@ _:
 {
   imports = [
     ./ai/claude-code.nix
+    ./ai/codex.nix
     ../nixpkgs.nix
   ];
 
