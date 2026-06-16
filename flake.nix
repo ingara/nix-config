@@ -57,10 +57,6 @@
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;
     };
-    homebrew-satococoa = {
-      url = "github:satococoa/homebrew-tap";
-      flake = false;
-    };
     homebrew-graphite = {
       url = "github:withgraphite/homebrew-tap";
       flake = false;

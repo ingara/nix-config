@@ -1,9 +1,9 @@
 {
   "hashes": {
-    "opencode-darwin-arm64": "sha256-dzMX8SJfiRjYGduvPRElo7PMWFqx6YKz/deIGESiEso=",
-    "opencode-darwin-x64": "sha256-FqedyIGRD+Z2mgdLRY4qgJupRUf0N1Br4tqr3K2eExc=",
-    "opencode-linux-arm64": "sha256-FdP/Kp0tZVIVhKw93PkVT9cIhnZN/uzlEa8UTL2cYfA=",
-    "opencode-linux-x64": "sha256-HGoziSxZhGoJkEmITKky0NYjNFoewo6YiWIUWARNq2o="
+    "opencode-darwin-arm64": "sha256-Qq6EJBsVVOSKZwzFVCqj9PHunvA9Y5d0GQhEsn6pvEg=",
+    "opencode-darwin-x64": "sha256-LceZBPdp+kpKtQbx7jueLkMrejymWAm4GSf7cfDzDx4=",
+    "opencode-linux-arm64": "sha256-5nrOHSPPGblYRfrLNpZOQNzoKiMiJzYQ6p8bp6oGpxQ=",
+    "opencode-linux-x64": "sha256-2HelnbGAPJEPqZ1BGPaQGvu0zmlZ/BCOvt8iBxF5gNs="
   },
-  "version": "1.17.3"
+  "version": "1.17.4"
 }

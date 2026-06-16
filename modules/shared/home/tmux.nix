@@ -105,6 +105,19 @@ let
   # calls, git state, worktrees. Distributed as a Rust binary + tmux
   # plugin scripts; we build the binary with rustPlatform and graft it
   # into the plugin's expected `bin/` path so the wizard never runs.
+  #
+  # On bumping `rev` below:
+  #   1. The two `src/process.rs` `--replace-fail` patches further down fail
+  #      the build loudly if upstream restructured the matcher — that's the
+  #      safety net, no manual re-check needed beyond reading the error.
+  #   2. Run `/plugin update tmux-agent-sidebar@hiroppy` inside Claude Code:
+  #      the plugin install copies sources to a version-keyed cache dir
+  #      (`~/.config/claude/plugins/cache/hiroppy/.../<version>/`), so
+  #      plugin-side assets (hooks.json, slash commands, sidebar config)
+  #      do NOT auto-update on a Nix bump even though the binary does (via
+  #      the `~/.tmux/plugins/.../bin/` fallback in `hook.sh`).
+  #   3. If upstream lands Nix-wrapper compat (trusting hooks over pid-scan,
+  #      or accepting the `.<agent>-unwrapped` basename), drop the postPatch.
   tmux-agent-sidebar-src = pkgs.fetchFromGitHub {
     owner = "hiroppy";
     repo = "tmux-agent-sidebar";
@@ -230,7 +243,7 @@ in
 
       # Loud, themed style for bell-flagged windows so attention-needed
       # sessions pop against the dim inactive window-status row.
-      set -g window-status-bell-style "bg=${c.base08},fg=${c.base00},bold"
+      set -g window-status-bell-style "bg=default,fg=${c.base08},bold"
 
       # === Status bar ==========================================================
       set -g status on
@@ -259,8 +272,8 @@ in
       # window's accent box pops. Active recolors sympathetically with mode.
       set -g window-status-style "bg=default,fg=${c.base04}"
       set -g window-status-separator ""
-      set -g window-status-format " #I:#W#F "
-      set -g window-status-current-format "#{?client_prefix,#[bg=${c.base09}],#{?pane_in_mode,#[bg=${c.base0A}],#[bg=${c.base0D}]}}#[fg=${c.base00},bold] #I:#W#F #[default]"
+      set -g window-status-format " #I:#W#{?window_zoomed_flag, ,} "
+      set -g window-status-current-format "#{?client_prefix,#[bg=${c.base09}],#{?pane_in_mode,#[bg=${c.base0A}],#[bg=${c.base0D}]}}#[fg=${c.base00},bold] #I:#W#{?window_zoomed_flag, ,} #[default]"
 
       set -g status-left "#[bg=${c.base02},fg=${c.base05}] #{?client_prefix,#{@chip_prefix},#{?pane_in_mode,#{@chip_copy},#{@chip_normal}}} #{session_name}${hostSuffix} #[default] #{?#{==:#{pane_current_command},ssh},#{@chip_ssh} ,}#[fg=${c.base05}]#(tmux-cwd-icon #{pane_current_path})#[default] "
 
@@ -384,6 +397,19 @@ in
   # stays valid while the underlying store path updates transparently.
   home.file.".tmux/plugins/tmux-agent-sidebar".source =
     "${tmux-agent-sidebar}/share/tmux-plugins/tmux-agent-sidebar";
+
+  # OpenCode integration: a local plugin bridge (one JS file in
+  # ~/.config/opencode/plugins/) that fires events at the sidebar's hook.sh.
+  # That directory is the only way opencode loads a local plugin — the `plugin`
+  # array in opencode.json is npm-only, and this bridge isn't published
+  # standalone (it ships inside the tmux-plugin repo). Sourcing it from the
+  # built plugin's `.opencode/` tree keeps it pinned to `rev` above.
+  #
+  # Unconditional, like the `.tmux/plugins` symlink: a headless devbox still
+  # runs the sidebar over SSH, so a hasGui gate would wrongly drop it, and the
+  # bridge is a no-op (hook.sh exits fast) where no sidebar is attached.
+  xdg.configFile."opencode/plugins/tmux-agent-sidebar.js".source =
+    "${tmux-agent-sidebar}/share/tmux-plugins/tmux-agent-sidebar/.opencode/plugins/tmux-agent-sidebar.js";
 
   # tmux-agent-sidebar bakes absolute Nix store paths into its `prefix +
   # e` keybinds and caches its binary path in `@agent_sidebar_bin` —

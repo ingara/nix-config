@@ -42,7 +42,7 @@
 { lib, ... }:
 
 let
-  slimVersion = "1.1.1";
+  slimVersion = "2.0.2";
   slimPluginEntry = "oh-my-opencode-slim@${slimVersion}";
 
   # --------------------------------------------------------------------------
@@ -82,10 +82,22 @@ let
   slimConfig = {
     "$schema" = "https://unpkg.com/oh-my-opencode-slim@${slimVersion}/oh-my-opencode-slim.schema.json";
     preset = "bedrock";
+
+    # Background agents are the default workflow in slim v2. "auto" opens each
+    # specialist in a dedicated tmux/zellij pane when one is detected, and
+    # no-ops otherwise (non-interactive server runs) — pairs with the
+    # tmux-agent-sidebar so subagents show up live.
+    multiplexer.type = "auto";
+
+    # Nix owns the pinned version (`slimVersion` above); stop slim from
+    # self-updating its plugin in the background and fighting the pin. Default
+    # is true (background auto-install); flip to notification-only.
+    autoUpdate = false;
+
     presets = {
       bedrock = {
         orchestrator = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-6-v1";
+          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
           skills = [ "*" ];
           mcps = [
             "*"
@@ -93,13 +105,13 @@ let
           ];
         };
         oracle = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-6-v1";
+          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
           variant = "high";
           skills = [ "simplify" ];
           mcps = [ ];
         };
         council = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-6-v1";
+          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
           variant = "high";
           skills = [ ];
           mcps = [ ];

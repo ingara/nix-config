@@ -51,6 +51,10 @@ let
       # channel. Keeping error reporting off is fine (it doesn't gate RC).
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
       DISABLE_ERROR_REPORTING = "1";
+      # Disable auto memory (the per-repo store Claude writes itself) across
+      # all hosts. Durable conventions belong in committed AGENTS.md/CLAUDE.md,
+      # not an opaque, non-portable, machine-local memory dir.
+      CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
     };
 
     # Suppress the Co-Authored-By footer in commits and PRs. Marked

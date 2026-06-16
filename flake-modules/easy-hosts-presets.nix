@@ -123,12 +123,38 @@ in
                   enableRosetta = true;
                   mutableTaps = false;
 
+                  # Declarative tap trust. Homebrew 6.x enforces tap trust by
+                  # default and refuses to load formulae/casks from non-official
+                  # taps, which breaks `brew bundle` during activation. We trust
+                  # exactly the items we install from non-official taps, rather
+                  # than blanket-disabling trust enforcement. (Replaced the
+                  # interim `extraEnv.HOMEBREW_NO_REQUIRE_TAP_TRUST = "1"` opt-out
+                  # once nix-homebrew shipped per-item trust —
+                  # zhaofengli/nix-homebrew PR #157.)
+                  #
+                  # Keep this in sync with every non-official-tap item the
+                  # config can install: graphite (withgraphite), skhd-zig
+                  # (jackielii), plus the two conditional WM-backend casks
+                  # omniwm (barutsrb) / aerospace (nikitabobko) from
+                  # `window-manager.nix` — trusted unconditionally so a backend
+                  # switch or an upgrade of either doesn't trip the trust gate.
+                  #
+                  # Note: trust entries are NOT auto-removed when dropped from
+                  # these lists — use `brew untrust` to clear one.
+                  trust = {
+                    formulae = [ "withgraphite/tap/graphite" ];
+                    casks = [
+                      "jackielii/tap/skhd-zig"
+                      "barutsrb/tap/omniwm"
+                      "nikitabobko/tap/aerospace"
+                    ];
+                  };
+
                   taps = {
                     "homebrew/homebrew-core" = inputs.homebrew-core;
                     "homebrew/homebrew-cask" = inputs.homebrew-cask;
                     "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
                     "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
-                    "satococoa/homebrew-tap" = inputs.homebrew-satococoa;
                     "withgraphite/homebrew-tap" = inputs.homebrew-graphite;
                     "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
                     "theboredteam/homebrew-boring-notch" = inputs.homebrew-boring-notch;

@@ -1,8 +1,9 @@
 theme = stylix
 background-opacity = 0.95
 # font-family = "Hack Nerd Font Mono Regular"
+# font-family = "ZedMono NFM"  # retired: geometric/symbol glyphs overflow the cell in Ghostty
 # font-size = 10
-font-family = "ZedMono NFM"
+font-family = "Pragmasevka Nerd Font"
 # Let Ghostty send the standard kitty keyboard protocol sequence for shift+enter
 # keybind = shift+enter=esc:SE
 keybind = global:cmd+ctrl+t=toggle_quick_terminal

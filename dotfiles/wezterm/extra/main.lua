@@ -4,7 +4,8 @@ local config = wezterm.config_builder()
 -- https://github.com/wez/wezterm/issues/5990#issuecomment-2305416553
 config.front_end = "WebGpu"
 
-config.font = wezterm.font("ZedMono Nerd Font")
+config.font = wezterm.font("Pragmasevka Nerd Font")
+-- config.font = wezterm.font("ZedMono Nerd Font") -- retired: glyphs overflow the cell in Ghostty
 -- config.font = wezterm.font("CaskaydiaCove Nerd Font")
 -- config.font = wezterm.font("Hack Nerd Font")
 -- config.font = wezterm.font("VictorMono Nerd Font")
