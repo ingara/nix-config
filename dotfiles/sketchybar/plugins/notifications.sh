@@ -6,8 +6,23 @@ source "$HOME/.config/sketchybar/env.sh"
 GRAPHITE_ICON=":git_hub:"
 
 get_graphite_pr_count() {
-  local count
+  # gh hits the network; this runs on every 5s tick, so cache the count and
+  # only re-poll every ~30s. Keeps the common tick osascript-only (cheap), so
+  # update() doesn't run long enough to overlap the next tick. The timestamp is
+  # stored in the file ("epoch|count") rather than read via stat, since this
+  # PATH may resolve stat to GNU coreutils (whose -f differs from BSD stat).
+  local cache="${TMPDIR:-/tmp}/sketchybar_graphite_pr_count"
+  local now ts count
+  now=$(date +%s)
+  if [ -f "$cache" ]; then
+    IFS='|' read -r ts count <"$cache"
+    if [ -n "$ts" ] && [ "$((now - ts))" -lt 30 ]; then
+      echo "$count"
+      return
+    fi
+  fi
   count=$(gh search prs --review-requested=@me --state=open -- -author:@me draft:false -review:approved 2>/dev/null | wc -l | tr -d ' ')
+  printf '%s|%s' "$now" "$count" >"$cache"
   echo "$count"
 }
 
@@ -148,8 +163,25 @@ EOF
     fi
   done <<<"$existing_items"
 
-  # Update combined bracket (notifications + status items)
-  # Always remove existing bracket first (bracket members can't be updated)
+  # Update combined bracket (notifications + status items).
+  # A bracket can't be edited in place, so refreshing it means remove + re-add,
+  # which repaints the whole status cluster (WiFi/volume/battery). Doing that
+  # every tick is a visible flicker — and the membership only changes when a
+  # notification item appears/disappears (badge counts above update in place).
+  # So rebuild the bracket only when its inputs actually change: the member set,
+  # or the theme colors it's drawn with (so a scheme switch recolors it).
+  local sig_file="${TMPDIR:-/tmp}/sketchybar_status_notifications.sig"
+  local desired_sig
+  desired_sig="${has_notifications}|${COLOR_ITEM_BACKGROUND}|${COLOR_BORDER}|$(printf '%s\n' $item_names | sort | tr '\n' ' ')"
+  local prev_sig=""
+  [ -f "$sig_file" ] && prev_sig=$(cat "$sig_file")
+
+  if [ "$desired_sig" = "$prev_sig" ] && sketchybar --query status_notifications &>/dev/null; then
+    return 0
+  fi
+  printf '%s' "$desired_sig" >"$sig_file"
+
+  # Membership changed (or bracket missing): remove the old bracket and rebuild.
   sketchybar --remove status_notifications 2>/dev/null
 
   if [ "$has_notifications" = true ]; then

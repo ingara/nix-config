@@ -140,9 +140,6 @@ alt-x = 'focus-back-and-forth'
 # Focus/cycle editors on dev workspace (alt + v)
 alt-v = 'exec-and-forget ~/.config/aerospace/scripts/focus_editor.sh'
 
-# Focus WezTerm (alt + t)
-alt-t = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|WezTerm$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a WezTerm'
-
 # Stack/accordion navigation (alt + z/c) - works in both horizontal and vertical
 alt-z = [
   'focus --boundaries-action wrap-around-the-workspace left',
@@ -159,17 +156,22 @@ alt-shift-j = 'move down'
 alt-shift-k = 'move up'
 alt-shift-l = 'move right'
 
+# Monitor nav (alt + m/n focus, alt + shift + m/n move window) — convention
+alt-m = 'focus-monitor --wrap-around next'
+alt-n = 'focus-monitor --wrap-around prev'
+alt-shift-m = 'move-node-to-monitor --wrap-around next'
+alt-shift-n = 'move-node-to-monitor --wrap-around prev'
+
 # Join/stack  windows (shift + cmd + hjkl)
 shift-cmd-h = 'join-with left'
 shift-cmd-j = 'join-with down'
 shift-cmd-k = 'join-with up'
 shift-cmd-l = 'join-with right'
 
-# Resize windows (ctrl + alt + hjkl)
-ctrl-alt-j = 'resize smart -50'
-ctrl-alt-k = 'resize smart +50'
-ctrl-alt-h = 'resize smart -150'
-ctrl-alt-l = 'resize smart +150'
+# Resize windows (alt + -/=) — convention resize tier (docs/keybindings.md).
+# 'resize smart' adjusts whichever dimension matches the layout orientation.
+alt-minus = 'resize smart -50'
+alt-equal = 'resize smart +50'
 
 # Layout switching (ctrl + alt + z/x/c)
 ctrl-alt-z = [
@@ -207,17 +209,21 @@ alt-shift-3 = ['move-node-to-workspace social', 'workspace social']
 alt-shift-4 = ['move-node-to-workspace work', 'workspace work']
 alt-shift-5 = ['move-node-to-workspace other', 'workspace other']
 
-# App launchers (cmd + ctrl + key)
+# App launchers (cmd + ctrl + key) — cross-platform letters per
+# docs/keybindings.md (c = the platform's Chromium-family browser, Arc here)
 # Arc: focus existing window on dev workspace, or switch to dev workspace if not running
-cmd-ctrl-a = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
+cmd-ctrl-c = 'exec-and-forget id=$(aerospace list-windows --workspace dev --format "%{window-id}|%{app-name}" | grep "|Arc$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || aerospace workspace dev'
 # Slack: focus existing window, or launch if not running
 cmd-ctrl-s = 'exec-and-forget id=$(aerospace list-windows --all --format "%{window-id}|%{app-name}" | grep "|Slack$" | head -1 | cut -d"|" -f1); [ -n "$id" ] && aerospace focus --window-id "$id" || open -a Slack'
+cmd-ctrl-d = 'exec-and-forget open -a Discord'
+cmd-ctrl-e = 'exec-and-forget open -a Element'
+cmd-ctrl-v = 'exec-and-forget open -a Obsidian'
+cmd-ctrl-z = 'exec-and-forget open -a Zen'
+cmd-ctrl-t = 'exec-and-forget open /Applications/Ghostty.app'
 cmd-ctrl-m = 'exec-and-forget open /Applications/Airmail.app'
 cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
-cmd-ctrl-g = 'exec-and-forget open /Applications/Ghostty.app'
 cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
 cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show TIDAL || open /Applications/TIDAL.app/'
-cmd-ctrl-c = 'exec-and-forget aerospace-scratchpad show Timepage || open -a Timepage'
 
 # Setup management (cmd + shift + alt + key)
 cmd-shift-alt-h = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh home'

@@ -25,10 +25,6 @@ let
     "tokyo-night-light" = "tokyonight-day";
     "kanagawa" = "kanagawa-wave";
     "kanagawa-dragon" = "kanagawa-dragon";
-    "catppuccin-macchiato" = "catppuccin-macchiato";
-    "catppuccin-mocha" = "catppuccin-mocha";
-    "catppuccin-frappe" = "catppuccin-frappe";
-    "catppuccin-latte" = "catppuccin-latte";
   };
 
   # All 16 base16 slots, ordered.

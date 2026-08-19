@@ -18,7 +18,7 @@
     shellAliases = import ./aliases.nix { };
     oh-my-zsh = {
       enable = true;
-      theme = "bira";
+      # No theme: starship (starship.nix) owns the prompt.
       plugins = [
         "git"
         "sudo"

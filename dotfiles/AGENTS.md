@@ -15,6 +15,16 @@ Base is **LazyVim**. Check `lazyvim.plugins.extras.*` imports in
 `lua/config/lazy.lua` before extending any plugin — extras may already register
 keybinds and commands.
 
+## Tmux + Zellij
+
+Both multiplexers are deliberately maintained in parallel. Any keybind or theme
+change must land in **both**:
+
+- tmux: `public/modules/shared/home/tmux.nix` (Nix-generated, rebuild required)
+- zellij: `public/dotfiles/zellij/config.kdl` (live-edit) plus the Nix-generated
+  sidecars in `public/modules/shared/home/terminal-themes.nix`
+  (`themes/stylix.kdl`, `layouts/zjstatus.kdl`, `session-colors.sh`)
+
 ## Theming
 
 Single source of truth: `myOptions.theme.scheme` in
@@ -27,23 +37,24 @@ Single source of truth: `myOptions.theme.scheme` in
    `inputs.tinted-schemes/base16/<scheme>.yaml`
 2. `public/modules/shared/home/theme.nix` exposes `config.lib.myTheme.*`
    (scheme name, polarity, YAML path)
-3. Per-platform Stylix wiring reads `myTheme` and sets
-   `stylix.base16Scheme` / `stylix.polarity`
+3. `stylix-base.nix` (shared HM core) reads `myTheme` and sets
+   `stylix.base16Scheme` / `stylix.polarity`, plus the global fonts
+   (`stylix.fonts.*` — monospace is Pragmasevka) and `stylix.opacity.terminal`
 4. Stylix auto-themes apps via its targets (starship, tmux, fish, fzf, bat,
-   wezterm, ghostty, zellij, jankyborders, KDE Plasma)
+   ghostty, wezterm, zellij, jankyborders, KDE Plasma) — terminal font and
+   opacity flow from the globals in 3, so don't set them per-app
 5. Custom adapters handle apps Stylix doesn't support:
    - `nvim-theme.nix` → generates `nvim/lua/theme.lua` (palette + colorscheme
      name)
    - `sketchybar.nix` → generates `sketchybar/colors.sh` (30 `COLOR_*` vars)
-   - `terminal-themes.nix` → generates `ghostty/themes/stylix` and
-     `zellij/themes/stylix.kdl`
+   - `terminal-themes.nix` → generates `zellij/themes/stylix.kdl`
 
 ### Edit patterns
 
-| Pattern                                    | Apps                                                                                                                         | Workflow                                                    |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Per-file `mkOutOfStoreSymlink` (live-edit) | nvim, ghostty config, zellij config.kdl, sketchybar plugins, lazygit, aerospace, yabai, skhd, wezterm/extra, git/extra       | Edit `~/.config/<app>/<file>` directly; changes are instant |
-| Nix-generated (rebuild required)           | starship, tmux, fish, fzf, bat, wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, `colors.sh`, `themes/stylix*` | Edit the Nix module; run `just switch`                      |
+| Pattern                                    | Apps                                                                                                                                                                                     | Workflow                                                    |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Per-file `mkOutOfStoreSymlink` (live-edit) | nvim, zellij config.kdl, sketchybar plugins, aerospace, yabai, skhd, wezterm/extra, git/extra                                                                                            | Edit `~/.config/<app>/<file>` directly; changes are instant |
+| Nix-generated (rebuild required)           | starship, tmux, fish, fzf, bat, ghostty (`programs.ghostty`), lazygit (`programs.lazygit`), wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, `colors.sh`, `themes/stylix*` | Edit the Nix module; run `just switch`                      |
 
 ### Adding a new theme
 

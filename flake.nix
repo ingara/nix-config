@@ -1,5 +1,5 @@
 {
-  description = "Multi-platform Nix configuration (macOS, NixOS, Fedora)";
+  description = "Multi-platform Nix configuration (macOS, NixOS)";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts = {
@@ -18,13 +18,6 @@
     };
     darwin = {
       url = "github:LnL7/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    # vz/lima-based Linux builder VM for darwin workstations. Replaces
-    # nix-darwin's qemu-based `nix.linux-builder` (see hosts/darwin/default.nix
-    # for why qemu is unusable on this hardware).
-    nix-rosetta-builder = {
-      url = "github:cpick/nix-rosetta-builder";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
@@ -73,18 +66,13 @@
       url = "github:BarutSRB/homebrew-tap";
       flake = false;
     };
+    homebrew-nehir = {
+      url = "github:guria/homebrew-tap";
+      flake = false;
+    };
     homebrew-skhd-zig = {
       url = "github:jackielii/homebrew-tap";
       flake = false;
-    };
-    nix-flatpak = {
-      # Note: nix-flatpak declares no inputs at all, so no `follows` needed
-      url = "github:gmodena/nix-flatpak";
-    };
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
     };
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
@@ -94,8 +82,20 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # numtide's AI-agent package set; we consume only its prebuilt
+    # `packages.<system>.opencode`. `follows` nixpkgs, and since the derivation
+    # is fetchurl + autoPatchelf + wrapper with no compilation, it needs no
+    # binary cache.
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     aerospace-scratchpad = {
       url = "github:cristianoliveira/aerospace-scratchpad";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    paneru = {
+      url = "github:karinushka/paneru";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {

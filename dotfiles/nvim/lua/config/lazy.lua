@@ -47,7 +47,7 @@ require("lazy").setup({
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
   lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
-  install = { colorscheme = { "catpuccin", "tokyonight", "habamax" } },
+  install = { colorscheme = { "rose-pine", "habamax" } },
   checker = { enabled = true }, -- automatically check for plugin updates
   performance = {
     rtp = {

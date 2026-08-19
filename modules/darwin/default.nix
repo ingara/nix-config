@@ -11,7 +11,6 @@
 
 let
   user = config.myOptions.user.username;
-  wmBackend = config.myOptions.windowManager.backend;
 in
 {
   imports = [
@@ -19,6 +18,7 @@ in
     ./window-manager.nix
     ./skhd.nix
     ./bar.nix
+    ./claude-code.nix
   ];
 
   # System-level Stylix (currently the only consumer is the jankyborders
@@ -29,17 +29,19 @@ in
     base16Scheme = "${inputs.tinted-schemes}/base16/${config.myOptions.theme.scheme}.yaml";
     polarity = config.myOptions.theme.polarity;
     targets.jankyborders.enable = true;
+    # Fonts are owned by HM Stylix (shared/home/stylix-base.nix); without this
+    # off-switch the autoEnabled system-scope font-packages target would
+    # install the four never-referenced stylix.fonts defaults system-wide
+    # (incl. the noto emoji whose afdko source build broke a switch — #48).
+    targets.font-packages.enable = false;
   };
 
-  # It me
   users.users.${user} = {
     name = "${user}";
     home = "/Users/${user}";
     isHidden = false;
-    # shell = pkgs.fish;
   };
 
-  # Enable home-manager
   home-manager = {
     useGlobalPkgs = false;
     backupFileExtension = "backup";
@@ -50,36 +52,18 @@ in
       }:
       {
         imports = [
-          ../shared/home/dotfiles.nix
+          inputs.paneru.homeModules.paneru
           ./dotfiles.nix
           ./colima.nix
+          ./paneru.nix
+          ./nehir.nix
           ../shared/home
+          ../shared/home/stylix-base.nix
         ];
 
-        myOptions.dotfiles.wmBackend = wmBackend;
-
-        # System-level Stylix (above) propagates `enable`, `base16Scheme`,
-        # `polarity` into HM via stylix's home-manager-integration module.
-        # We only declare HM-specific target toggles here.
-        #
-        # We track Stylix and home-manager both from master, so their release
-        # strings never line up; the release check is a permanent false
-        # positive (it suppresses only the warning, not any behaviour, and a
-        # genuine option incompatibility still errors loudly). It is not
-        # propagated from the system module, so set it HM-side.
-        stylix.enableReleaseChecks = false;
+        # Platform-specific Stylix target extras on top of the shared core
+        # (../shared/home/stylix-base.nix).
         stylix.targets = {
-          starship.enable = true;
-          tmux.enable = true;
-          fish.enable = true;
-          fzf.enable = true;
-          bat.enable = true;
-          wezterm.enable = true;
-          ghostty.enable = true;
-          zellij.enable = true;
-          # Nvim is driven by our own theme.lua generator; skip Stylix's
-          # neovim target.
-          neovim.enable = false;
           # No GTK apps on darwin; skip the target so Stylix doesn't wire
           # adw-gtk3 / fonts / gtk.css into HM here.
           gtk.enable = false;
@@ -88,41 +72,12 @@ in
         home = {
           enableNixpkgsReleaseCheck = false;
           packages = pkgs.callPackage ./packages.nix { };
-          file = { };
-          sessionVariables = {
-            PAGER = "less";
-            LESS = "-R --quit-if-one-screen --no-init";
-          };
-          sessionPath = [
-            "$HOME/go/bin"
-          ];
-
           stateVersion = "23.11";
         };
 
-        # Marked broken Oct 20, 2022 check later to remove this
+        # Workaround for broken manpage build:
         # https://github.com/nix-community/home-manager/issues/3344
         manual.manpages.enable = false;
       };
   };
-
-  # Fully declarative dock using the latest from Nix Store
-  # local = {
-  #   dock.enable = true;
-  #   dock.entries = [
-  #     { path = "/Applications/Slack.app/"; }
-  #     { path = "/System/Applications/Messages.app/"; }
-  #     { path = "/Applications/Firefox.app/"; }
-  #     { path = "/Applications/Firefox Developer Edition.app/"; }
-  #     { path = "/Applications/Airmail.app/"; }
-  #     { path = "/Applications/Spotify.app/"; }
-  #     { path = "/Applications/Slack.app/"; }
-  #     { path = "${pkgs.alacritty}/Applications/Alacritty.app/"; }
-  #     {
-  #       path = "${config.users.users.${user}.home}/.local/share/downloads";
-  #       section = "others";
-  #       options = "--sort name --view grid --display stack";
-  #     }
-  #   ];
-  # };
 }

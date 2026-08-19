@@ -23,7 +23,6 @@ in
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         eval "$(/opt/homebrew/bin/brew shellenv)"
       ''}
-      fish_add_path -g $HOME/go/bin
       # Disable greeting
       set -g fish_greeting
 
@@ -60,10 +59,6 @@ in
           exec zellij attach -c main
         end
       ''}
-
-      # Pager configuration
-      # set -gx PAGER less
-      # set -gx LESS "-R --quit-if-one-screen --no-init"
 
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         # MacOS ALT+d fzf

@@ -1,9 +1,0 @@
-{
-  "hashes": {
-    "opencode-darwin-arm64": "sha256-Qq6EJBsVVOSKZwzFVCqj9PHunvA9Y5d0GQhEsn6pvEg=",
-    "opencode-darwin-x64": "sha256-LceZBPdp+kpKtQbx7jueLkMrejymWAm4GSf7cfDzDx4=",
-    "opencode-linux-arm64": "sha256-5nrOHSPPGblYRfrLNpZOQNzoKiMiJzYQ6p8bp6oGpxQ=",
-    "opencode-linux-x64": "sha256-2HelnbGAPJEPqZ1BGPaQGvu0zmlZ/BCOvt8iBxF5gNs="
-  },
-  "version": "1.17.4"
-}

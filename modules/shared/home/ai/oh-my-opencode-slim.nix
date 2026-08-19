@@ -1,7 +1,7 @@
 # oh-my-opencode-slim — declarative install
 #
 # Replaces the upstream `bunx oh-my-opencode-slim install` flow with a fully
-# nix-managed install. The installer mutates four pieces of state:
+# nix-managed install. The installer mutates five pieces of state:
 #
 #   1. opencode.json `plugin` array — adds slim's npm entry
 #   2. opencode.json `agent.{explore,general}.disable` — slim wants to own
@@ -45,9 +45,7 @@ let
   slimVersion = "2.0.2";
   slimPluginEntry = "oh-my-opencode-slim@${slimVersion}";
 
-  # --------------------------------------------------------------------------
-  # Slim preset config (~/.config/opencode/oh-my-opencode-slim.json)
-  # --------------------------------------------------------------------------
+  # Slim preset config (~/.config/opencode/oh-my-opencode-slim.json).
   # One preset ships: bedrock. The plain `anthropic` provider can't be
   # registered on this host — `opencode auth login anthropic` fails with
   # "Failed to load auth provider metadata from anthropic: fetch() URL is
@@ -85,8 +83,7 @@ let
 
     # Background agents are the default workflow in slim v2. "auto" opens each
     # specialist in a dedicated tmux/zellij pane when one is detected, and
-    # no-ops otherwise (non-interactive server runs) — pairs with the
-    # tmux-agent-sidebar so subagents show up live.
+    # no-ops otherwise (non-interactive server runs).
     multiplexer.type = "auto";
 
     # Nix owns the pinned version (`slimVersion` above); stop slim from

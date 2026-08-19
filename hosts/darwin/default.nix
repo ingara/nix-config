@@ -7,21 +7,12 @@
 
 let
   user = config.myOptions.user.username;
-
-  # To find key codes:
-  #
-  # Find hex value from: https://developer.apple.com/library/archive/technotes/tn2450/_index.html#//apple_ref/doc/uid/DTS40017618-CH1-KEY_TABLE_USAGES
-  # For exmple 'Keyboard \ and |' has hex code 0x31
-  # bash/zsh:
-  #   $ printf '%d\n' "$(( 0x700000000 | 0x31 ))"
-  #   30064771121
 in
 {
   imports = [
     ../../modules/darwin
     ../../modules/shared/system
     ../../modules/darwin/homebrew.nix
-    inputs.nix-rosetta-builder.darwinModules.default
   ];
 
   myOptions = {
@@ -30,41 +21,35 @@ in
     gitCredentialHelper = "osxkeychain";
   };
 
-  # Window manager selection: "yabai", "aerospace", "omniwm", or "none"
-  myOptions.windowManager.backend = "omniwm";
+  # Window manager: list installed WMs in `enabled`, set the active one as
+  # `default` (yabai/aerospace/omniwm/paneru/nehir).
+  myOptions.windowManager = {
+    enabled = [
+      "nehir"
+      "omniwm"
+    ];
+    default = "nehir";
+  };
 
-  # The default Nix build user group ID was changed from 30000 to 350.
-  # You are currently managing Nix build users with nix-darwin, but your
-  # nixbld group has GID 30000, whereas we expected 350.
-  #
-  # Possible causes include setting up a new Nix installation with an
-  # existing nix-darwin configuration, setting up a new nix-darwin
-  # installation with an existing Nix installation, or manually increasing
-  # your `system.stateVersion` setting.
-  #
-  # You can set the configured group ID to match the actual value:
-  #
-  #     ids.gids.nixbld = 30000;
-  #
-  # We do not recommend trying to change the group ID with macOS user
-  # management tools without a complete uninstallation and reinstallation
-  # of Nix.
+  # The default Nix build user group ID changed from 30000 to 350; this
+  # host's nixbld group has GID 30000, so pin the actual value. Don't try to
+  # change the group ID with macOS user management tools without a complete
+  # uninstallation and reinstallation of Nix.
   ids.gids.nixbld = 30000;
 
-  # Setup user, packages, programs
   nix = {
     enable = true;
     package = pkgs.nixVersions.latest;
     settings = {
       # Only the primary user is trusted for privileged Nix operations
-      # (custom substituters, signing store paths, unsandboxed builds).
-      # Removed `@admin` so a second admin user couldn't poison the store.
+      # (custom substituters, signing store paths, unsandboxed builds) —
+      # not `@admin`, so a second admin user can't poison the store.
       trusted-users = [ "${user}" ];
       experimental-features = [
         "nix-command"
         "flakes"
       ];
-      # Let the builder VM fetch build inputs straight from the binary
+      # Let remote builders fetch build inputs straight from the binary
       # caches instead of copying them through this host — faster, and keeps
       # the Mac's store out of the offload path.
       builders-use-substitutes = true;
@@ -81,53 +66,28 @@ in
     };
   };
 
-  # Linux remote builder, run as a NixOS guest under vz (Apple
-  # Virtualization.framework) via lima. It registers in `buildMachines`, so
-  # this darwin host can REALIZE aarch64-linux derivations locally. That's
-  # what makes cross-platform IFD resolve during remote aarch64-linux server
-  # deploys — e.g. catppuccin and tmux-agent-sidebar read a `Cargo.lock` out of
-  # an aarch64-linux fetch AT EVAL TIME; without a Linux builder that fetch
-  # can only succeed while it happens to sit in the local store, so a GC turns
-  # every server deploy into a "platform mismatch" eval failure. It also lets
-  # us build full Linux closures here instead of relying solely on deploy-rs's
-  # on-target build, and adds x86_64-linux via Rosetta.
-  #
-  # This replaces nix-darwin's built-in `nix.linux-builder`: that module is
-  # qemu-only, and qemu 11.0.0's HVF path asserts on the SME control register
-  # (`hvf_arch_init_vcpu`, SMCR_EL1) on M3/M4 hosts, so its VM can never boot.
-  # Worse, its launchd daemon is `KeepAlive=true`, so the broken VM became a
-  # ~10s crash-restart loop (constant CPU + image rebuilds; see WATCHLIST
-  # "qemu HVF/SME" entry in the private repo). vz sidesteps qemu entirely —
-  # the same call already made for colima (modules/darwin/colima.nix).
-  #
-  # The guest image is an aarch64-linux build, so the FIRST build needs some
-  # other Linux builder (remote server, or `nix.linux-builder` if qemu works);
-  # after that the VM rebuilds itself.
-  nix-rosetta-builder = {
-    # Match the old linux-builder sizing.
-    cores = 6;
-    memory = "8GiB";
-    diskSize = "40GiB";
-    # Boot the VM on demand and power it off after idling (default 180 min)
-    # instead of running it 24/7 — builds are bursty here, and an always-on
-    # guest is paying RAM + battery for nothing between deploys.
-    onDemand = true;
-  };
+  # No local Linux builder by design. Server deploys build on the target
+  # (deploy-rs `remoteBuild = true`), so only eval-time IFD on a Linux
+  # derivation would ever pull an aarch64-linux build onto this Mac — and
+  # that fails loudly with a "platform mismatch" eval error. If an input
+  # introduces one, fix it at the source (consume it as a flake input /
+  # `builtins.fetchTree`, not a `pkgs.fetch*` derivation) rather than adding
+  # a local builder. Only if that proves impractical, revisit a builder —
+  # vz, NOT nix-darwin's `nix.linux-builder`, which is qemu-only and asserts
+  # on SMCR_EL1 on M3/M4 (issue #24, qemu HVF/SME; it crash-looped and
+  # cooked this host once).
 
   environment.shells = [ pkgs.fish ];
   programs.fish.enable = true;
   users.users.${user}.shell = pkgs.fish;
 
-  # Load configuration that is shared across systems
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
-    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex
     inputs.aerospace-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   system = {
     stateVersion = 5;
-    # Turn off NIX_PATH warnings now that we're using flakes
+    # Flakes don't use NIX_PATH
     checks.verifyNixPath = false;
     primaryUser = user;
     keyboard = {

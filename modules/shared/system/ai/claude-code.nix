@@ -26,6 +26,7 @@
 # Refs: https://docs.claude.com/en/docs/claude-code/settings
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -40,9 +41,12 @@ let
     # in-app UI. Locked here on purpose — change them in Nix + redeploy.
     alwaysThinkingEnabled = true;
     effortLevel = "high";
-    theme = "dark-ansi";
+    theme = "custom:stylix";
     preferredNotifChannel = "terminal_bell";
     agentPushNotifEnabled = true;
+    # Auto-connect Remote Control for every interactive session (tri-state:
+    # unset would follow the organization default). Requires v2.1.119+.
+    remoteControlAtStartup = true;
 
     env = {
       # NOTE: DISABLE_TELEMETRY and CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC are
@@ -57,9 +61,21 @@ let
       CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
     };
 
-    # Suppress the Co-Authored-By footer in commits and PRs. Marked
-    # deprecated upstream in favour of `attribution`, but still respected.
-    includeCoAuthoredBy = false;
+    # Empty `commit`/`pr` suppress the Co-Authored-By footer — both are
+    # required, since defining either one alone falls the other back to its
+    # default attribution text. sessionUrl drops the Claude-Session trailer
+    # and PR-body link, which otherwise fires on every session here via
+    # remoteControlAtStartup.
+    attribution = {
+      commit = "";
+      pr = "";
+      sessionUrl = false;
+    };
+
+    # Managed (or user) scope is mandatory here: Claude Code ignores a
+    # defaultMode of "auto" from project/local settings, since those are
+    # repo-controllable and a clone could otherwise disarm the permission prompt.
+    permissions.defaultMode = "auto";
 
     permissions.allow = [
       # JS build/test loops
@@ -92,6 +108,33 @@ let
       "Bash(gh issue list:*)"
       "Bash(gh repo view:*)"
     ];
+
+    # Mechanical secret backstop, managed-locked so no user/project/local scope
+    # can relax it, evaluated before allow. A Read deny also covers the Edit and
+    # Write tools on the same path, and matches whether the symlink or its target
+    # lands in a denied path. These gate the Read/Edit/Write tools, not a shell
+    # `cat` of the same file — the airtight read boundary is the OS sandbox
+    # (sandbox.denyRead), not yet enabled here.
+    permissions.deny = [
+      # Home-dir credential stores. ~/.aws/config stays readable (non-secret
+      # profile definitions); only the creds file and the SSO bearer cache go.
+      "Read(~/.ssh/**)"
+      "Read(~/.aws/credentials)"
+      "Read(~/.aws/sso/**)"
+      "Read(~/.config/gcloud/**)"
+      "Read(~/.config/sops/**)"
+      "Read(~/Library/Application Support/sops/**)"
+      # Secret-bearing file classes, at any depth.
+      "Read(**/.env)"
+      "Read(**/*.pem)"
+      "Read(**/*.age)"
+      # sops decryption to stdout. Best-effort only — shell argument matching is
+      # not a trust boundary (the file-read denies and the sandbox are the real
+      # control) — but it blocks the obvious forms per the never-decrypt rule.
+      "Bash(sops -d *)"
+      "Bash(sops --decrypt *)"
+      "Bash(sops decrypt *)"
+    ];
   };
 
   # Private / host-specific overlay wins on conflicting leaf keys.
@@ -104,11 +147,27 @@ let
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 in
 lib.mkMerge [
-  # CLAUDE_CONFIG_DIR env var — Claude Code does not respect XDG_CONFIG_HOME,
-  # so we point it explicitly into the XDG directory for consistency with
-  # every other tool.
+  # CLAUDE_CONFIG_DIR points into the XDG dir (Claude Code ignores
+  # XDG_CONFIG_HOME) for parity with every other tool.
+  #
+  # ~/.claude still appears and is expected: the herdr usagebar collector
+  # hardcodes it for its cache with no env or config override, so it holds
+  # regenerable cache only. Don't symlink it onto the real config
+  # dir — `rm -rf ~/.claude/` and `~/.claude/*` both follow through, and the
+  # sibling ~/.claude.json is outside any such link anyway.
   {
+    environment.systemPackages = [
+      inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    ];
     environment.variables.CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    home-manager.sharedModules = [
+      ({ config, ... }: {
+        programs.herdr.integrations.claude = {
+          directories = [ "${config.xdg.configHome}/claude" ];
+          environment.CLAUDE_CONFIG_DIR = "${config.xdg.configHome}/claude";
+        };
+      })
+    ];
   }
 
   # Cachix substituter for the claude-code-nix flake input. Without this,

@@ -8,7 +8,6 @@ let
 in
 {
   imports = [
-    ../shared/home/dotfiles.nix
     ../shared/home
   ];
 
@@ -17,7 +16,6 @@ in
     username = "${user}";
     homeDirectory = "/home/${user}";
     packages = import ../shared/packages.nix { inherit pkgs; };
-    file = { };
     stateVersion = "23.11";
   };
 }

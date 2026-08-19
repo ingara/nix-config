@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 prefs=(
-  update_freq=10
   "padding_left=$ITEM_SPACING"
   icon.drawing=on
   icon="􀆊"

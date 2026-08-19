@@ -22,15 +22,14 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
 let
   inherit (config.myOptions.opencode) hostClass;
 
-  # ---------------------------------------------------------------------------
-  # Secret-path bash denies (defense-in-layers for `permission.read`)
-  # ---------------------------------------------------------------------------
+  # Secret-path bash denies (defense-in-layers for `permission.read`).
   # bash commands bypass `permission.read`'s secret-file denies since they
   # don't route through opencode's Read tool. These rules mirror the most
   # critical read denies at the bash layer by expanding N commands × M path
@@ -80,9 +79,7 @@ let
     ) secretReadCommands
   );
 
-  # ---------------------------------------------------------------------------
   # Base profile (workstation)
-  # ---------------------------------------------------------------------------
   baseSettings = {
     # MCP servers — same set on every host. Additional servers (typically
     # private/internal endpoints) can be added by other modules via
@@ -409,9 +406,7 @@ let
     };
   };
 
-  # ---------------------------------------------------------------------------
   # Server profile additions (merged on top of base via lib.recursiveUpdate)
-  # ---------------------------------------------------------------------------
   serverExtras = {
     permission = {
       read = {
@@ -475,14 +470,17 @@ let
     if hostClass == "server" then lib.recursiveUpdate baseSettings serverExtras else baseSettings;
 in
 {
+  # Herdr 0.7.3 ignores XDG_CONFIG_HOME for this integration.
+  programs.herdr.integrations.opencode.directories = [
+    "${config.home.homeDirectory}/.config/opencode"
+  ];
+
   programs.opencode = {
     enable = true;
-    # `pkgs.opencode-bin` wraps opencode's published per-arch npm tarball
-    # (overlay: `public/overlays/opencode-bin.nix`, sidecar JSON pins the
-    # version + SRI hashes). Avoids building from source — opencode's Bun
-    # requirement frequently outruns nixpkgs' Bun, breaking `just switch`.
-    # Bump with `just update-opencode-bin`.
-    package = pkgs.opencode-bin;
+    # Prebuilt-binary opencode (per-arch GitHub release via llm-agents.nix),
+    # not a source build: opencode's Bun requirement frequently outruns
+    # nixpkgs' Bun, which would break `just switch`.
+    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
     settings = finalSettings;
   };
 }

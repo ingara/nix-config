@@ -1,5 +1,14 @@
 return {
   "folke/snacks.nvim",
+  keys = {
+    {
+      "<C-p>",
+      function()
+        Snacks.picker.lsp_workspace_symbols()
+      end,
+      desc = "Goto Symbol (Workspace)",
+    },
+  },
   opts = {
     terminal = {
       win = {

@@ -1,11 +1,7 @@
 # Starship prompt configuration.
 #
 # Powerline-style prompt inspired by powerlevel10k classic preset.
-# Settings (format string + segment attrs) live inline as a `let`
-# binding so moving the file doesn't require threading through a
-# sibling helper. Colors come from the active base16 palette via
-# `config.lib.stylix.colors`; segments use a shared pill-edge helper
-# to keep the render consistent across language-version/git segments.
+# Colors come from the active base16 palette via `config.lib.stylix.colors`.
 { config, lib, ... }:
 
 let
@@ -29,27 +25,18 @@ let
   fg_red = c.base08;
   fg_text = c.base05;
 
-  # Separator character
   sep = "/";
-
-  # Helper to create separator format
   mkSep = "[${sep}](bg:${bg} fg:${fg_overlay})";
-
-  # Helper to create segment format
   mkSegment = text: color: "[ ${text} ](bg:${bg} fg:${color})";
-
-  # Helper to create pill start (left rounded edge)
+  # Pill edges: left and right rounded caps around a segment group.
   mkPillStart = "[](fg:${bg})";
-
-  # Helper to create pill end (right rounded edge)
   mkPillEnd = "[](fg:${bg})";
 
   starshipSettings = {
-    # Add blank line before prompt for breathing room
     add_newline = true;
 
-    # Left side: line connector, directory, git info (in one pill)
-    # Right side: cmd_duration, language versions, time (in one pill)
+    # Left pill: line connector, directory, git info.
+    # Right pill: cmd_duration, language versions, time.
     format = lib.concatStrings [
       "[╭─](bold green)"
       mkPillStart
@@ -72,24 +59,22 @@ let
       "[╰─](bold green)$character"
     ];
 
-    # Fill space between left and right
     fill = {
       symbol = " ";
     };
 
-    # Username (only shown on SSH / root)
+    # Only shown on SSH / root.
     username = {
       show_always = false;
       format = "[$user](bg:${bg} fg:${fg_green})[@](bg:${bg} fg:${fg_overlay})";
     };
 
-    # Hostname (only shown on SSH)
+    # Only shown on SSH.
     hostname = {
       ssh_only = true;
       format = "[$hostname](bg:${bg} fg:${fg_green})[${sep}](bg:${bg} fg:${fg_overlay})";
     };
 
-    # Directory
     directory = {
       truncation_length = 5;
       truncation_symbol = "…/";
@@ -104,13 +89,12 @@ let
       };
     };
 
-    # Git branch
     git_branch = {
       format = "${mkSep}${mkSegment "$symbol$branch(:$remote_branch)" fg_mauve}";
       symbol = " ";
     };
 
-    # Git status with counts (only shown when dirty)
+    # Counts; only shown when dirty.
     git_status = {
       format = "(${mkSep}${mkSegment "$all_status$ahead_behind" fg_yellow})";
       conflicted = "🏳";
@@ -126,13 +110,12 @@ let
       deleted = "✘\${count}";
     };
 
-    # Command duration (right side, only for slow commands >2s)
+    # Only shown for commands slower than min_time (2s).
     cmd_duration = {
       min_time = 2000;
       format = "${mkSegment "󰔟 $duration" fg_yellow}";
     };
 
-    # Node.js version
     nodejs = {
       format = "${mkSep}${mkSegment "$symbol$version" fg_green}";
       symbol = " ";
@@ -143,39 +126,27 @@ let
       ];
     };
 
-    # Rust version
     rust = {
       format = "${mkSep}${mkSegment "$symbol$version" fg_red}";
       symbol = "󱘗 ";
     };
 
-    # Python version
     python = {
       format = "${mkSep}${mkSegment "$symbol$pyenv_prefix$version" fg_yellow}";
       symbol = " ";
     };
 
-    # Nix shell indicator
     nix_shell = {
       format = "${mkSep}${mkSegment "$symbol$state( \\($name\\))" fg_blue}";
       symbol = " ";
     };
 
-    # Time
     time = {
       disabled = false;
       format = "${mkSep}${mkSegment "󰥔 $time" fg_text}";
       time_format = "%H:%M";
     };
 
-    # Shell indicator
-    shell = {
-      disabled = false;
-      fish_indicator = "🐟";
-      zsh_indicator = "𝓏";
-    };
-
-    # Character changes on success/failure
     character = {
       success_symbol = "[❯](bold green)";
       error_symbol = "[❯](bold red)";

@@ -4,15 +4,13 @@
 #   scriptable version. launchd agent here just plumbs logs to /tmp for
 #   debugging; the bar configuration itself is in the sketchybar dotfiles.
 # - `services.jankyborders` — highlights the focused window with a colored
-#   border. Auto-disabled when the active window manager is `omniwm`, which
-#   ships its own borders (configured via `[borders]` in settings.toml).
-#
-# Split out of the old `darwin/home-manager.nix` because they're system
-# services, not home-manager config.
-{ config, ... }:
+#   border. Auto-disabled when the active window manager is `omniwm` (which
+#   ships its own borders), `paneru` (optional native border under
+#   [decorations.active.border]), or `nehir` (native focus borders).
+{ config, lib, ... }:
 
 let
-  inherit (config.myOptions.windowManager) backend;
+  cfg = config.myOptions.windowManager;
 in
 {
   services = {
@@ -22,9 +20,11 @@ in
 
     # https://mynixos.com/options/services.jankyborders
     # active_color / inactive_color come from stylix.targets.jankyborders
-    # (system-level Stylix darwinModule).
+    # (system-level Stylix darwinModule). Disabled whenever a native-border WM is
+    # installed — jankyborders plus a native border renders double borders.
     jankyborders = {
-      enable = backend != "omniwm";
+      enable =
+        !(lib.elem "omniwm" cfg.enabled || lib.elem "paneru" cfg.enabled || lib.elem "nehir" cfg.enabled);
       style = "round";
       width = 3.0;
       hidpi = true;

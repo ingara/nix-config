@@ -1,22 +1,19 @@
-# Terminal theme bridges — ghostty + zellij.
+# Terminal theme bridge — zellij.
 #
-# Stylix's `programs.<app>.themes` HM targets only write theme files
-# when `programs.<app>.enable = true`. Our ghostty + zellij configs
-# are dotfile-symlinked (live-edit), not HM-managed, so those targets
-# are no-ops. Bypass them by writing the theme files ourselves from
-# `config.lib.stylix.colors`.
+# Stylix's `programs.<app>.themes` HM targets only write theme files when
+# `programs.<app>.enable = true`. Our zellij config is dotfile-symlinked
+# (live-edit), not HM-managed, so that target is a no-op. Bypass it by writing
+# the theme file ourselves from `config.lib.stylix.colors`.
 #
-# The dotfile-side configs reference `theme = stylix` (ghostty) and
-# `theme "stylix"` (zellij); the files emitted here satisfy those
-# references.
+# The dotfile-side config references `theme "stylix"` (zellij); the file emitted
+# here satisfies that reference.
 { config, lib, ... }:
 
 let
   c = config.lib.stylix.colors.withHashtag;
 
   # Zellij theme attrs, identical structure to Stylix's
-  # modules/zellij/hm.nix (programs.zellij.themes.stylix). Rendered to
-  # KDL via lib.hm.generators.toKDL below.
+  # programs.zellij.themes.stylix.
   zellijThemeAttrs = {
     # The inner block name must match `theme "<name>"` in zellij's
     # config.kdl AND the filename (`stylix.kdl`). Stylix's upstream
@@ -152,40 +149,14 @@ let
 in
 {
   config.xdg.configFile = {
-    # Ghostty's theme file format is plain key-value with `palette`
-    # repeated per index.
-    "ghostty/themes/stylix".text = ''
-      background = ${c.base00}
-      foreground = ${c.base05}
-      cursor-color = ${c.base05}
-      selection-background = ${c.base02}
-      selection-foreground = ${c.base05}
-      palette = 0=${c.base00}
-      palette = 1=${c.base08}
-      palette = 2=${c.base0B}
-      palette = 3=${c.base0A}
-      palette = 4=${c.base0D}
-      palette = 5=${c.base0E}
-      palette = 6=${c.base0C}
-      palette = 7=${c.base05}
-      palette = 8=${c.base03}
-      palette = 9=${c.base08}
-      palette = 10=${c.base0B}
-      palette = 11=${c.base0A}
-      palette = 12=${c.base0D}
-      palette = 13=${c.base0E}
-      palette = 14=${c.base0C}
-      palette = 15=${c.base07}
-    '';
-
     # Zellij theme is structured KDL; render via HM's toKDL generator.
     "zellij/themes/stylix.kdl".text = lib.hm.generators.toKDL { } zellijThemeAttrs;
 
     # zjstatus status-bar layout — uses *named* ANSI colors (`blue`,
-    # `magenta`, …) instead of hex. The terminal resolves them against
-    # its palette at render time, and ghostty's palette is templated by
-    # stylix above. Net effect: status-bar colors track the active
-    # scheme automatically, even for resurrected sessions whose
+    # `magenta`, …) instead of hex. The terminal resolves them against its
+    # palette at render time, and the terminal's palette is stylix-themed (e.g.
+    # ghostty via Stylix's ghostty target). Net effect: status-bar colors
+    # track the active scheme automatically, even for resurrected sessions whose
     # session-layout.kdl was cached under a previous scheme — the names
     # are what's baked, not the resolved values.
     #

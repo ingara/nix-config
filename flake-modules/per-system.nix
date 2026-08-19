@@ -1,7 +1,5 @@
 # perSystem outputs (devShells, formatter, checks) for the public flake
-# when it's evaluated standalone. The lib helpers that both flakes share
-# (e.g. `flake.lib.devShellBase`) live in `./lib.nix` so they're available
-# via flakeModules.default to the private root flake too.
+# when it's evaluated standalone.
 {
   inputs,
   self,
@@ -25,10 +23,9 @@
         '';
       };
 
-      # `nix fmt` entry point — runs treefmt with all formatters + linters.
+      # `nix fmt` entry point.
       formatter = treefmtEval.config.build.wrapper;
 
-      # `nix flake check` validates formatting.
       checks.formatting = treefmtEval.config.build.check self;
     };
 }

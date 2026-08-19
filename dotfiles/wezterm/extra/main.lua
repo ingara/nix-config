@@ -4,16 +4,10 @@ local config = wezterm.config_builder()
 -- https://github.com/wez/wezterm/issues/5990#issuecomment-2305416553
 config.front_end = "WebGpu"
 
-config.font = wezterm.font("Pragmasevka Nerd Font")
--- config.font = wezterm.font("ZedMono Nerd Font") -- retired: glyphs overflow the cell in Ghostty
--- config.font = wezterm.font("CaskaydiaCove Nerd Font")
--- config.font = wezterm.font("Hack Nerd Font")
--- config.font = wezterm.font("VictorMono Nerd Font")
-config.font_size = 13
--- color_scheme is set by Stylix's wezterm target (generates and selects
--- a "stylix" scheme matching myOptions.theme.scheme).
+-- font, font_size, window_background_opacity, and color_scheme come from
+-- Stylix's wezterm target (globals in stylix-base.nix); the table returned
+-- here shallow-merges over those settings, so don't set them in this file.
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-config.window_background_opacity = 1
 config.send_composed_key_when_left_alt_is_pressed = true
 
 config.enable_kitty_keyboard = true

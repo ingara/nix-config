@@ -1,9 +1,4 @@
-# CLI productivity tools cluster.
-#
-# Each tool is a one-file module. Keeping them under a `cli-tools/`
-# subdirectory rather than flat at `home/` matches the bundle-growth
-# trajectory (previously a single `cli-tools.nix` with 6 programs) and
-# lets the aggregator import the whole cluster in one line from
+# CLI productivity tools cluster — one tool per file, imported as a unit by
 # `home/default.nix`.
 _: {
   imports = [
@@ -12,6 +7,7 @@ _: {
     ./fzf.nix
     ./mise.nix
     ./ripgrep.nix
+    ./worktrunk.nix
     ./zoxide.nix
   ];
 }

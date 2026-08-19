@@ -1,0 +1,13 @@
+# Nehir left-hand aliases — a/d mirror h/l for focus and move
+# (docs/keybindings.md). Nehir can't express them: its hotkeys.toml codec maps
+# one chord per action id, so a second chord has to come from outside.
+#
+# Absolute path — the skhd agent's launchd PATH has no Homebrew bin dir.
+# skhdrc loads this whenever nehir is *enabled* and skhd grabs at the event-tap
+# level regardless of which WM runs, so under another WM these four keys are
+# dead rather than passed through.
+
+alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus left
+alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus right
+shift + alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command move left
+shift + alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command move right

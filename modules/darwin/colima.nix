@@ -32,9 +32,7 @@
     profiles.default = {
       # Defining `profiles.default` here overrides the module's option-level
       # default (which set these), so they must be restated: run as a launchd
-      # service and be the active docker/k8s context. setDockerHost stays false
-      # — at stateVersion < 26.05 colima registers its own "colima" docker
-      # context on activation, which our bare `docker` CLI picks up.
+      # service and be the active docker/k8s context.
       isService = true;
       isActive = true;
       settings = {

@@ -1,10 +1,7 @@
-# Git and git-adjacent tooling.
+# Git and git-adjacent tooling (git, gh, delta, lazygit).
 #
-# - `programs.git`   — config + signing. Signing key + sshSignProgram pulled
-#                      from `myOptions.user` and `myOptions.sshSignProgram`
-#                      so work / home hosts can override the signer.
-# - `programs.gh`    — GitHub CLI (auth tokens live outside this tree).
-# - `programs.delta` — diff viewer, enabled as git's pager.
+# Signing key + sshSignProgram pull from `myOptions.user` and
+# `myOptions.sshSignProgram` so work / home hosts can override the signer.
 {
   config,
   lib,
@@ -16,8 +13,17 @@ let
   inherit (config.myOptions) sshSignProgram gitCredentialHelper;
   name = userConfig.fullName;
   inherit (userConfig) email;
+  dots = import ./lib/dotfiles.nix { inherit lib; };
 in
 {
+  # git-extra (clean dir → whole-dir symlink) holds the files programs.git.includes
+  # points at below.
+  xdg.configFile = dots.mkDirSymlink {
+    inherit config;
+    srcRel = "git-extra";
+    xdgRel = "git/extra";
+  };
+
   programs.gh = {
     enable = true;
   };
@@ -68,11 +74,46 @@ in
       credential.helper = gitCredentialHelper;
     };
 
-    # Include all git config files from git-extra directory
-    # To add more files: just add them to this list and to dotfiles/git-extra/
+    # Files here must also exist under dotfiles/git-extra/ (symlinked above).
     includes = [
       { path = "~/.config/git/extra/aliases.gitconfig"; }
     ];
+  };
+
+  # lazygit config only — the binary comes from shared/packages.nix;
+  # `package = null` avoids a second, HM-owned copy.
+  # git.diffRenderers is lazygit's multi-renderer array form (verified schema).
+  programs.lazygit = {
+    enable = true;
+    package = null;
+    # Off: its shell integration installs an `lg` cd-on-exit wrapper that would
+    # collide with the existing `lg = lazygit` alias (aliases.nix).
+    enableFishIntegration = false;
+    enableBashIntegration = false;
+    enableZshIntegration = false;
+    settings = {
+      git.diffRenderers = [
+        {
+          colorArg = "always";
+          command = "delta --paging=never";
+        }
+      ];
+      customCommands = [
+        {
+          key = "!";
+          description = "Run git alias!";
+          command = "git {{index .PromptResponses 0}}";
+          context = "global";
+          prompts = [
+            {
+              type = "input";
+              title = "Command (git alias)";
+            }
+          ];
+          output = "terminal";
+        }
+      ];
+    };
   };
 
   programs.delta = {

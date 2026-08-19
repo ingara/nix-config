@@ -1,42 +1,34 @@
-# easy-hosts presets — the module lists previously hidden inside
-# mkDarwinHost / mkNixosHost / mkHeadlessServer builder functions.
-#
-# Organization:
-#   - easy-hosts.shared.modules     → every host (options.nix is the myOptions schema)
-#   - easy-hosts.perClass.nixos     → every nixos host
-#   - easy-hosts.perClass.darwin    → every darwin host
-#   - easy-hosts.perTag.server      → headless servers (disko + qemu-guest + base.nix)
+# easy-hosts presets — the shared/perClass/perTag module bundles.
 #
 # Home-manager wiring lives in perClass.{nixos,darwin} because both classes
-# want the same mkSharedModules trick (propagate system-level myOptions to
-# HM via `home-manager.sharedModules` with mkDefault priority).
+# want the same mkSharedHmOptionsModule trick.
 { inputs, ... }:
 let
-  # Propagate system-level myOptions to home-manager. Returns a list of
-  # modules; first registers the options schema, second assigns current
-  # system-level values to HM with mkDefault priority (so per-HM overrides
-  # still win).
+  # Propagate system-level myOptions to home-manager: register the options
+  # schema, then assign current system-level values with mkDefault priority
+  # (so per-HM overrides still win).
   mkSharedHmOptionsModule =
     { config, lib }:
     [
       ../modules/shared/options.nix
       ../modules/shared/nixpkgs.nix
       {
-        myOptions = {
-          user = {
-            username = lib.mkDefault config.myOptions.user.username;
-            fullName = lib.mkDefault config.myOptions.user.fullName;
-            email = lib.mkDefault config.myOptions.user.email;
-            signingKey = lib.mkDefault config.myOptions.user.signingKey;
-          };
-          dotfiles.repoRoot = lib.mkDefault config.myOptions.dotfiles.repoRoot;
-          hasGui = lib.mkDefault config.myOptions.hasGui;
-          mutableDotfiles = lib.mkDefault config.myOptions.mutableDotfiles;
-          zellijAutoAttach = lib.mkDefault config.myOptions.zellijAutoAttach;
-          sshSignProgram = lib.mkDefault config.myOptions.sshSignProgram;
-          gitCredentialHelper = lib.mkDefault config.myOptions.gitCredentialHelper;
-          opencode.hostClass = lib.mkDefault config.myOptions.opencode.hostClass;
-        };
+        # Forward the whole system-scope myOptions tree to HM at mkDefault
+        # priority (a per-HM override still wins). Both scopes import the
+        # same options.nix, so this generically covers every leaf (theme,
+        # user, dotfiles, ...) instead of a hand-enumerated list that
+        # silently drops whichever option the list forgot.
+        #
+        # `windowManager.enabled` is a listOf, which merges/concatenates
+        # instead of overriding by default, so it needs its own mkForce to
+        # stay the single definition despite any stray HM-side definition
+        # of the same list.
+        myOptions = lib.mkMerge [
+          (lib.mkDefault config.myOptions)
+          {
+            windowManager.enabled = lib.mkForce config.myOptions.windowManager.enabled;
+          }
+        ];
       }
     ];
 in
@@ -51,6 +43,7 @@ in
       {
         nixos = {
           modules = [
+            ../hosts/nixos/base.nix
             inputs.home-manager.nixosModules.home-manager
             (
               { config, lib, ... }:
@@ -65,11 +58,12 @@ in
                   extraSpecialArgs = { inherit inputs; };
                   sharedModules = mkSharedHmOptionsModule { inherit config lib; };
                   users.${config.myOptions.user.username} =
-                    { config, ... }:
+                    { ... }:
                     {
                       imports = [
                         ../modules/linux/home-manager.nix
                         inputs.stylix.homeModules.stylix
+                        ../modules/shared/home/stylix-base.nix
                       ];
 
                       # Headless servers benefit from theming too: shell
@@ -82,25 +76,7 @@ in
                       # whose activation hooks need a dbus session and
                       # fail on headless machines (`GDBus.Error:
                       # org.freedesktop.DBus.Error.ServiceUnknown`).
-                      stylix = {
-                        enable = true;
-                        autoEnable = false;
-                        # Stylix and home-manager both track master, so their
-                        # release strings never match and the version check is
-                        # a permanent false positive. It gates a warning only,
-                        # not behaviour; a real incompatibility still errors.
-                        enableReleaseChecks = false;
-                        base16Scheme = config.lib.myTheme.schemeYaml;
-                        polarity = config.lib.myTheme.polarity;
-                        targets = {
-                          starship.enable = true;
-                          tmux.enable = true;
-                          fish.enable = true;
-                          fzf.enable = true;
-                          bat.enable = true;
-                          neovim.enable = false;
-                        };
-                      };
+                      stylix.autoEnable = false;
                     };
                 };
               }
@@ -125,27 +101,33 @@ in
 
                   # Declarative tap trust. Homebrew 6.x enforces tap trust by
                   # default and refuses to load formulae/casks from non-official
-                  # taps, which breaks `brew bundle` during activation. We trust
-                  # exactly the items we install from non-official taps, rather
-                  # than blanket-disabling trust enforcement. (Replaced the
-                  # interim `extraEnv.HOMEBREW_NO_REQUIRE_TAP_TRUST = "1"` opt-out
-                  # once nix-homebrew shipped per-item trust —
-                  # zhaofengli/nix-homebrew PR #157.)
+                  # taps, which breaks `brew bundle` during activation. This lists
+                  # exactly the items we install from non-official taps: graphite
+                  # (withgraphite), skhd-zig (jackielii), plus the conditional
+                  # WM-backend casks omniwm (barutsrb) / nehir (guria) / aerospace
+                  # (nikitabobko) from `window-manager.nix` — all trusted so a
+                  # backend switch or upgrade doesn't trip the gate.
                   #
-                  # Keep this in sync with every non-official-tap item the
-                  # config can install: graphite (withgraphite), skhd-zig
-                  # (jackielii), plus the two conditional WM-backend casks
-                  # omniwm (barutsrb) / aerospace (nikitabobko) from
-                  # `window-manager.nix` — trusted unconditionally so a backend
-                  # switch or an upgrade of either doesn't trip the trust gate.
-                  #
-                  # Note: trust entries are NOT auto-removed when dropped from
-                  # these lists — use `brew untrust` to clear one.
+                  # Currently INERT: the gate is disabled in
+                  # `../modules/darwin/homebrew.nix` (brew's bundle deletes
+                  # trust.json mid-activation, so per-item trust can't hold).
+                  # Nothing enforces this list while the gate is off, so it can
+                  # drift; re-enabling means re-auditing it against the
+                  # non-official-tap items in `window-manager.nix` and the darwin
+                  # `homebrew.casks`/`brews` first, not just flipping one line.
+                  # (Entries aren't auto-removed when dropped here — `brew
+                  # untrust` clears one.)
                   trust = {
                     formulae = [ "withgraphite/tap/graphite" ];
                     casks = [
                       "jackielii/tap/skhd-zig"
                       "barutsrb/tap/omniwm"
+                      # Stable `nehir` declares conflicts_with the `nehir@rc`
+                      # cask, so brew loads (and trust-checks) both even when
+                      # only installing stable — trust both or the install is
+                      # refused on the untrusted sibling.
+                      "guria/tap/nehir"
+                      "guria/tap/nehir@rc"
                       "nikitabobko/tap/aerospace"
                     ];
                   };
@@ -159,6 +141,7 @@ in
                     "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
                     "theboredteam/homebrew-boring-notch" = inputs.homebrew-boring-notch;
                     "BarutSRB/homebrew-tap" = inputs.homebrew-omniwm;
+                    "guria/homebrew-tap" = inputs.homebrew-nehir;
                     "jackielii/homebrew-tap" = inputs.homebrew-skhd-zig;
                   };
                 };
@@ -181,14 +164,14 @@ in
     perTag =
       tag:
       {
-        server = {
+        headless = {
           modules = [
             inputs.disko.nixosModules.disko
             (
               { modulesPath, ... }:
               {
                 imports = [
-                  ../hosts/nixos/base.nix
+                  ../hosts/nixos/headless.nix
                   (modulesPath + "/profiles/qemu-guest.nix")
                 ];
               }

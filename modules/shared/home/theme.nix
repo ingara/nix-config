@@ -2,9 +2,9 @@
 # Stylix (and any other base16-aware consumer) can read.
 #
 # Exposed as `config.lib.myTheme` so HM modules can interpolate without
-# the full `inputs` arg dance. Stylix wiring lives per-platform (Darwin
-# HM, Fedora HM, NixOS HM preset); this module deliberately does NOT
-# set `stylix.*` to keep eval cross-platform-safe.
+# the full `inputs` arg dance. Stylix wiring lives in stylix-base.nix
+# (shared core: scheme, fonts, opacity, cross-platform targets) plus
+# per-platform target extras; this module only resolves the scheme.
 {
   config,
   inputs,

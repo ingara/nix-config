@@ -46,7 +46,7 @@
 
   # Custom formatters not bundled with treefmt-nix.
 
-  # Selene: lua linter. Config at public/selene.toml with LazyVim-friendly rules.
+  # Selene: lua linter, with LazyVim-friendly rules.
   settings.formatter.selene = {
     command = lib.getExe pkgs.selene;
     options = [

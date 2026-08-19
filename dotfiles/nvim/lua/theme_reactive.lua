@@ -1,6 +1,5 @@
 -- Mode-aware cursor / cursorline coloring for reactive.nvim, driven by
--- the base16 palette in `theme.lua` (Nix-generated). Replaces the
--- catppuccin-specific reactive presets we used to load.
+-- the base16 palette in `theme.lua` (Nix-generated).
 --
 -- Live-editable: change mode → base16 slot mappings here and reload.
 -- The palette itself follows myOptions.theme.scheme, so accent colors

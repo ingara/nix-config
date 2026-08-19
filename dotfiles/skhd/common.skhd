@@ -1,9 +1,27 @@
+# Terminal — Opt+Return → bare Ghostty; Opt+Shift+Return → Ghostty in the shared
+# `main` tmux session (docs/keybindings.md canonical terminal).
+# WM-agnostic: common.skhd loads on every enabled macOS WM. nehir/aerospace/
+# yabai don't bind Opt+Return (they're WMs, not launchers — verified). OmniWM's
+# native hotkeys are GUI-managed and not introspectable; if it ever binds
+# Opt+Return both could fire, but OmniWM isn't a default WM today (dormant).
+# `open -na` opens a new window each press (macOS has no CLI to add a window to
+# the running instance — Ghostty's +new-window is Linux-only); the per-launch
+# --window-save-state=never stops that instance from restoring the previous
+# window's tabs, so each press is a clean window.
+alt - return : open -na Ghostty.app --args --window-save-state=never
+shift + alt - return : open -na Ghostty.app --args --window-save-state=never -e tmux new -A -s main
+
+# App tier — cross-platform letters (docs/keybindings.md): s/d/e/v/z/t/c
+# match the Linux Ctrl+Super binds; c is the platform's Chromium-family
+# browser (Arc here). m/w/x/r are macOS-local extras.
 cmd + ctrl - s : open -a Slack
-cmd + ctrl - x : yabai -m window --toggle music || open /System/Applications/Music.app
+cmd + ctrl - d : open -a Discord
+cmd + ctrl - e : open -a Element
+cmd + ctrl - v : open -a Obsidian
+cmd + ctrl - z : open -a Zen
+cmd + ctrl - t : open -a Ghostty
+cmd + ctrl - c : open -a Arc
 cmd + ctrl - m : open -a Airmail
 cmd + ctrl - w : open -a WhatsApp
-cmd + ctrl - a : open -a Arc
-cmd + ctrl - d : yabai -m window --toggle discord || open -a Discord
-cmd + ctrl - g : open -a Ghostty
-cmd + ctrl - c : open -a Cursor
+cmd + ctrl - x : open /System/Applications/Music.app
 cmd + ctrl - r : open /System/Applications/Reminders.app

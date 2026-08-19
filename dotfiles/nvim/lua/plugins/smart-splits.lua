@@ -1,6 +1,11 @@
 return {
   {
     "mrjones2014/smart-splits.nvim",
+    -- Inside herdr, herdr-splits.lua owns Ctrl+hjkl instead. smart-splits picks
+    -- exactly one multiplexer and would choose herdr the moment HERDR_ENV is
+    -- set, leaving no way to reach an outer tmux — and both plugins binding the
+    -- same keys would fight. The two conds are exact complements.
+    cond = vim.env.HERDR_ENV ~= "1",
     lazy = false,
     opts = {
       -- Enable Zellij integration: move to next tab when at edge of pane
@@ -21,7 +26,7 @@ return {
           require("smart-splits").move_cursor_left()
         end,
         mode = { "i", "n", "v" },
-        { desc = "navigate left" },
+        desc = "Navigate left",
       },
       {
         "<C-j>",
@@ -29,7 +34,7 @@ return {
           require("smart-splits").move_cursor_down()
         end,
         mode = { "i", "n", "v" },
-        { desc = "navigate down" },
+        desc = "Navigate down",
       },
       {
         "<C-k>",
@@ -37,7 +42,7 @@ return {
           require("smart-splits").move_cursor_up()
         end,
         mode = { "i", "n", "v" },
-        { desc = "navigate up" },
+        desc = "Navigate up",
       },
       {
         "<C-l>",
@@ -45,7 +50,7 @@ return {
           require("smart-splits").move_cursor_right()
         end,
         mode = { "i", "n", "v" },
-        { desc = "navigate right" },
+        desc = "Navigate right",
       },
       -- Resizing
       {
@@ -53,28 +58,32 @@ return {
         function()
           require("smart-splits").resize_left()
         end,
-        { desc = "navigate left", silent = true },
+        desc = "Resize left",
+        silent = true,
       },
       {
         "<Down>",
         function()
           require("smart-splits").resize_down()
         end,
-        { desc = "navigate down", silent = true },
+        desc = "Resize down",
+        silent = true,
       },
       {
         "<Up>",
         function()
           require("smart-splits").resize_up()
         end,
-        { desc = "navigate up", silent = true },
+        desc = "Resize up",
+        silent = true,
       },
       {
         "<Right>",
         function()
           require("smart-splits").resize_right()
         end,
-        { desc = "navigate right", silent = true },
+        desc = "Resize right",
+        silent = true,
       },
     },
   },

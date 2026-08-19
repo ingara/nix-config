@@ -1,5 +1,6 @@
-# Window focus (WASD)
-alt - a : omniwmctl command focus left
-alt - d : omniwmctl command focus right
-alt - w : omniwmctl command focus up
-alt - s : omniwmctl command focus down
+# OmniWM skhd bindings — intentionally empty.
+#
+# skhdrc .loads this file whenever OmniWM is enabled, but skhd grabs keys at the
+# event-tap level even when OmniWM isn't the active WM — so any bind here shadows
+# the active WM's own hotkeys. Leave it empty (OmniWM uses internal hotkeys)
+# until the rig only loads a WM's binds when that WM is active/default.

@@ -1,8 +1,3 @@
-# This is a demo config to showcase some of the most important commands.
-# It is meant to be changed and configured, as it is intentionally kept sparse.
-# For a (much) more advanced configuration example see my dotfiles:
-# https://github.com/FelixKratz/dotfiles
-
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 ITEM_DIR="$CONFIG_DIR/items"
 
@@ -17,12 +12,6 @@ FONT_MONO="SF Mono"
 ICON_FONT="SF Pro"
 
 source "$CONFIG_DIR/colors.sh"
-
-# Setting up and starting the helper process
-HELPER=git.felix.helper
-killall sketchybar-cpu-helper
-
-sketchybar-cpu-helper $HELPER > /dev/null 2>&1 &
 
 ##### Bar Appearance #####
 # Configuring the general appearance of the bar.
@@ -78,29 +67,48 @@ sketchybar --default "${default[@]}"
 # -----------------------------------
 # Yabai events
 sketchybar \
-  --add event yabai_loaded              \
-  --add event skhd_space_type_changed   \
+  --add event yabai_loaded \
+  --add event skhd_space_type_changed \
   --add event skhd_window_type_changed
 
 # AeroSpace events
 sketchybar \
-  --add event aerospace_loaded              \
-  --add event aerospace_workspace_change    \
+  --add event aerospace_loaded \
+  --add event aerospace_workspace_change \
   --add event aerospace_monitor_changed
+
+# Paneru events
+sketchybar \
+  --add event paneru_loaded \
+  --add event paneru_workspace_change
 
 # Left side items
 source "$ITEM_DIR/apple.sh"
 source "$ITEM_DIR/spaces.sh"
 
 # Only show yabai layout indicator when yabai is running
-if pgrep -x "yabai" > /dev/null 2>&1; then
+if pgrep -x "yabai" >/dev/null 2>&1; then
   source "$ITEM_DIR/yabai.sh"
 fi
 
 source "$ITEM_DIR/front_app.sh"
 
-# Create left side bracket - include yabai item only when yabai is running
-if pgrep -x "yabai" > /dev/null 2>&1; then
+# Create left side bracket - include yabai item only when yabai is running.
+# Paneru draws its own per-workspace card brackets, so a single `system`
+# bracket must NOT span them (it would draw a background across the cards);
+# apple + front_app get their own brackets instead.
+if pgrep -x "paneru" >/dev/null 2>&1; then
+  sketchybar --add bracket system apple.logo \
+    --set system background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+  sketchybar --add bracket frontapp front_app \
+    --set frontapp background.color=$COLOR_BACKGROUND_SECONDARY \
+    background.corner_radius=8 \
+    background.border_width=1 \
+    background.border_color=$COLOR_BORDER
+elif pgrep -x "yabai" >/dev/null 2>&1; then
   sketchybar --add bracket system apple.logo spaces yabai front_app \
     --set system background.color=$COLOR_BACKGROUND_SECONDARY \
     background.corner_radius=8 \
@@ -114,20 +122,17 @@ else
     background.border_color=$COLOR_BORDER
 fi
 
+# AI plan quota strip. Guarded because this item, unlike its siblings, is
+# linked in by a Nix module and is absent without it. Sourced after the left
+# bracket: its items attach to the left region and it brackets them itself, so
+# `system` must not span them and paint a second background.
+[ -r "$ITEM_DIR/showy_quota.sh" ] && source "$ITEM_DIR/showy_quota.sh"
+
 # Right side items (reverse order since they stack right to left)
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
 source "$ITEM_DIR/system-resources.sh"
 source "$ITEM_DIR/notifications.sh"
-# source "$ITEM_DIR/spotify.sh"
-# source "$ITEM_DIR/apple-music.sh"
-
-# Create right side bracket for media controls
-sketchybar --add bracket media apple-music apple-music.play apple-music.next \
-  --set media background.color=$COLOR_BACKGROUND_SECONDARY \
-  background.corner_radius=8 \
-  background.border_width=1 \
-  background.border_color=$COLOR_BORDER
 
 # Create right side bracket for calendar
 sketchybar --add bracket calendar_bracket calendar \

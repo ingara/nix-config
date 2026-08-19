@@ -4,7 +4,6 @@
 local theme = require("theme")
 
 return {
-  { "catppuccin/nvim", name = "catppuccin", opts = { transparent_background = true } },
   { "rose-pine/neovim", name = "rose-pine" },
   { "folke/tokyonight.nvim" },
   { "rebelot/kanagawa.nvim" },

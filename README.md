@@ -1,30 +1,27 @@
 # nix-config
 
-Multi-platform Nix configuration for macOS (nix-darwin), NixOS (VirtualBox),
-and Fedora (home-manager only).
+Multi-platform Nix configuration for macOS (nix-darwin) and NixOS.
 
 ## What's Included
 
 - macOS configuration with Homebrew, AeroSpace WM, and sketchybar
-- NixOS configuration for VirtualBox
-- Fedora configuration with KDE Plasma via plasma-manager
+- NixOS configuration
 - Home Manager for dotfiles and user packages
 - Global theming via Stylix (single `myOptions.theme.scheme` knob drives all
   surfaces)
-- Reusable flake-parts modules and builder functions for creating host
-  configurations
+- Reusable flake-parts modules for creating host configurations
 
 ## Platforms
 
-| Platform              | Configuration                 |
-| --------------------- | ----------------------------- |
-| macOS (Apple Silicon) | build via `mkDarwinHost`      |
-| NixOS VirtualBox      | `vboxnixos` (runnable sample) |
-| Fedora                | build via `mkFedoraHome`      |
+| Platform              | Configuration                  |
+| --------------------- | ------------------------------ |
+| macOS (Apple Silicon) | declare via `easy-hosts.hosts` |
+| NixOS                 | declare via `easy-hosts.hosts` |
 
-The runnable sample config is `vboxnixos`. Darwin and Fedora/home-manager
-hosts are built from the exported builder functions in your own flake — this
-repo ships the reusable modules and builders, not personal host configs.
+This repo ships reusable modules, not runnable host configs. The example below
+shows the minimum inputs for a NixOS-only consumer; macOS consumers must also
+provide the Darwin, nix-homebrew, and Homebrew source inputs used by the
+Darwin preset.
 
 ## Setup
 
@@ -57,7 +54,7 @@ myOptions.user = {
 
 ### macOS
 
-Define a darwin host with the `mkDarwinHost` builder in your own flake, then:
+Declare a darwin host through `easy-hosts.hosts` in your own flake, then:
 
 ```bash
 nix build .#darwinConfigurations.<your-host>.system
@@ -70,22 +67,12 @@ Updates:
 just switch
 ```
 
-### NixOS VirtualBox
+### NixOS
+
+Declare a nixos host through `easy-hosts.hosts` in your own flake, then:
 
 ```bash
-git clone https://github.com/ingara/nix-config.git ~/nix-config
-cd ~/nix-config
-sudo nixos-rebuild switch --flake .#vboxnixos
-```
-
-### Fedora
-
-Requires Nix installed on an existing Fedora system with KDE Plasma:
-
-```bash
-git clone https://github.com/ingara/nix-config.git ~/nix-config
-cd ~/nix-config
-nix run home-manager -- switch --flake .#<your-host>
+sudo nixos-rebuild switch --flake .#<your-host>
 ```
 
 ## Commands
@@ -124,21 +111,33 @@ flake-parts-based flake:
 
 ```nix
 {
-  inputs.public-config.url = "path:./public"; # or github:ingara/nix-config
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    easy-hosts.url = "github:tgirlcloud/easy-hosts";
+    home-manager.url = "github:nix-community/home-manager";
+    disko.url = "github:nix-community/disko";
+    stylix.url = "github:nix-community/stylix";
+    public-config.url = "github:ingara/nix-config";
+  };
 
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ inputs.public-config.flakeModules.default ];
+      systems = [ "x86_64-linux" ];
+      imports = [
+        inputs.easy-hosts.flakeModule
+        inputs.public-config.flakeModules.default
+      ];
 
-      # Declare hosts via easy-hosts
       easy-hosts.hosts.myhost = {
-        class = "darwin";
-        # ...
+        class = "nixos";
+        arch = "x86_64";
+        tags = [ "headless" ];
+        path = ./hosts/myhost;
       };
     };
 }
 ```
 
-The flake module provides easy-hosts presets (`perClass.darwin`, `perClass.nixos`,
-shared HM modules), and exports `flake.lib.mkFedoraHome` for standalone
-home-manager configurations.
+The flake module provides easy-hosts presets (`perClass.darwin`, `perClass.nixos`)
+and shared Home Manager modules.
