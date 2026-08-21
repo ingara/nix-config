@@ -1,13 +1,21 @@
-# Nehir left-hand aliases — a/d mirror h/l for focus and move
-# (docs/keybindings.md). Nehir can't express them: its hotkeys.toml codec maps
-# one chord per action id, so a second chord has to come from outside.
+# Nehir skhd layer — binds hotkeys.toml can't express (docs/keybindings.md):
+#   - a/d left-hand aliases for h/l focus/move: the hotkeys.toml codec maps
+#     one chord per action id, so a second chord has to come from outside.
+#   - r/Shift+r ratio splits: parameterized commands (set-column-width) have
+#     no hotkeys.toml action id, so they route through nehir-ratio.sh.
 #
-# Absolute path — the skhd agent's launchd PATH has no Homebrew bin dir.
-# skhdrc loads this whenever nehir is *enabled* and skhd grabs at the event-tap
-# level regardless of which WM runs, so under another WM these four keys are
-# dead rather than passed through.
+# Absolute nehirctl path — the skhd agent's launchd PATH has no Homebrew bin
+# dir. skhdrc loads this whenever nehir is *enabled* and skhd grabs at the
+# event-tap level regardless of which WM runs, so under another WM these keys
+# are dead rather than passed through.
 
 alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus left
 alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus right
 shift + alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command move left
 shift + alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command move right
+
+# Ratio splits: focused column 2/3 and its neighbor 1/3; Shift = inverse.
+# 50/50 is Option+B (balance-sizes) and full-width Option+W, both in
+# hotkeys.toml — together the three width regimes: equal / asymmetric / all.
+alt - r : sh ~/.config/skhd/nehir-ratio.sh 66.667% 33.333%
+shift + alt - r : sh ~/.config/skhd/nehir-ratio.sh 33.333% 66.667%

@@ -80,7 +80,9 @@ let
   #
   # Gaps vs the convention (no Nehir action): center/fit column; move-window-to-
   # monitor (monitorNext/Previous are focus-only — cross-monitor moves route via
-  # workspace-on-monitor); window-level back-and-forth.
+  # workspace-on-monitor); window-level back-and-forth. The Option+R ratio
+  # splits live in skhd (nehir.skhd → nehir-ratio.sh) — hotkeys.toml has no
+  # parameterized set-column-width action.
   hotkeysToml = ''
     # Nehir keybindings — Nix-generated (modules/darwin/nehir.nix).
     [workspace]
@@ -112,7 +114,6 @@ let
     expelFromColumn = "Option+Period"
 
     [layout]
-    cycleColumnWidthForward = "Option+R"
     decreaseColumnWidth = "Option+Minus"
     increaseColumnWidth = "Option+Equal"
     decreaseWindowHeight = "Option+Shift+Minus"

@@ -7,6 +7,7 @@ _: {
     ./fzf.nix
     ./mise.nix
     ./ripgrep.nix
+    ./worktree-sweep.nix
     ./worktrunk.nix
     ./zoxide.nix
   ];

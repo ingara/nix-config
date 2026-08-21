@@ -19,6 +19,7 @@
     ./zsh.nix
     ./starship.nix
     ./git.nix
+    ./gh-dash.nix
     ./nvim.nix
     ./ghostty.nix
     ./zellij.nix
@@ -55,7 +56,7 @@
     in
     [
       {
-        assertion = pkgs.stdenv.isDarwin || lib.all (w: lib.elem w linuxWms) wm.enabled;
+        assertion = pkgs.stdenv.hostPlatform.isDarwin || lib.all (w: lib.elem w linuxWms) wm.enabled;
         message = ''
           myOptions.windowManager.enabled contains a darwin-only WM on a Linux
           host (Linux WMs: ${toString linuxWms}). macOS WM dotfile bundles must

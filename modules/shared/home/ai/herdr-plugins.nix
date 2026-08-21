@@ -30,6 +30,28 @@
 let
   cfg = config.programs.herdr;
 
+  reviewrAssets = {
+    aarch64-darwin = {
+      target = "aarch64-apple-darwin";
+      hash = "sha256-xqSr4zT8P3txo2CRSLAiGSZGLP6KXmaI35V7oTtmVaw=";
+    };
+    x86_64-darwin = {
+      target = "x86_64-apple-darwin";
+      hash = "sha256-HDA0zwRwI5Gg5xpuwmSGqMjCXSBHz12I+oh2HMjsUrk=";
+    };
+    aarch64-linux = {
+      target = "aarch64-unknown-linux-musl";
+      hash = "sha256-iGOfWOHYzvhsn3VYB1U8PeLK9PcdckxiQyCi4FG56/Q=";
+    };
+    x86_64-linux = {
+      target = "x86_64-unknown-linux-musl";
+      hash = "sha256-UVFbTOrZnFgJPZ7HzgatC5DguYL/pxB0BnY5ZupaPvA=";
+    };
+  };
+  reviewrAsset =
+    reviewrAssets.${pkgs.stdenv.hostPlatform.system}
+      or (throw "herdr-reviewr: unsupported system ${pkgs.stdenv.hostPlatform.system}");
+
   # Untagged upstream — no releases to track, so this is a dated commit pin:
   # bump it deliberately, and don't expect a version string to follow along.
   resurrectPin = {
@@ -74,51 +96,35 @@ let
   # path, so the binary has to sit inside the plugin root alongside the manifest
   # and the `herdr/` scripts — hence a plugin-root-shaped output rather than a
   # plain `bin/` package.
-  herdr-reviewr = pkgs.rustPlatform.buildRustPackage (finalAttrs: {
+  herdr-reviewr = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "herdr-reviewr";
-    version = "0.29.0";
+    version = "0.33.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "persiyanov";
       repo = "herdr-reviewr";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-xr9V9rJjT3RMir/luIn09eo2bXuw5Fxn3lkHHZXAOTA=";
+      hash = "sha256-kS40fu57daPBUzUzEojOz2LrGzo90sYpeL3VCZK88X0=";
     };
 
-    cargoHash = "sha256-XNxymWF/3W+UgbYqMw4/ZHxgSBnofnNHh+RCfBjhhWQ=";
+    binary = pkgs.fetchurl {
+      url = "https://github.com/persiyanov/herdr-reviewr/releases/download/v${finalAttrs.version}/herdr-reviewr-${reviewrAsset.target}.tar.gz";
+      inherit (reviewrAsset) hash;
+    };
 
-    nativeBuildInputs = [ pkgs.pkg-config ];
-    # The tests drive the real scripts: git:: shells out to git (without it
-    # `worktree_of` can't tell "outside a repo" from "couldn't tell"), and the
-    # pane-action suite runs pane.sh, which parses its config with jq. The
-    # postInstall PATH patch below can't help here — checks run before install,
-    # against the unpatched source.
-    nativeCheckInputs = [
-      pkgs.git
-      pkgs.jq
+    nativeBuildInputs = [
+      pkgs.gnutar
+      pkgs.gzip
     ];
-    buildInputs = [
-      pkgs.libgit2
-      pkgs.openssl
-      pkgs.zlib
-    ];
-    # git2 arrives transitively; build it against nixpkgs' libgit2 rather than
-    # letting libgit2-sys vendor and compile its own copy.
-    env.LIBGIT2_NO_VENDOR = 1;
+    dontConfigure = true;
+    dontBuild = true;
 
-    # Several pane-action tests resolve the worktree of their own cwd and refuse
-    # outright when it isn't a repo. fetchFromGitHub strips .git, so stand one up
-    # rather than skipping the tests and losing the coverage.
-    # Keep maintenance synchronous so no detached child holds .git/maintenance.lock
-    # during TempDir teardown. REMOVE WHEN upstream waits for maintenance completion.
-    preCheck = ''
-      export HOME="$TMPDIR"
-      git config --global maintenance.autoDetach false
-      git init -q -b main .
-      git -c user.email=nix@localhost -c user.name=nix commit -q --allow-empty -m "build sandbox"
-    '';
+    installPhase = ''
+      runHook preInstall
+      mkdir -p "$out/bin"
+      tar -xzf ${finalAttrs.binary} -C "$TMPDIR"
+      install -m755 "$TMPDIR/herdr-reviewr" "$out/bin/herdr-reviewr"
 
-    postInstall = ''
       cp -r herdr "$out/herdr"
       cp herdr-plugin.toml "$out/herdr-plugin.toml"
 
@@ -140,6 +146,8 @@ let
             pkgs.git
           ]
         }:'
+
+      runHook postInstall
     '';
 
     meta = {
@@ -147,7 +155,11 @@ let
       homepage = "https://github.com/persiyanov/herdr-reviewr";
       license = lib.licenses.mit;
       mainProgram = "herdr-reviewr";
-      platforms = lib.platforms.unix;
+      platforms = builtins.attrNames reviewrAssets;
+      sourceProvenance = with lib.sourceTypes; [
+        binaryNativeCode
+        fromSource
+      ];
     };
   });
 
@@ -181,13 +193,13 @@ let
   # inside tmux adds a third layer it has no concept of.
   herdr-splits = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "herdr-splits";
-    version = "0.5.1";
+    version = "0.5.3";
 
     src = pkgs.fetchFromGitHub {
       owner = "lmilojevicc";
       repo = "herdr-splits.nvim";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-wj4W7MqMIkiXxEgYJ2OXAEOcILFp6ThVH7Q82ce97dg=";
+      hash = "sha256-7rHAPSjd2n16FGOcqI/1KNHl1yCmMOVVwiJl/eEU9n8=";
     };
 
     dontConfigure = true;

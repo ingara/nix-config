@@ -59,6 +59,14 @@ let
       # all hosts. Durable conventions belong in committed AGENTS.md/CLAUDE.md,
       # not an opaque, non-portable, machine-local memory dir.
       CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
+    }
+    // lib.optionalAttrs (config.myOptions.agentGit.gitconfigPath != "") {
+      # Route agent git through the scoped-token config (agent-git.nix). Both
+      # are required: GIT_CONFIG_GLOBAL alone leaves the system scope in force,
+      # and git's own etc/gitconfig there carries a platform credential helper
+      # that answers from cache regardless of the token.
+      GIT_CONFIG_GLOBAL = config.myOptions.agentGit.gitconfigPath;
+      GIT_CONFIG_SYSTEM = "/dev/null";
     };
 
     # Empty `commit`/`pr` suppress the Co-Authored-By footer — both are

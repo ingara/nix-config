@@ -10,7 +10,6 @@ with pkgs;
   fastfetch
   fd
   git-absorb
-  gh-dash
   glow
   graphite-cli
   go
@@ -49,8 +48,8 @@ with pkgs;
   python3
 
   # node stuff
-  nodejs_22
-  corepack_22
+  nodejs_24
+  corepack_24
 
   # fonts
   maple-mono.NF

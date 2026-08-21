@@ -51,20 +51,69 @@ let
     # meta.mainProgram and lib.getExe fails on it.
     inherit (upstreamCodex) meta;
     postBuild = ''
-      wrapProgram "$out/bin/codex" --set-default HERDR_AGENT codex
+      wrapProgram "$out/bin/codex" ${
+        lib.escapeShellArgs (
+          [
+            "--set-default"
+            "HERDR_AGENT"
+            "codex"
+          ]
+          ++ lib.optionals config.myOptions.codex.linkedWorktreeGitWrite [
+            "--run"
+            ''
+              codex_cwd=$PWD
+              codex_expect_cwd=
+              for codex_arg in "$@"; do
+                if [ -n "$codex_expect_cwd" ]; then
+                  codex_cwd=$codex_arg
+                  codex_expect_cwd=
+                  continue
+                fi
+                case "$codex_arg" in
+                  --)
+                    break
+                    ;;
+                  -C|--cd)
+                    codex_expect_cwd=1
+                    ;;
+                  --cd=*)
+                    codex_cwd=''${codex_arg#--cd=}
+                    ;;
+                esac
+              done
+
+              if codex_worktree_root="$(${lib.getExe pkgs.git} -C "$codex_cwd" rev-parse --path-format=absolute --show-toplevel 2>/dev/null)" \
+                && [ -f "$codex_worktree_root/.git" ] \
+                && codex_common_git_dir="$(${lib.getExe pkgs.git} -C "$codex_cwd" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+                set -- --add-dir "$codex_common_git_dir" "$@"
+              fi
+            ''
+          ]
+        )
+      }
     '';
   };
 
   baseSystemConfig = {
     # Strip vars whose name contains KEY/SECRET/TOKEN from the environment Codex
-    # hands to the shell commands it spawns. Codex's own process keeps them (it
-    # inherits from the launching shell — that's how AWS_BEARER_TOKEN_BEDROCK
-    # reaches the Bedrock provider); this scrubs only the *subprocess* env, so a
-    # command Codex runs can't `echo $AWS_BEARER_TOKEN_BEDROCK`. Default is off:
-    # ignore_default_excludes defaults true, i.e. the scrub disabled. Escape
-    # hatch for a command that genuinely needs a secret-named var:
+    # hands to the shell commands it spawns. Codex's own process is unaffected —
+    # it keeps whatever the launching shell exported, so a provider that reads
+    # its key from the env still authenticates; only the *subprocess* env is
+    # scrubbed. Default is off: ignore_default_excludes defaults true, i.e. the
+    # scrub disabled. Escape hatch for a command that genuinely needs one:
     # shell_environment_policy.set.<NAME> re-adds it after the exclusion pass.
-    shell_environment_policy.ignore_default_excludes = false;
+    shell_environment_policy = {
+      ignore_default_excludes = false;
+    }
+    // lib.optionalAttrs (config.myOptions.agentGit.gitconfigPath != "") {
+      # Codex 0.146.0 applies this map after default KEY/SECRET/TOKEN
+      # exclusions. Route its subprocesses through the same scoped-token Git
+      # config as Claude Code, including the system-scope neutralisation.
+      set = {
+        GIT_CONFIG_GLOBAL = config.myOptions.agentGit.gitconfigPath;
+        GIT_CONFIG_SYSTEM = "/dev/null";
+      };
+    };
 
     tui = {
       status_line = [

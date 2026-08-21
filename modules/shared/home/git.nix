@@ -5,6 +5,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
@@ -26,6 +27,10 @@ in
 
   programs.gh = {
     enable = true;
+    # HM owns ~/.local/share/gh/extensions once any extension is declared
+    # (gh-dash registers itself via its own module); imperative installs get
+    # displaced, so every extension must be listed here.
+    extensions = [ pkgs.gh-pr-review ];
   };
 
   programs.git = {

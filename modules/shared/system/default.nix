@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./ai/agent-git.nix
     ./ai/claude-code.nix
     ./ai/codex.nix
     ../nixpkgs.nix

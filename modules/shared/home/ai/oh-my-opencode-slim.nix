@@ -30,11 +30,10 @@
 #
 # Drift surfaces:
 #   - npm package:   xh GET https://registry.npmjs.org/oh-my-opencode-slim/latest | jq -r .version
-#   - model IDs:     https://models.dev (anthropic + amazon-bedrock catalogs)
+#   - model IDs:     https://models.dev (openai catalog)
 #
-# Slim release notes can change agent personas, bundled skill names, or the
-# preset schema — read the changelog when bumping `slimVersion`. Other
-# variables in this file (provider IDs, MCP names) don't drift externally.
+# Slim release notes can change agent personas, bundled skill/MCP names, or the
+# preset schema — read the changelog when bumping `slimVersion`.
 #
 # The plugin npm package itself is fetched by opencode's bundled runtime on
 # first start; no external bun/npm needed. The `~/.config/opencode/{package,
@@ -42,15 +41,14 @@
 { lib, ... }:
 
 let
-  slimVersion = "2.0.2";
+  slimVersion = "2.2.15";
   slimPluginEntry = "oh-my-opencode-slim@${slimVersion}";
 
   # Slim preset config (~/.config/opencode/oh-my-opencode-slim.json).
-  # One preset ships: bedrock. The plain `anthropic` provider can't be
-  # registered on this host — `opencode auth login anthropic` fails with
-  # "Failed to load auth provider metadata from anthropic: fetch() URL is
-  # invalid" (upstream issue). When/if that's fixed, add an `anthropic`
-  # preset alongside `bedrock` and switch via `preset` below.
+  # One preset ships: chatgpt, on the subscription rather than a metered API
+  # key. Register it with `opencode auth login -p openai` and pick the ChatGPT
+  # OAuth method (browser or headless); the credential lands in opencode's own
+  # auth store, which is imperative state this module does not manage.
   #
   # `skills` and `mcps` are slim's per-agent capability scoping:
   #   - "*"        — all available (auto-discovered from ~/.config/opencode
@@ -58,7 +56,7 @@ let
   #   - "!<name>"  — exclude
   #   - []         — none
   #
-  # MCP names — from our own opencode config plus the two that slim bundles
+  # MCP names — from our own opencode config plus the one that slim bundles
   # and auto-registers at startup. Our own (see ./opencode.nix and
   # ../../../../modules/ai/opencode-mcp.nix):
   #   - context7    — library docs (librarian-scoped)
@@ -67,22 +65,19 @@ let
   #                   (aggregates fetcher etc.; useful for librarian-style
   #                   page fetches over tailnet)
   # Slim-bundled (registered by the plugin itself, no config needed):
-  #   - websearch   — Exa-backed web search
-  #   - grep_app    — GitHub code search
+  #   - gh_grep     — GitHub code search
+  # OpenCode's built-in websearch tool uses Exa and is enabled below.
   #
-  # Model IDs: opencode's amazon-bedrock provider routes via region-prefixed
-  # inference-profile IDs. We use the `us.` prefix because that's the region
-  # that's historically worked here (the `global.` cross-region profile has
-  # had upstream issues). Switch to `eu.` / `au.` / `jp.` / `global.` if you
-  # want to pin traffic elsewhere. IDs come from models.dev (`amazon-bedrock`
-  # models catalog). Auth piggybacks on `AWS_BEARER_TOKEN_BEDROCK` (see
-  # modules/aws-bedrock-bearer.nix).
+  # Model IDs come from models.dev (`openai` models catalog) and keep its
+  # dotted spelling. Tiering follows the roles: the flagship for the agents
+  # that plan or judge, the cheap tier for the high-volume search-and-patch
+  # ones, and the mid tier where output shape matters more than depth.
   slimConfig = {
     "$schema" = "https://unpkg.com/oh-my-opencode-slim@${slimVersion}/oh-my-opencode-slim.schema.json";
-    preset = "bedrock";
+    preset = "chatgpt";
 
     # Background agents are the default workflow in slim v2. "auto" opens each
-    # specialist in a dedicated tmux/zellij pane when one is detected, and
+    # specialist in a dedicated tmux/zellij/Herdr pane when one is detected, and
     # no-ops otherwise (non-interactive server runs).
     multiplexer.type = "auto";
 
@@ -92,9 +87,9 @@ let
     autoUpdate = false;
 
     presets = {
-      bedrock = {
+      chatgpt = {
         orchestrator = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
+          model = "openai/gpt-5.6-sol";
           skills = [ "*" ];
           mcps = [
             "*"
@@ -102,40 +97,39 @@ let
           ];
         };
         oracle = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
+          model = "openai/gpt-5.6-sol";
           variant = "high";
           skills = [ "simplify" ];
           mcps = [ ];
         };
         council = {
-          model = "amazon-bedrock/us.anthropic.claude-opus-4-8";
+          model = "openai/gpt-5.6-sol";
           variant = "high";
           skills = [ ];
           mcps = [ ];
         };
         librarian = {
-          model = "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0";
+          model = "openai/gpt-5.6-luna";
           skills = [ ];
           mcps = [
-            "websearch"
             "context7"
-            "grep_app"
+            "gh_grep"
             "ingar"
           ];
         };
         explorer = {
-          model = "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0";
+          model = "openai/gpt-5.6-luna";
           skills = [ ];
           mcps = [ ];
         };
         designer = {
-          model = "amazon-bedrock/us.anthropic.claude-sonnet-4-6";
+          model = "openai/gpt-5.6-terra";
           variant = "medium";
           skills = [ ];
           mcps = [ ];
         };
         fixer = {
-          model = "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0";
+          model = "openai/gpt-5.6-luna";
           skills = [ ];
           mcps = [ ];
         };
@@ -144,6 +138,10 @@ let
   };
 in
 {
+  # Slim's interactive installer enables Exa; declarative installs must do it
+  # here.
+  home.sessionVariables.OPENCODE_ENABLE_EXA = "1";
+
   programs.opencode = {
     settings = {
       # Pinned plugin entry — opencode's runtime resolves and caches under

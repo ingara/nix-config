@@ -102,6 +102,56 @@ in
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
+    # Consumed by system/ai/agent-git.nix. Declared here for the same reason as
+    # claudeCode.ownStatusLine below: the whole myOptions tree is forwarded into
+    # home-manager, so a system-only declaration breaks HM's copy.
+    agentGit = {
+      ownerTokens = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        example = lib.literalExpression ''{ someowner = "/run/secrets/github-token"; }'';
+        description = ''
+          Map of GitHub owner to a file holding a token with write access to
+          that owner's repos. One token per owner is a GitHub constraint: a
+          fine-grained PAT is scoped to a single resource owner. Owners absent
+          here get no credential, so agent writes to them fail — which is what
+          keeps agents off arbitrary upstream repos, independently of whether
+          the token's own permissions were set correctly.
+        '';
+      };
+
+      projectsToken = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        example = "/run/secrets/github-projects-token";
+        description = ''
+          File holding a token limited to GitHub Projects and the metadata read
+          scope required by the gh CLI. The agent wrapper uses it only for
+          `gh project` commands.
+        '';
+      };
+
+      signingKeyFile = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        internal = true;
+        description = "Private SSH signing key used by the rendered agent gitconfig.";
+      };
+
+      allowedSignersFile = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        internal = true;
+        description = "SSH allowed-signers file used by the rendered agent gitconfig.";
+      };
+
+      gitconfigPath = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        internal = true;
+        description = "Rendered agent gitconfig; consumed by the agent harness modules.";
+      };
+    };
     claudeCode = {
       extraManagedSettings = lib.mkOption {
         type = lib.types.attrs;
@@ -131,6 +181,12 @@ in
       '';
     };
     codex = {
+      linkedWorktreeGitWrite = lib.mkEnableOption ''
+        writable Git metadata for linked worktrees. The Codex launcher adds
+        only the current worktree's common Git directory as an extra workspace
+        root; the main checkout remains outside the sandbox's write roots
+      '';
+
       extraSystemConfig = lib.mkOption {
         type = lib.types.attrs;
         default = { };

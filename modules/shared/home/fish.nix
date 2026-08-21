@@ -20,7 +20,7 @@ in
     enable = true;
     shellAliases = import ./aliases.nix { };
     shellInit = ''
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         eval "$(/opt/homebrew/bin/brew shellenv)"
       ''}
       # Disable greeting
@@ -36,7 +36,7 @@ in
         set -gx SSH_AUTH_SOCK ~/.ssh/agent.sock
       ''}
 
-      ${lib.optionalString pkgs.stdenv.isLinux ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
         # Kill orphaned zellij servers whose sockets have disappeared.
         # Nix upgrades can change the binary path, orphaning old servers.
         # See: https://github.com/zellij-org/zellij/issues/3775
@@ -60,7 +60,7 @@ in
         end
       ''}
 
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         # MacOS ALT+d fzf
         bind "∂" fzf-cd-widget
 
