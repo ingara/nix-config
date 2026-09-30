@@ -118,9 +118,9 @@ let
     increaseColumnWidth = "Option+Equal"
     decreaseWindowHeight = "Option+Shift+Minus"
     increaseWindowHeight = "Option+Shift+Equal"
-    toggleFullscreen = "Option+F"
+    toggleFullscreen = "Option+Shift+F"
     toggleColumnFullWidth = "Option+W"
-    balanceSizes = "Option+B"
+    balanceSizes = "Option+Shift+B"
     toggleColumnTabbed = "Option+T"
     toggleFocusedFloating = "Option+G"
 

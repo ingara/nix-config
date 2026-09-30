@@ -232,10 +232,9 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       ];
 
       # ALT is the modifier to mirror the macOS workstation (nehir/aerospace)
-      # muscle memory: alt+hjkl focus, alt+shift+hjkl move, alt+-/= resize. The
-      # cost on Linux is that Hyprland grabs Alt+<key> before apps, shadowing
-      # GTK/Qt menu mnemonics (Alt+F File, etc.) and some terminal Alt-word
-      # motions for the bound keys — accepted to match the workstation layout.
+      # muscle memory: alt+hjkl focus, alt+shift+hjkl move, alt+-/= resize.
+      # Bound Alt chords are consumed before apps; leave Alt+B/F free for
+      # terminal word navigation.
       "$mod" = "ALT";
       "$terminal" = "ghostty";
       "$termmux" = "ghostty -e tmux new -A -s main";
@@ -257,7 +256,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         # service the graceful close request killactive sends.
         "$mod SHIFT, Q, forcekillactive"
         "$mod SHIFT, E, exit"
-        "$mod, F, fullscreen"
+        "$mod SHIFT, F, fullscreen"
         "$mod, G, togglefloating"
 
         # Screenshots (Shottr-style: grab → satty editor → Enter copies / Ctrl+S

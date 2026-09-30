@@ -190,8 +190,8 @@ ctrl-alt-x = [
 # Flatten workspace tree - escape hatch for nested containers (ctrl + alt + f)
 ctrl-alt-f = 'flatten-workspace-tree'
 
-# Toggle fullscreen (alt + f)
-alt-f = 'fullscreen'
+# Toggle fullscreen (alt + shift + f)
+alt-shift-f = 'fullscreen'
 
 # Toggle float (ctrl + alt + t)
 ctrl-alt-t = [

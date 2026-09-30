@@ -15,7 +15,7 @@ shift + alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command move l
 shift + alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command move right
 
 # Ratio splits: focused column 2/3 and its neighbor 1/3; Shift = inverse.
-# 50/50 is Option+B (balance-sizes) and full-width Option+W, both in
+# 50/50 is Option+Shift+B (balance-sizes) and full-width Option+W, both in
 # hotkeys.toml — together the three width regimes: equal / asymmetric / all.
 alt - r : sh ~/.config/skhd/nehir-ratio.sh 66.667% 33.333%
 shift + alt - r : sh ~/.config/skhd/nehir-ratio.sh 33.333% 66.667%

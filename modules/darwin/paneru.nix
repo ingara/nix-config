@@ -102,13 +102,13 @@ in
         # Column width / layout. Resize rides minus/equal (off the ctrl+alt
         # tier); alt-r still cycles width presets. Paneru has no height-resize
         # and no true-fullscreen op (src/config.rs Operation enum), so the
-        # convention's Shift+-/= height and `f` fullscreen stay unbound here.
+        # convention's Shift+-/= height and Shift+f fullscreen stay unbound here.
         window_resize = "alt - r";
         window_shrink = "alt - minus";
         window_grow = "alt - equal";
         window_fullwidth = "alt - w";
         window_center = "alt - c";
-        window_equalize = "alt - b";
+        window_equalize = "alt + shift - b";
 
         # Stack/unstack ≈ consume/expel into column → comma/period per the
         # convention (word key-names, see scheme note above).

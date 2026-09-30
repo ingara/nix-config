@@ -135,7 +135,7 @@ let
         // quit shows a confirmation dialog — a deliberate divergence from
         // Hyprland's instant exit.
         Alt+Shift+E { quit; }
-        Alt+F { fullscreen-window; }
+        Alt+Shift+F { fullscreen-window; }
         Alt+G { toggle-window-floating; }
 
         // Screenshots: niri's built-in UI (select region/window, Enter copies,

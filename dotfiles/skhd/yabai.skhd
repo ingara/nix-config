@@ -80,7 +80,7 @@ ctrl + alt - l: yabai -m window --resize right:50:0; \
 
 # Layout
 alt + shift - r: yabai -m space --rotate 90; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
-alt - f: yabai -m window --toggle zoom-fullscreen; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
+alt + shift - f: yabai -m window --toggle zoom-fullscreen; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
 ctrl + alt - z: yabai -m space --layout bsp; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
 ctrl + alt - x: yabai -m space --layout float; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
 ctrl + alt - c: yabai -m space --layout stack; command -v sketchybar &> /dev/null && sketchybar --trigger skhd_window_type_changed
