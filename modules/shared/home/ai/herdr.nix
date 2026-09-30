@@ -68,6 +68,7 @@ let
   reconcilePlugin =
     _name: plugin:
     "reconcile_plugin ${lib.escapeShellArg plugin.id} ${lib.escapeShellArg "${plugin.package}"}";
+  declaredPluginIds = builtins.toJSON (map (plugin: plugin.id) (builtins.attrValues cfg.plugins));
 
   # Reconciles the registry (~/.config/herdr/plugins.json) through the CLI rather
   # than writing it: it is lock-guarded, atomically rewritten by the running
@@ -85,6 +86,14 @@ let
   # reads that file, so the outcome is identical to the online path — it simply
   # doesn't need the restart to have happened yet. Verified: an offline link
   # lands in the real registry and a running server picks it up without a reload.
+  #
+  # Local entries rooted in the store whose id is not declared are uninstalled,
+  # which is how a plugin removed from the configuration leaves the registry.
+  # herdr records the canonicalized root, so this also covers a hand link that
+  # resolves into the store (`herdr plugin link ./result`); such a root breaks at
+  # the next GC anyway. Roots outside the store are left alone. `uninstall`
+  # rather than `unlink`, because only `uninstall` works offline; it drops the
+  # registry entry and keeps the plugin's config dir.
   #
   # Exposed on PATH as well, so a reconcile can be forced without a switch.
   herdrRelink = pkgs.writeShellApplication {
@@ -170,6 +179,29 @@ let
 
       ${lib.concatStringsSep "\n      " (lib.mapAttrsToList reconcilePlugin cfg.plugins)}
 
+      # Reread after reconciling: a declared plugin whose manifest id differs is
+      # registered under that id by now, and must be pruned in this same run.
+      registry_json="$(herdr plugin list --json 2>/dev/null || printf '%s' "$registry_json")"
+      undeclared="$(jq -r \
+        --arg store ${lib.escapeShellArg "${builtins.storeDir}/"} \
+        --argjson declared ${lib.escapeShellArg declaredPluginIds} \
+        '.result.plugins[]?
+          | select(.source.kind == "local")
+          | select((.plugin_root // "") | startswith($store))
+          | .plugin_id as $id
+          | select(any($declared[]; . == $id) | not)
+          | $id' \
+        <<<"$registry_json" || true)"
+      while IFS= read -r id; do
+        [[ -n "$id" ]] || continue
+        if herdr plugin uninstall "$id" >/dev/null 2>"$herdr_err"; then
+          echo "herdr: uninstalled plugin '$id', which is no longer declared." >&2
+        else
+          echo "herdr: could not uninstall undeclared plugin '$id':" >&2
+          cat "$herdr_err" >&2
+        fi
+      done <<<"$undeclared"
+
       # Applies most UI settings without restarting panes. Pointless when we went
       # offline — that server is the one refusing us — so only try when online.
       if [[ "$online" -eq 1 ]]; then
@@ -195,6 +227,8 @@ in
       description = ''
         Herdr plugins linked from the store instead of installed with
         `herdr plugin install`, which clones from GitHub and self-updates.
+        Store-linked plugins that are no longer declared are uninstalled on
+        activation; hand-installed plugins are left alone.
       '';
     };
   };
@@ -297,7 +331,8 @@ in
         '';
       })
 
-      (lib.mkIf (cfg.plugins != { }) {
+      # Unconditional, so removing the last declared plugin still prunes it.
+      {
         assertions = [
           {
             assertion = lib.all (plugin: builtins.match "[A-Za-z0-9._:-]+" plugin.id != null) (
@@ -311,12 +346,12 @@ in
 
         home.activation.linkHerdrPlugins = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
           if [[ -n "''${DRY_RUN_CMD:-}" ]]; then
-            echo "Would link Herdr plugins: ${lib.concatStringsSep ", " pluginNames}"
+            echo "Would reconcile Herdr plugins: ${lib.concatStringsSep ", " pluginNames}"
           else
             ${herdrRelink}/bin/herdr-relink
           fi
         '';
-      })
+      }
     ]
   );
 }
