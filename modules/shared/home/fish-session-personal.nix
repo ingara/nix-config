@@ -26,13 +26,19 @@ in
       eval "$(/opt/homebrew/bin/brew shellenv)"
     ''}
     ${lib.optionalString (!hasGui) ''
-      # Keep SSH agent forwarding working inside tmux.
-      # On SSH login the real socket path is saved to a stable symlink;
-      # inside a tmux session we always point at that symlink.
-      if set -q SSH_AUTH_SOCK; and not set -q TMUX
-        ln -sf $SSH_AUTH_SOCK ~/.ssh/agent.sock
+      # Keep SSH agent forwarding working in long-lived multiplexer panes.
+      # On SSH login the forwarded socket is saved to a stable symlink, and
+      # every shell points at that symlink. A nested shell inherits the
+      # symlink itself as SSH_AUTH_SOCK, so only a live socket elsewhere is
+      # linked; a broken link is removed so clients report no agent instead
+      # of a symlink loop.
+      set -l stable ~/.ssh/agent.sock
+      if set -q SSH_AUTH_SOCK; and test "$SSH_AUTH_SOCK" != $stable; and test -S "$SSH_AUTH_SOCK"; and not set -q TMUX
+        ln -sf $SSH_AUTH_SOCK $stable
+      else if test -L $stable; and not test -e $stable
+        rm $stable
       end
-      set -gx SSH_AUTH_SOCK ~/.ssh/agent.sock
+      set -gx SSH_AUTH_SOCK $stable
     ''}
   '';
 }
