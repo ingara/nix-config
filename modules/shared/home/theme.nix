@@ -8,11 +8,23 @@
 {
   config,
   inputs,
+  lib,
   ...
 }:
 
 let
   cfg = config.myOptions.theme;
+  schemeYaml = "${inputs.tinted-schemes}/base16/${cfg.scheme}.yaml";
+  schemeLines = lib.splitString "\n" (builtins.readFile schemeYaml);
+  base05 = lib.findFirst (lib.hasPrefix "  base05:") null schemeLines;
+  correctedSchemeYaml = builtins.toFile "${cfg.scheme}.yaml" (
+    lib.concatStringsSep "\n" (
+      map (
+        line:
+        if lib.hasPrefix "  base07:" line then "  base07:${lib.removePrefix "  base05:" base05}" else line
+      ) schemeLines
+    )
+  );
 in
 {
   # No `options.lib.myTheme` declaration — HM's `options.lib` is already
@@ -20,6 +32,16 @@ in
   # write to `config.lib.myTheme` and consumers read it.
   config.lib.myTheme = {
     inherit (cfg) scheme polarity;
-    schemeYaml = "${inputs.tinted-schemes}/base16/${cfg.scheme}.yaml";
+    inherit schemeYaml;
+    stylixSchemeYaml =
+      if
+        builtins.elem cfg.scheme [
+          "rose-pine"
+          "rose-pine-moon"
+        ]
+      then
+        correctedSchemeYaml
+      else
+        schemeYaml;
   };
 }

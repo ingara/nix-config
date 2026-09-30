@@ -7,10 +7,6 @@ return {
     -- same keys would fight. The two conds are exact complements.
     cond = vim.env.HERDR_ENV ~= "1",
     lazy = false,
-    opts = {
-      -- Enable Zellij integration: move to next tab when at edge of pane
-      zellij_move_focus_or_tab = true,
-    },
     keys = {
       {
         "<leader>wr",

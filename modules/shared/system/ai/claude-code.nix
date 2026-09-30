@@ -33,6 +33,63 @@
 }:
 
 let
+  mcpAuth = import ../../_mcp-auth.nix { inherit lib; };
+  upstreamClaude = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+  enabledMcpServers = lib.filterAttrs (_: server: server.enabled) config.myOptions.mcp.servers;
+  authenticatedMcpServers = lib.filterAttrs (
+    _: server: mcpAuth.hasBearerToken server
+  ) enabledMcpServers;
+  claudeTokenSetup = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (
+      name: server:
+      let
+        tokenEnvVar = mcpAuth.tokenEnvVar name;
+      in
+      ''
+        token_file=
+        token_selection_error=
+        for candidate in ${lib.escapeShellArgs (mcpAuth.bearerTokenPaths server)}; do
+          if [[ -r "$candidate" ]]; then
+            if [[ -n "$token_file" ]]; then
+              printf 'Claude MCP bearer token selection is ambiguous\n' >&2
+              token_selection_error=1
+              break
+            fi
+            token_file="$candidate"
+          fi
+        done
+
+        if [[ -n "$token_selection_error" ]]; then
+          unset ${tokenEnvVar}
+        elif [[ -z "$token_file" ]]; then
+          unset ${tokenEnvVar}
+          printf 'Claude MCP bearer token is unavailable\n' >&2
+        else
+          token="$(< "$token_file")"
+          if [[ -z "$token" || "$token" == *$'\n'* || "$token" == *$'\r'* ]]; then
+            unset ${tokenEnvVar}
+            printf 'Claude MCP bearer token is empty or malformed\n' >&2
+          else
+            export ${tokenEnvVar}="$token"
+          fi
+        fi
+        unset token token_file candidate token_selection_error
+      ''
+    ) authenticatedMcpServers
+  );
+  claude =
+    if authenticatedMcpServers == { } then
+      upstreamClaude
+    else
+      pkgs.symlinkJoin {
+        name = "claude-code-mcp-auth-${lib.getVersion upstreamClaude}";
+        paths = [ upstreamClaude ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        inherit (upstreamClaude) meta;
+        postBuild = ''
+          wrapProgram "$out/bin/claude" --run ${lib.escapeShellArg claudeTokenSetup}
+        '';
+      };
   # Generic policy + stable preference scalars. Host-specific / private
   # additions come from myOptions.claudeCode.extraManagedSettings and are
   # recursiveUpdate-merged over this base (private keys win on conflict).
@@ -44,36 +101,24 @@ let
     theme = "custom:stylix";
     preferredNotifChannel = "terminal_bell";
     agentPushNotifEnabled = true;
-    # Auto-connect Remote Control for every interactive session (tri-state:
-    # unset would follow the organization default). Requires v2.1.119+.
-    remoteControlAtStartup = true;
+    # Keep every session local, including explicit CLI and in-session attempts.
+    disableRemoteControl = true;
 
     env = {
-      # NOTE: DISABLE_TELEMETRY and CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC are
-      # deliberately NOT set here. Remote Control's eligibility check fails if
-      # either is present, since the feature rides the telemetry/registration
-      # channel. Keeping error reporting off is fine (it doesn't gate RC).
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
       DISABLE_ERROR_REPORTING = "1";
+      DISABLE_TELEMETRY = "1";
       # Disable auto memory (the per-repo store Claude writes itself) across
       # all hosts. Durable conventions belong in committed AGENTS.md/CLAUDE.md,
       # not an opaque, non-portable, machine-local memory dir.
       CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
-    }
-    // lib.optionalAttrs (config.myOptions.agentGit.gitconfigPath != "") {
-      # Route agent git through the scoped-token config (agent-git.nix). Both
-      # are required: GIT_CONFIG_GLOBAL alone leaves the system scope in force,
-      # and git's own etc/gitconfig there carries a platform credential helper
-      # that answers from cache regardless of the token.
-      GIT_CONFIG_GLOBAL = config.myOptions.agentGit.gitconfigPath;
-      GIT_CONFIG_SYSTEM = "/dev/null";
     };
 
     # Empty `commit`/`pr` suppress the Co-Authored-By footer — both are
     # required, since defining either one alone falls the other back to its
     # default attribution text. sessionUrl drops the Claude-Session trailer
-    # and PR-body link, which otherwise fires on every session here via
-    # remoteControlAtStartup.
+    # and PR-body link from explicit Remote Control sessions.
     attribution = {
       commit = "";
       pr = "";
@@ -117,6 +162,8 @@ let
       "Bash(gh repo view:*)"
     ];
 
+    permissions.additionalAllow = [ ];
+
     # Mechanical secret backstop, managed-locked so no user/project/local scope
     # can relax it, evaluated before allow. A Read deny also covers the Edit and
     # Write tools on the same path, and matches whether the symlink or its target
@@ -148,8 +195,23 @@ let
   # Private / host-specific overlay wins on conflicting leaf keys.
   managedSettings = lib.recursiveUpdate baseManagedSettings config.myOptions.claudeCode.extraManagedSettings;
 
+  # Concatenate and deduplicate permissions.allow with permissions.additionalAllow;
+  # remove additionalAllow before serialization (not a Claude Code setting key).
+  managedSettingsMerged = managedSettings // {
+    permissions = managedSettings.permissions // {
+      allow = lib.unique (
+        managedSettings.permissions.allow ++ (managedSettings.permissions.additionalAllow or [ ])
+      );
+    };
+  };
+
   managedSettingsJson = pkgs.writeText "claude-managed-settings.json" (
-    builtins.toJSON managedSettings
+    builtins.toJSON (
+      managedSettingsMerged
+      // {
+        permissions = lib.attrsets.removeAttrs managedSettingsMerged.permissions [ "additionalAllow" ];
+      }
+    )
   );
 
   inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
@@ -157,15 +219,9 @@ in
 lib.mkMerge [
   # CLAUDE_CONFIG_DIR points into the XDG dir (Claude Code ignores
   # XDG_CONFIG_HOME) for parity with every other tool.
-  #
-  # ~/.claude still appears and is expected: the herdr usagebar collector
-  # hardcodes it for its cache with no env or config override, so it holds
-  # regenerable cache only. Don't symlink it onto the real config
-  # dir — `rm -rf ~/.claude/` and `~/.claude/*` both follow through, and the
-  # sibling ~/.claude.json is outside any such link anyway.
   {
     environment.systemPackages = [
-      inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+      claude
     ];
     environment.variables.CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
     home-manager.sharedModules = [

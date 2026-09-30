@@ -1,18 +1,5 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
-  # Opt out of brew 6.x's non-official-tap trust gate. It's unworkable under
-  # nix-darwin here: `brew bundle --zap --force-cleanup` (the activation step)
-  # deletes trust.json mid-run, and its `sudo --set-home` strips XDG_CONFIG_HOME
-  # so it reads ~/.homebrew while an interactive brew reads ~/.config/homebrew
-  # (zhaofengli/nix-homebrew#161). The net effect is the gate refusing our taps
-  # and aborting the switch whenever cleanup uninstalls anything. The tap
-  # content is already pinned to reviewed commits via locked flake inputs
-  # (mutableTaps = false), so the gate is redundant defence here. The launcher
-  # sources this file before the trust check. A tracking issue holds the
-  # procedure to re-test and re-enable once upstream resolves both the XDG split
-  # and the deletion.
-  environment.etc."homebrew/brew.env".text = "HOMEBREW_NO_REQUIRE_TAP_TRUST=1\n";
-
   homebrew = {
     enable = true;
     onActivation = {
@@ -35,7 +22,7 @@
       "bettertouchtool"
       "claude"
       "codex-app" # OpenAI Codex desktop app (GUI; CLI comes from codex-cli-nix)
-      # AI usage meters + widgets (GUI; CLI comes from overlays/codexbar.nix).
+      # AI usage meters + widgets.
       # A cask rather than nixpkgs' package because macOS ties Keychain grants
       # to the bundle path, and a store path moves on every bump.
       "codexbar"
@@ -86,9 +73,19 @@
       "graphite"
       "switchaudio-osx"
     ];
-    taps = map (key: builtins.replaceStrings [ "homebrew-" ] [ "" ] key) (
-      builtins.attrNames config.nix-homebrew.taps
-    );
+    # Brewfile `trusted: true` on each non-official tap satisfies brew's tap
+    # trust gate without `brew trust` state, which `brew bundle` cleanup deletes
+    # mid-activation. Short-named brews and casks inherit trust from their tap.
+    taps = map (
+      key:
+      let
+        name = builtins.replaceStrings [ "homebrew-" ] [ "" ] key;
+      in
+      {
+        inherit name;
+        trusted = !lib.hasPrefix "homebrew/" name;
+      }
+    ) (builtins.attrNames config.nix-homebrew.taps);
     masApps = {
       "Amphetamine" = 937984704;
       "Balance Lock" = 1019371109;

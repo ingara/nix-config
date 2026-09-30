@@ -33,19 +33,19 @@ let
   reviewrAssets = {
     aarch64-darwin = {
       target = "aarch64-apple-darwin";
-      hash = "sha256-xqSr4zT8P3txo2CRSLAiGSZGLP6KXmaI35V7oTtmVaw=";
+      hash = "sha256-gf1BcymDZ8D1LZaeE7LB7vj1Qx2CUFNJegVs7bjR8mE=";
     };
     x86_64-darwin = {
       target = "x86_64-apple-darwin";
-      hash = "sha256-HDA0zwRwI5Gg5xpuwmSGqMjCXSBHz12I+oh2HMjsUrk=";
+      hash = "sha256-r2vbg4/yvVC3a8NnkxVPt/OzUMP4BFp5LVjkSX8blTA=";
     };
     aarch64-linux = {
       target = "aarch64-unknown-linux-musl";
-      hash = "sha256-iGOfWOHYzvhsn3VYB1U8PeLK9PcdckxiQyCi4FG56/Q=";
+      hash = "sha256-8c3hLNYiSK03XQz2i44WCVAD+ul/I62jQZmmtl3aX/4=";
     };
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
-      hash = "sha256-UVFbTOrZnFgJPZ7HzgatC5DguYL/pxB0BnY5ZupaPvA=";
+      hash = "sha256-P1mWvp+9ie3LlN5MMlZIPkpsopxA+YHhUFVBWQtYKX8=";
     };
   };
   reviewrAsset =
@@ -55,9 +55,9 @@ let
   # Untagged upstream — no releases to track, so this is a dated commit pin:
   # bump it deliberately, and don't expect a version string to follow along.
   resurrectPin = {
-    rev = "461e866cc772e156e39b94d085701972e24761af";
-    date = "2026-07-12";
-    hash = "sha256-PADoHDKDtCsXc3acojaxugxXaZfvCECvSNSwnhvW7hk=";
+    rev = "5afa6755d4f35c62c7522ba4fd04922d1ac69602";
+    date = "2026-08-24";
+    hash = "sha256-t4HCaLy2yWkeuvDovFTRdG0jQvlyKf5Z+u5UIU3xvts=";
   };
 
   # Pure stdlib Node (no dependencies, no lockfile), so the source tree is the
@@ -74,13 +74,30 @@ let
 
     dontConfigure = true;
     dontBuild = true;
+    nativeBuildInputs = [ pkgs.makeWrapper ];
 
     installPhase = ''
       runHook preInstall
       mkdir -p "$out"
       cp -r . "$out/"
       substituteInPlace "$out/herdr-plugin.toml" \
-        --replace-fail '"node"' '"${lib.getExe pkgs.nodejs}"'
+        --replace-fail '"node"' '"${lib.getExe pkgs.nodejs}"' \
+        --replace-fail '"bash"' '"${lib.getExe pkgs.bashNonInteractive}"'
+      for script in "$out"/*.sh; do
+        substituteInPlace "$script" \
+          --replace-fail '#!/usr/bin/env bash' \
+          '#!${lib.getExe pkgs.bashNonInteractive}'
+        wrapProgram "$script" \
+          --prefix PATH : ${
+            lib.makeBinPath [
+              pkgs.coreutils
+              pkgs.fzf
+              pkgs.gnused
+              pkgs.jq
+              pkgs.nodejs
+            ]
+          }
+      done
       runHook postInstall
     '';
 
@@ -98,13 +115,13 @@ let
   # plain `bin/` package.
   herdr-reviewr = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "herdr-reviewr";
-    version = "0.33.0";
+    version = "0.36.2";
 
     src = pkgs.fetchFromGitHub {
       owner = "persiyanov";
       repo = "herdr-reviewr";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-kS40fu57daPBUzUzEojOz2LrGzo90sYpeL3VCZK88X0=";
+      hash = "sha256-bQiIj9HpkwCtoR5SoyDah0w/f15fUVtSqxMZ3zxLOy8=";
     };
 
     binary = pkgs.fetchurl {
@@ -162,31 +179,6 @@ let
       ];
     };
   });
-
-  # A popup is not a workspace pane: herdr launches it through
-  # `PaneLaunchEnv::without_pane_identity()`, which clears HERDR_PANE_ID and
-  # sets no workspace identity at all, leaving only the HERDR_ACTIVE_* set that
-  # `custom_command_env()` adds. reviewr's send reads HERDR_WORKSPACE_ID alone,
-  # so unbridged the popup finds zero candidate agents and refuses with "no
-  # agent here" — while the plugin-pane variant, which does get the identity,
-  # sends fine.
-  #
-  # HERDR_ACTIVE_PANE_ID is deliberately *not* bridged to HERDR_PANE_ID: reviewr
-  # reads that one to exclude its own pane from the candidates, and the active
-  # pane is the agent the comments are for. It also gates the cosmetic pane-label
-  # writes, which a popup has no pane to carry.
-  reviewrPopup = pkgs.writeShellScript "herdr-reviewr-popup" ''
-    if [ -n "$HERDR_ACTIVE_WORKSPACE_ID" ]; then
-      export HERDR_WORKSPACE_ID="$HERDR_ACTIVE_WORKSPACE_ID"
-    else
-      # `without_pane_identity()` clears only HERDR_PANE_ID, and the server is
-      # long-lived enough to have inherited a workspace id from whatever launched
-      # it. Prefer none over a stale one: reviewr then refuses visibly instead of
-      # sending the comments to an agent in some other workspace.
-      unset HERDR_WORKSPACE_ID
-    fi
-    exec ${lib.getExe herdr-reviewr} "$@"
-  '';
 
   # Ctrl+hjkl across nvim splits, herdr panes and — with the patch below — an
   # outer tmux. Upstream assumes herdr is the outermost multiplexer; running it
@@ -262,12 +254,6 @@ let
   });
 in
 {
-  options.programs.herdr.usagebar.enable = lib.mkEnableOption ''
-    herdr-agent-usage, showing each agent pane's context use and its provider's
-    plan window in the sidebar, plus rate-limit toasts. Reads local harness
-    state only — no API keys
-  '';
-
   options.programs.herdr.splits.enable = lib.mkEnableOption ''
     herdr-splits, giving Ctrl+hjkl one meaning across Neovim splits, herdr
     panes and an outer tmux. Pairs with the Neovim plugin, which must be
@@ -304,74 +290,26 @@ in
           package = herdr-reviewr;
         };
 
-        # The plugin's worktree.created hook auto-opens a pane in every fresh
-        # worktree (auto_open defaults to true); opt out so the binds below
-        # stay the only entry points.
+        # Keep review panes opt-in when creating or opening worktrees.
         xdg.configFile."herdr/plugins/config/persiyanov.reviewr/config.toml".source =
           (pkgs.formats.toml { }).generate "herdr-reviewr-config.toml"
             {
               auto_open = false;
+              toggle_placement = "tab";
             };
 
         # prefix+d for "diff". Prefix-gated rather than a bare chord so the
         # focused pane can't swallow it, and plain ASCII rather than
         # `ctrl+shift+*`, which rides the kitty keyboard protocol and may not
         # survive an SSH hop — herdr is driven over `--remote` here.
-        #
-        # Needs reviewr >= 0.27.0: any pane running the binary is a full reviewr
-        # pane, fetching its plugin config from herdr itself. A popup inherits
-        # the focused pane's cwd, so it reviews the repo under the cursor.
-        #
-        # `prefix+shift+d` is herdr's default `close_workspace`. A user binding
-        # displaces a conflicting default at config load, so this takes the
-        # chord and close_workspace ends up unbound — but only while
-        # close_workspace itself stays at its default. Bind it explicitly and
-        # both are user bindings, at which point herdr keeps the action and
-        # disables this command with a config diagnostic rather than an error.
-        # The rarer of the two actions sits here for that reason.
         programs.herdr.settings.keys.command = lib.mkAfter [
           {
             key = "prefix+d";
-            type = "popup";
-            command = "${reviewrPopup}";
-            width = "90%";
-            height = "90%";
-            description = "reviewr: open the diff as a large popup";
-          }
-          {
-            key = "prefix+shift+d";
             type = "plugin_action";
             command = "persiyanov.reviewr.toggle";
-            description = "reviewr: toggle the diff pane as a split";
+            description = "reviewr: toggle the diff tab";
           }
         ];
-      })
-
-      (lib.mkIf cfg.usagebar.enable {
-        # Preserve the complete sidebar experience for existing consumers while
-        # keeping its layout and agent identity owned outside usagebar.
-        programs.herdr.agentDisplay.enable = lib.mkDefault true;
-
-        programs.herdr.plugins.usagebar = {
-          id = "usagebar";
-          # An overlay rather than a sibling in the `let` above, because Claude
-          # Code's statusLine — the only route to its rate limits — is configured
-          # from system scope, which cannot see a home-manager binding.
-          package = pkgs.herdr-usagebar;
-        };
-
-        # prefix+u for "usage". The limits pane is on-demand — nothing surfaces
-        # it without an explicit invocation — so with no bind the plugin looks
-        # inert even while it is collecting fine.
-        programs.herdr.settings.keys.command = lib.mkAfter [
-          {
-            key = "prefix+u";
-            type = "plugin_action";
-            command = "usagebar.open-limits";
-            description = "Agent Usage: open the limits pane";
-          }
-        ];
-
       })
 
       (lib.mkIf cfg.splits.enable {

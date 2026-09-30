@@ -6,9 +6,9 @@ return {
     servers = {
       biome = {},
       -- Use nixd instead of nil_ls (LazyVim's nix extra default)
-      nixd = {},
+      nixd = { mason = false },
       nil_ls = {
-        mason = false, -- Disable Mason auto-install, use system nixd instead
+        enabled = false,
       },
     },
     inlay_hints = { enabled = false },

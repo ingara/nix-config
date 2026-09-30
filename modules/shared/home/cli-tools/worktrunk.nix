@@ -7,14 +7,29 @@
 # startup (same idiom as zoxide/starship) rather than letting
 # `wt config shell install` mutate shell config imperatively.
 { pkgs, ... }:
+
+let
+  fishInit = ''
+    wt config shell init fish | source
+  '';
+  zshInit = ''
+    eval "$(wt config shell init zsh)"
+  '';
+in
 {
   home.packages = [ pkgs.worktrunk ];
 
-  programs.fish.interactiveShellInit = ''
-    wt config shell init fish | source
-  '';
+  programs.fish.interactiveShellInit = fishInit;
 
-  programs.zsh.initContent = ''
-    eval "$(wt config shell init zsh)"
-  '';
+  programs.zsh.initContent = zshInit;
+
+  myOptions.developerEnvironmentParity = {
+    packages.worktrunk = {
+      package = pkgs.worktrunk;
+      commands = [ "wt" ];
+    };
+    surfaces.cliWorktrunk = {
+      inherit fishInit zshInit;
+    };
+  };
 }

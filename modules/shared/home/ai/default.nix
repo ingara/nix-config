@@ -5,7 +5,7 @@ _: {
     ./herdr-agent-display.nix
     ./herdr-plugins.nix
     ./opencode.nix
-    ./oh-my-opencode-slim.nix
+    ./lavish.nix
     ./claude-theme.nix
     ./claude-statusline.nix
   ];

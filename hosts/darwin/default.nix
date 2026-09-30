@@ -82,6 +82,8 @@ in
   users.users.${user}.shell = pkgs.fish;
 
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
+    # Keep nvim global because EDITOR and sudoedit run outside Home Manager.
+    pkgs.neovim
     inputs.aerospace-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 

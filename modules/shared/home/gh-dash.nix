@@ -129,4 +129,9 @@ in
       smartFilteringAtLaunch = true;
     };
   };
+
+  myOptions.developerEnvironmentParity.surfaces.gitUx.ghDash = {
+    inherit (config.programs.gh-dash) enable settings;
+    extension = config.programs.gh-dash.package;
+  };
 }

@@ -7,7 +7,12 @@
 #   border. Auto-disabled when the active window manager is `omniwm` (which
 #   ships its own borders), `paneru` (optional native border under
 #   [decorations.active.border]), or `nehir` (native focus borders).
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.myOptions.windowManager;
@@ -16,6 +21,12 @@ in
   services = {
     sketchybar = {
       enable = true;
+      # launchd does not expand $HOME/$USER in the agent PATH, so per-user
+      # profile packages are unreachable; plugin tools must be declared here.
+      extraPackages = [
+        pkgs.jq
+        pkgs.terminal-notifier
+      ];
     };
 
     # https://mynixos.com/options/services.jankyborders

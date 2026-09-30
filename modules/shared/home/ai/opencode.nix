@@ -81,23 +81,17 @@ let
 
   # Base profile (workstation)
   baseSettings = {
-    # MCP servers — same set on every host. Additional servers (typically
-    # private/internal endpoints) can be added by other modules via
-    # `programs.opencode.settings.mcp.<name> = { ... }` and will merge
-    # into this attrset.
+    # OpenCode defaults LSP integration off.
+    lsp = true;
+
+    # Client-specific MCP servers live here; shared hosted servers arrive
+    # through the programs.mcp integration below.
     #
     # Tools surface in opencode's catalog as `<server>_<tool>` (run /mcp
     # in opencode to see exact names). For aggregator MCP servers (e.g.
     # MCPJungle), the upstream tool naming convention `<source>__<tool>`
     # is preserved and prefixed with the opencode server name.
     mcp = {
-      # Context7 — library-docs lookup for code-aware questions.
-      # https://github.com/upstash/context7
-      context7 = {
-        type = "remote";
-        url = "https://mcp.context7.com/mcp";
-      };
-
       # Obsidian vault access — reads/writes the synced vault via
       # obsidian-sync-mcp running on loopback. Only available on
       # workstation (launchd agent) and servers with the service
@@ -460,19 +454,38 @@ let
 
   finalSettings =
     if hostClass == "server" then lib.recursiveUpdate baseSettings serverExtras else baseSettings;
-in
-{
-  # Herdr 0.7.3 ignores XDG_CONFIG_HOME for this integration.
-  programs.herdr.integrations.opencode.directories = [
+  opencodePackage = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+  herdrDirectories = [
     "${config.home.homeDirectory}/.config/opencode"
   ];
+in
+{
+  # Exa-backed web search requires this gate outside the OpenCode providers.
+  home.sessionVariables.OPENCODE_ENABLE_EXA = "1";
+
+  # Herdr 0.7.3 ignores XDG_CONFIG_HOME for this integration.
+  programs.herdr.integrations.opencode.directories = herdrDirectories;
 
   programs.opencode = {
     enable = true;
+    enableMcpIntegration = true;
     # Prebuilt-binary opencode (per-arch GitHub release via llm-agents.nix),
     # not a source build: opencode's Bun requirement frequently outruns
     # nixpkgs' Bun, which would break `just switch`.
-    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+    package = opencodePackage;
     settings = finalSettings;
+  };
+
+  myOptions.developerEnvironmentParity = {
+    packages.opencode = {
+      package = opencodePackage;
+      commands = [ "opencode" ];
+    };
+    surfaces.opencode = {
+      inherit hostClass;
+      settings = finalSettings;
+      sessionVariables.OPENCODE_ENABLE_EXA = "1";
+      herdr.directories = herdrDirectories;
+    };
   };
 }

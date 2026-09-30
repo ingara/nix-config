@@ -1,14 +1,25 @@
-_: {
+{ config, pkgs, ... }:
+
+let
+  arguments = [
+    "--column"
+    "--line-number"
+    "--max-columns-preview"
+    "--colors=line:style:bold"
+  ];
+in
+{
   programs.ripgrep = {
     enable = true;
-    # ripgrep binary stays in shared/packages.nix (see git.nix's lazygit
-    # comment for the per-platform scope story); this avoids a second copy.
-    package = null;
-    arguments = [
-      "--column"
-      "--line-number"
-      "--max-columns-preview"
-      "--colors=line:style:bold"
-    ];
+    package = pkgs.ripgrep;
+    inherit arguments;
+  };
+
+  myOptions.developerEnvironmentParity = {
+    packages.ripgrep = {
+      package = pkgs.ripgrep;
+      commands = [ "rg" ];
+    };
+    surfaces.cliRipgrep = builtins.removeAttrs config.programs.ripgrep [ "package" ];
   };
 }

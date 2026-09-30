@@ -1,0 +1,13 @@
+diff --git a/src/cli.js b/src/cli.js
+--- a/src/cli.js
++++ b/src/cli.js
+@@ -120,6 +120,9 @@ export async function run(argv) {
+           agent,
+         }),
+       commands: {
++        update: () => {
++          throw new AxiError("Self-update is disabled; update the Nix package instead.", "VALIDATION_ERROR");
++        },
+         open: openCommand,
+         poll: pollCommand,
+         end: endCommand,

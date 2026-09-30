@@ -8,7 +8,6 @@
 # lagged and noto pulled an afdko from-source build (#48).
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -24,21 +23,7 @@ in
     # gates a warning only, not behaviour; a real incompatibility still
     # errors.
     enableReleaseChecks = false;
-    base16Scheme = config.lib.myTheme.schemeYaml;
-    # Rosé Pine's dark ports fill base07 (the spec's "lightest" slot) with a
-    # dark overlay tone, so everything mapped to bright white — terminal ANSI
-    # color 15, starship's bright-white, bat foregrounds — renders dark-on-dark.
-    # Restore the palette's light text tint. (Palette-definition site: a hex
-    # literal is correct here, same as the scheme yaml itself.)
-    override =
-      lib.optionalAttrs
-        (builtins.elem config.lib.myTheme.scheme [
-          "rose-pine"
-          "rose-pine-moon"
-        ])
-        {
-          base07 = "e0def4";
-        };
+    base16Scheme = config.lib.myTheme.stylixSchemeYaml;
     polarity = config.lib.myTheme.polarity;
 
     fonts = {
@@ -71,7 +56,6 @@ in
 
     targets = {
       starship.enable = true;
-      tmux.enable = true;
       fish.enable = true;
       fzf.enable = true;
       bat.enable = true;
@@ -86,9 +70,6 @@ in
       # fonts.fontconfig.enable below (the alias mapping only bites where
       # fontconfig is the resolver — Linux, not CoreText/macOS).
       fontconfig.enable = pkgs.stdenv.hostPlatform.isLinux && hasGui;
-      # Nvim is driven by our own theme.lua generator; skip Stylix's
-      # neovim target.
-      neovim.enable = false;
     };
   };
 

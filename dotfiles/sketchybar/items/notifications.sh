@@ -8,7 +8,7 @@ notifications_opts=(
   icon.drawing=off
   label.drawing=off
   width=0
-  script="$PLUGIN_DIR/notifications.sh"
+  script="ITEM_SPACING=$ITEM_SPACING ITEM_PADDING=$ITEM_PADDING $PLUGIN_DIR/notifications.sh"
 )
 
 sketchybar \

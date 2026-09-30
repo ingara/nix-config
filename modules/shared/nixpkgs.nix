@@ -3,7 +3,7 @@
 # Imported in both system and home-manager contexts so HM gets the same
 # overlays as the host system after we drop `useGlobalPkgs = true`.
 # Overlays themselves are platform-gated internally (see public/overlays/*).
-_:
+{ inputs, ... }:
 
 {
   nixpkgs = {
@@ -17,6 +17,12 @@ _:
     };
 
     # Apply each overlay found in the /overlays directory.
-    overlays = import ../../lib/load-overlays.nix ../../overlays;
+    overlays = (import ../../lib/load-overlays.nix ../../overlays) ++ [
+      (_final: prev: {
+        lavish-axi = prev.callPackage ../../overlays/lavish-axi/package.nix {
+          src = inputs.lavish-axi;
+        };
+      })
+    ];
   };
 }

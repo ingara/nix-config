@@ -2,8 +2,8 @@
 
 source "$HOME/.config/sketchybar/env.sh"
 
-PERCENTAGE="$(pmset -g batt | rg -o "\d+%" | cut -d% -f1)"
-CHARGING="$(pmset -g batt | rg 'AC Power')"
+BATTERY_STATUS="$(pmset -g batt)"
+PERCENTAGE="$(printf '%s\n' "$BATTERY_STATUS" | sed -nE 's/.*[[:space:]]([0-9]+)%.*/\1/p' | head -n 1)"
 
 if [ "$PERCENTAGE" = "" ]; then
   exit 0
@@ -33,7 +33,7 @@ case "${PERCENTAGE}" in
   ;;
 esac
 
-if [[ $CHARGING != "" ]]; then
+if [[ $BATTERY_STATUS == *"AC Power"* ]]; then
   ICON=􀢋
 fi
 

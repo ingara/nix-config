@@ -4,8 +4,9 @@
 { config, lib, ... }:
 
 {
-  # Tailscale SSH owns both the listener and tunnel, so downstream users need
-  # an independently proven transport before allowing activation restarts.
+  # Tailscale owns the private tunnel even when its built-in SSH server is off,
+  # so downstream users need an independently proven transport before allowing
+  # activation restarts.
   systemd.services.tailscaled.restartIfChanged = false;
 
   # networkd owns the interface config under the deploy path, so keep it from
@@ -43,8 +44,8 @@
   };
 
   # Only nix-declared keys count — a runtime-written ~/.ssh/authorized_keys
-  # cannot grant persistence. Tailscale SSH bypasses authorized_keys, so the
-  # tailnet login path is unaffected.
+  # cannot grant persistence. The built-in Tailscale SSH server is disabled, so
+  # ordinary OpenSSH remains authoritative over the tailnet too.
   services.openssh.authorizedKeysFiles = lib.mkForce [ "/etc/ssh/authorized_keys.d/%u" ];
 
   # Servers fetch from GitHub; pin its host key instead of trusting first use.

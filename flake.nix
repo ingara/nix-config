@@ -62,10 +62,6 @@
       url = "github:TheBoredTeam/homebrew-boring-notch";
       flake = false;
     };
-    homebrew-omniwm = {
-      url = "github:BarutSRB/homebrew-tap";
-      flake = false;
-    };
     homebrew-nehir = {
       url = "github:guria/homebrew-tap";
       flake = false;
@@ -89,6 +85,10 @@
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lavish-axi = {
+      url = "github:kunchenguid/lavish-axi/lavish-axi-v0.1.79";
+      flake = false;
     };
     aerospace-scratchpad = {
       url = "github:cristianoliveira/aerospace-scratchpad";

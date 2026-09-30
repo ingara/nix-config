@@ -122,24 +122,11 @@ else
     background.border_color=$COLOR_BORDER
 fi
 
-# AI plan quota strip. Guarded because this item, unlike its siblings, is
-# linked in by a Nix module and is absent without it. Sourced after the left
-# bracket: its items attach to the left region and it brackets them itself, so
-# `system` must not span them and paint a second background.
-[ -r "$ITEM_DIR/showy_quota.sh" ] && source "$ITEM_DIR/showy_quota.sh"
-
 # Right side items (reverse order since they stack right to left)
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/status.sh"
 source "$ITEM_DIR/system-resources.sh"
 source "$ITEM_DIR/notifications.sh"
-
-# Create right side bracket for calendar
-sketchybar --add bracket calendar_bracket calendar \
-  --set calendar_bracket background.color=$COLOR_BACKGROUND_SECONDARY \
-  background.corner_radius=8 \
-  background.border_width=1 \
-  background.border_color=$COLOR_BORDER
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --hotload on

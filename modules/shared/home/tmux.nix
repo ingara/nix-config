@@ -13,7 +13,7 @@
 # Status-bar layout is rendered here from `config.lib.stylix.colors`
 # (same pattern as `sketchybar.nix` / `nvim-theme.nix`) so the bar
 # follows `myOptions.theme.scheme` without per-theme plugins. The bundled
-# `stylix.targets.tmux` is still enabled per-platform; its default
+# `stylix.targets.tmux` is enabled below; its default
 # `status-style` etc. are overridden by the explicit `set -g` calls
 # below. We roll our own mode chip via `client_prefix` / `pane_in_mode`
 # instead of using tmux-prefix-highlight, because we want a chip visible
@@ -28,7 +28,34 @@
 let
   c = config.lib.stylix.colors.withHashtag;
   hasGui = config.myOptions.hasGui;
+  scriptText = path: lib.removePrefix "#!/usr/bin/env bash\n" (builtins.readFile path);
 
+  tmuxCwdIcon = pkgs.writeShellApplication {
+    name = "tmux-cwd-icon";
+    runtimeInputs = [
+      config.programs.git.package
+      pkgs.gawk
+      pkgs.gnused
+    ];
+    text = scriptText ../../../dotfiles/scripts/tmux-cwd-icon.sh;
+  };
+  tmuxGitStatus = pkgs.writeShellApplication {
+    name = "tmux-git-status";
+    runtimeInputs = [
+      config.programs.git.package
+      pkgs.coreutils
+    ];
+    text = scriptText ../../../dotfiles/scripts/tmux-git-status.sh;
+  };
+  tmuxKeysPopup = pkgs.writeShellApplication {
+    name = "tmux-keys-popup";
+    runtimeInputs = [
+      config.programs.fzf.package
+      config.programs.tmux.package
+      pkgs.gawk
+    ];
+    text = scriptText ../../../dotfiles/scripts/tmux-keys-popup.sh;
+  };
   # Hex color blender — used for the clock-box subtle mode tint.
   # No stylix helper for this; ~20 LOC of pure Nix is the cheaper alternative
   # to a separate runtime tool or hardcoded per-theme color tables.
@@ -105,6 +132,16 @@ let
   hostSuffix = lib.optionalString (!hasGui) "#[fg=${c.base09}]@#H#[fg=${c.base05}]";
 in
 {
+  home = {
+    packages = [
+      pkgs.osc
+      tmuxCwdIcon
+      tmuxGitStatus
+      tmuxKeysPopup
+    ];
+    shellAliases.t = "tmux new -A -s";
+  };
+
   programs.tmux = {
     enable = true;
 
@@ -116,18 +153,16 @@ in
     mouse = true;
     baseIndex = 1;
     plugins = with pkgs.tmuxPlugins; [
-      open # Open stuff with prefix+o
-      pain-control # navigating panes etc
-      sidebar # prefix+<tab> and prefix+<backspace>
-      tmux-fzf # prefix+F
-      # tmux-thumbs # copy/pasting stuff. prefix+<space>
+      open
+      pain-control
+      sidebar
+      tmux-fzf
       battery
-      # Root-table C-hjkl comes from the is_vim_or_herdr binds below, which
-      # render later and win. This stays for what those don't cover: C-hjkl
-      # inside copy-mode-vi, and the previous-pane key.
+      # Root-table C-hjkl comes from the explicit is_vim_or_herdr binds below;
+      # vim-tmux-navigator remains for copy-mode and previous-pane behavior.
       vim-tmux-navigator
-      yank # Copy to system clipboard
-      fzf-tmux-url # Find URLS with prefix+u
+      yank
+      fzf-tmux-url
     ];
 
     extraConfig = ''
@@ -249,11 +284,11 @@ in
           'send-keys -X copy-pipe-no-clear "osc copy"' \
           'send-keys M-c'
 
-      # Lazygit popup — matches the Zellij Ctrl+g binding.
+      # Lazygit popup.
       bind -N "[Tool] Open lazygit popup" -n C-g \
         display-popup -E -d "#{pane_current_path}" -w 90% -h 90% "lazygit"
 
-      # Window cycling — zellij-style unprefixed Ctrl+Left/Right. The vertical
+      # Window cycling — unprefixed Ctrl+Left/Right. The vertical
       # pair stays unbound so herdr's workspace nav reaches a nested herdr.
       bind -N "[Window] Previous window" -n C-Left  previous-window
       bind -N "[Window] Next window"     -n C-Right next-window
@@ -317,5 +352,50 @@ in
       bind -N "[Tmux] Discover root-table binds (fzf)" / \
         display-popup -E -w 90% -h 80% "tmux-keys-popup root"
     '';
+  };
+
+  stylix.targets.tmux.enable = true;
+
+  myOptions.developerEnvironmentParity = {
+    aliases.t = "tmux new -A -s";
+    packages = {
+      tmux = {
+        package = config.programs.tmux.package;
+        commands = [ "tmux" ];
+      };
+      tmuxOsc = {
+        package = pkgs.osc;
+        commands = [ "osc" ];
+      };
+      tmuxCwdIcon = {
+        package = tmuxCwdIcon;
+        commands = [ "tmux-cwd-icon" ];
+      };
+      tmuxGitStatus = {
+        package = tmuxGitStatus;
+        commands = [ "tmux-git-status" ];
+      };
+      tmuxKeysPopup = {
+        package = tmuxKeysPopup;
+        commands = [ "tmux-keys-popup" ];
+      };
+    };
+    surfaces.tmux = {
+      settings = {
+        inherit (config.programs.tmux)
+          enable
+          clock24
+          escapeTime
+          keyMode
+          shortcut
+          terminal
+          mouse
+          baseIndex
+          plugins
+          extraConfig
+          ;
+      };
+      stylixTarget = config.stylix.targets.tmux.enable;
+    };
   };
 }

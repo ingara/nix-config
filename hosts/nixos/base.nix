@@ -64,12 +64,13 @@ in
   # Tailscale mesh VPN — access services across machines privately
   services.tailscale = {
     enable = true;
-    extraSetFlags = [ "--ssh" ];
+    extraSetFlags = [ "--ssh=false" ];
   };
 
   environment.systemPackages = with pkgs; [
     gitFull
     graphite-cli
+    # Keep nvim global because EDITOR and sudoedit run outside Home Manager.
     neovim
   ];
 

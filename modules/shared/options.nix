@@ -1,4 +1,8 @@
-{ lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 let
   # Selectable window managers (darwin: yabai..nehir; linux: hyprland/niri),
   # partitioned by class in _wm-names.nix — the single source for the
@@ -6,9 +10,121 @@ let
   # assertion in home/default.nix, so adding a WM is one edit there.
   wmClasses = import ./_wm-names.nix;
   wmNames = wmClasses.darwin ++ wmClasses.linux;
+  gitAuthorType = lib.types.submodule {
+    options = {
+      name = lib.mkOption { type = lib.types.str; };
+      email = lib.mkOption { type = lib.types.str; };
+    };
+  };
+  personalGitAuthor = {
+    name = config.myOptions.user.fullName;
+    email = config.myOptions.user.email;
+  };
+  agentGitAuthor = personalGitAuthor // {
+    name = "${config.myOptions.user.fullName} (agent)";
+  };
+  developerEnvironmentPackageType = lib.types.submodule {
+    options = {
+      package = lib.mkOption {
+        type = lib.types.package;
+        description = "Package that realizes this developer-environment capability.";
+      };
+      commands = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Commands provided by the capability for runtime parity probes.";
+      };
+    };
+  };
+  developerEnvironmentSurfaceType = lib.types.submodule {
+    freeformType = lib.types.lazyAttrsOf lib.types.anything;
+  };
+  remoteMcpServerType = lib.types.submodule {
+    options = {
+      url = lib.mkOption {
+        type = lib.types.addCheck lib.types.str (
+          url: builtins.match "https?://[^/[:space:]][^[:space:]]*" url != null
+        );
+        description = "Absolute HTTP(S) endpoint for a hosted MCP server.";
+      };
+      enabled = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether this server is emitted into client configuration.";
+      };
+      bearerTokenFiles = lib.mkOption {
+        type = lib.types.submodule {
+          options =
+            lib.genAttrs
+              [
+                "personal"
+                "agent"
+              ]
+              (
+                _:
+                lib.mkOption {
+                  type = lib.types.nullOr (lib.types.addCheck lib.types.str (path: lib.hasPrefix "/" path));
+                  default = null;
+                  description = "Absolute runtime path to this identity's bearer token file.";
+                }
+              );
+        };
+        default = { };
+        description = ''
+          Protected runtime bearer-token files by execution identity. When both
+          entries are null, projection remains credential-free. Paths may be rendered
+          into generated configuration; token contents must not enter the Nix
+          store.
+        '';
+      };
+    };
+  };
 in
 {
   options.myOptions = {
+    executionIdentity = lib.mkOption {
+      type = lib.types.enum [
+        "personal"
+        "agent"
+      ];
+      default = "personal";
+      description = ''
+        Execution identity whose authority policy is composed with the shared
+        developer environment.
+      '';
+    };
+    developerEnvironmentParity = {
+      packages = lib.mkOption {
+        type = lib.types.attrsOf developerEnvironmentPackageType;
+        default = { };
+        internal = true;
+        description = ''
+          Owner-maintained registry of credential-free developer packages and
+          the commands each capability exposes.
+        '';
+      };
+      aliases = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        internal = true;
+        description = "Portable Fish aliases included in developer-environment parity checks.";
+      };
+      surfaces = lib.mkOption {
+        type = lib.types.attrsOf developerEnvironmentSurfaceType;
+        default = { };
+        internal = true;
+        description = ''
+          Credential-free, JSON-safe configuration surfaces registered beside
+          their owning modules for developer-environment parity checks.
+        '';
+      };
+      projection = lib.mkOption {
+        type = lib.types.attrsOf lib.types.anything;
+        readOnly = true;
+        internal = true;
+        description = "Normalized developer-environment projection produced by the owning composition.";
+      };
+    };
     user = {
       username = lib.mkOption {
         type = lib.types.str;
@@ -25,6 +141,18 @@ in
       signingKey = lib.mkOption {
         type = lib.types.str;
         default = "";
+      };
+    };
+    gitAuthors = {
+      personal = lib.mkOption {
+        type = gitAuthorType;
+        default = personalGitAuthor;
+        description = "Git author used by the personal execution identity.";
+      };
+      agent = lib.mkOption {
+        type = gitAuthorType;
+        default = agentGitAuthor;
+        description = "Git author used by the agent execution identity.";
       };
     };
     dotfiles = {
@@ -48,6 +176,15 @@ in
           on top of the workstation profile.
         '';
       };
+    };
+    mcp.servers = lib.mkOption {
+      type = lib.types.attrsOf remoteMcpServerType;
+      default = { };
+      description = ''
+        Hosted MCP servers projected into supported clients. Bearer token
+        contents remain mutable protected state; only their runtime paths are
+        represented here.
+      '';
     };
     hasGui = lib.mkOption {
       type = lib.types.bool;
@@ -90,10 +227,6 @@ in
       type = lib.types.bool;
       default = true;
     };
-    zellijAutoAttach = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-    };
     sshSignProgram = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
@@ -102,10 +235,26 @@ in
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
-    # Consumed by system/ai/agent-git.nix. Declared here for the same reason as
-    # claudeCode.ownStatusLine below: the whole myOptions tree is forwarded into
-    # home-manager, so a system-only declaration breaks HM's copy.
+    # Consumed by system/ai/agent-git.nix. Declared here because the whole
+    # myOptions tree is forwarded into home-manager, so a system-only
+    # declaration breaks HM's copy.
     agentGit = {
+      package = lib.mkOption {
+        type = lib.types.nullOr lib.types.package;
+        default = null;
+        description = ''
+          GitHub credential routing package. When unset, the in-tree package is
+          used.
+        '';
+      };
+
+      ghPackage = lib.mkOption {
+        type = lib.types.nullOr lib.types.package;
+        default = null;
+        internal = true;
+        description = "Generated gh package with agent credential routing.";
+      };
+
       ownerTokens = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         default = { };
@@ -113,10 +262,9 @@ in
         description = ''
           Map of GitHub owner to a file holding a token with write access to
           that owner's repos. One token per owner is a GitHub constraint: a
-          fine-grained PAT is scoped to a single resource owner. Owners absent
-          here get no credential, so agent writes to them fail — which is what
-          keeps agents off arbitrary upstream repos, independently of whether
-          the token's own permissions were set correctly.
+          fine-grained PAT is scoped to a single resource owner. Routing
+          prevents accidental credential crossover and operator fallback;
+          repository and permission limits come from each token's GitHub scope.
         '';
       };
 
@@ -126,8 +274,8 @@ in
         example = "/run/secrets/github-projects-token";
         description = ''
           File holding a token limited to GitHub Projects and the metadata read
-          scope required by the gh CLI. The agent wrapper uses it only for
-          `gh project` commands.
+          scope required by the gh CLI. The router selects it automatically for
+          `gh project` commands and exposes it as the named Projects credential.
         '';
       };
 
@@ -166,19 +314,6 @@ in
           keys set here cannot be overridden by Claude's in-app UI.
         '';
       };
-
-      ownStatusLine = lib.mkEnableOption ''
-        a locally-built statusLine command in place of invoking a renderer
-        directly. Claude Code gives the statusLine a single command slot, so
-        anything that needs to observe the same payload — usage collectors,
-        extra segments — has to be composed behind one entry point.
-
-        Declared here rather than beside its implementation because the whole
-        myOptions tree is forwarded into home-manager, so an option only the
-        system scope knows about breaks HM's copy of it. Off by default: such a
-        wrapper carries whatever it composes, which is closure a host that only
-        needs the renderer should not hold
-      '';
     };
     codex = {
       linkedWorktreeGitWrite = lib.mkEnableOption ''

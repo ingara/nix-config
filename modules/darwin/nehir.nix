@@ -2,7 +2,7 @@
 #
 # Nehir is a niri-style (column-scrolling) macOS WM, an opinionated fork of
 # OmniWM. Unlike Paneru it ships no Nix module: it's a Homebrew cask
-# (guria/tap/nehir, wired in window-manager.nix) that reads split TOML config
+# (guria/tap/nehir@rc, wired in window-manager.nix) that reads split TOML config
 # from ~/.config/nehir/. This module Nix-generates those config files and
 # symlinks them via xdg.configFile.
 #
@@ -75,7 +75,7 @@ let
   # ride Option+,/. — all Norwerty-safe (these are not the å/´/ø/æ symbol keys
   # nor the é/grave dead keys, and Nehir resolves key *names* like Minus/Comma to
   # physical keycodes, layout-independent). Action ids + key-name tokens verified
-  # against the installed Nehir 0.5.1 binary (HotkeysTOMLCodec / nehirctl
+  # against the installed Nehir 0.6.0-rc.44 binary (HotkeysTOMLCodec / nehirctl
   # capabilities). `{N}` expands to digits 1–9.
   #
   # Gaps vs the convention (no Nehir action): center/fit column; move-window-to-

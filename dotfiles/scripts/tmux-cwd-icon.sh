@@ -32,8 +32,8 @@ if git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   # Worktree-awareness: compare current worktree's top-level against the
   # main worktree's path (first entry in `git worktree list --porcelain`).
   # When they differ, we're in a linked worktree; append its directory
-  # name so e.g. `soolv/screening:agent-workflow-cleanup` rather than just
-  # `soolv/screening` (which loses the worktree identity).
+  # name so e.g. `example/project:feature-worktree` rather than just
+  # `example/project` (which loses the worktree identity).
   worktree_path="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || true)"
   main_worktree="$(git -C "$cwd" worktree list --porcelain 2>/dev/null |
     awk '/^worktree / { print $2; exit }')"

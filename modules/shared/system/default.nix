@@ -5,6 +5,7 @@
     ./ai/agent-git.nix
     ./ai/claude-code.nix
     ./ai/codex.nix
+    ./ai/mcp.nix
     ../nixpkgs.nix
   ];
 

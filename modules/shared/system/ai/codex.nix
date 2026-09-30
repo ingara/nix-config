@@ -9,12 +9,13 @@
 #
 # requirements.toml is the opposite kind of file: a system policy layer Codex
 # only ever reads, at /etc/codex/requirements.toml (the loader path is
-# cfg(unix), so darwin and nixos share it). The ceiling below forbids the
-# unsandboxed/no-prompt corner — `danger-full-access`, which drops the
-# Landlock+seccomp jail, and `approval_policy = never` — while leaving the whole
-# safe interactive range (read-only|workspace-write × untrusted|on-request)
-# selectable per session. It holds even against a prompt-injected or
-# fat-fingered --dangerously-bypass-approvals-and-sandbox.
+# cfg(unix), so darwin and nixos share it). The ceiling below forbids both
+# `danger-full-access`, which drops the Landlock+seccomp jail, and
+# `approval_policy = never`. Codex 0.149 rejects `untrusted` as an explicit
+# user setting but still derives it internally for untrusted projects, so the
+# requirements layer must allow that stricter mode alongside `on-request`.
+# The ceiling holds even against a prompt-injected or fat-fingered
+# --dangerously-bypass-approvals-and-sandbox.
 #
 # Cachix: codex-cli-nix isn't on cache.nixos.org, so without its substituter
 # every version bump re-derives upstream's own derivation. It doesn't cover the
@@ -29,7 +30,41 @@
 }:
 
 let
+  mcpAuth = import ../../_mcp-auth.nix { inherit lib; };
   upstreamCodex = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex;
+  enabledMcpServers = lib.filterAttrs (_: server: server.enabled) config.myOptions.mcp.servers;
+  mkBearerHeaderHelper =
+    name: server:
+    pkgs.writeShellApplication {
+      name = "codex-mcp-bearer-headers-${builtins.substring 0 16 (builtins.hashString "sha256" name)}";
+      runtimeInputs = [ pkgs.jq ];
+      text = ''
+        token_file=
+        token_paths=(${lib.escapeShellArgs (mcpAuth.bearerTokenPaths server)})
+        for candidate in "''${token_paths[@]}"; do
+          if [[ -r "$candidate" ]]; then
+            if [[ -n "$token_file" ]]; then
+              printf 'Codex MCP bearer token selection is ambiguous\n' >&2
+              exit 1
+            fi
+            token_file="$candidate"
+          fi
+        done
+
+        if [[ -z "$token_file" ]]; then
+          printf 'Codex MCP bearer token is unavailable\n' >&2
+          exit 1
+        fi
+
+        token="$(< "$token_file")"
+        if [[ -z "$token" || "$token" == *$'\n'* || "$token" == *$'\r'* ]]; then
+          printf 'Codex MCP bearer token is empty or malformed\n' >&2
+          exit 1
+        fi
+
+        printf '%s' "$token" | jq -Rs '{ Authorization: ("Bearer " + .) }'
+      '';
+    };
 
   # Herdr names a pane's agent from the foreground process's argv[0], which
   # codex-cli-nix's wrapper chain replaces with its own store path — so Codex
@@ -95,6 +130,16 @@ let
   };
 
   baseSystemConfig = {
+    mcp_servers = lib.mapAttrs (
+      name: server:
+      {
+        inherit (server) url;
+      }
+      // lib.optionalAttrs (mcpAuth.hasBearerToken server) {
+        http_headers_helper = lib.getExe (mkBearerHeaderHelper name server);
+      }
+    ) enabledMcpServers;
+
     # Strip vars whose name contains KEY/SECRET/TOKEN from the environment Codex
     # hands to the shell commands it spawns. Codex's own process is unaffected —
     # it keeps whatever the launching shell exported, so a provider that reads
@@ -104,16 +149,10 @@ let
     # shell_environment_policy.set.<NAME> re-adds it after the exclusion pass.
     shell_environment_policy = {
       ignore_default_excludes = false;
-    }
-    // lib.optionalAttrs (config.myOptions.agentGit.gitconfigPath != "") {
-      # Codex 0.146.0 applies this map after default KEY/SECRET/TOKEN
-      # exclusions. Route its subprocesses through the same scoped-token Git
-      # config as Claude Code, including the system-scope neutralisation.
-      set = {
-        GIT_CONFIG_GLOBAL = config.myOptions.agentGit.gitconfigPath;
-        GIT_CONFIG_SYSTEM = "/dev/null";
-      };
     };
+
+    # Repository workflows require durable, user-visible progress tracking.
+    tools.update_plan.enabled = true;
 
     tui = {
       status_line = [

@@ -10,6 +10,7 @@ with pkgs;
   # colima is provided declaratively via the home-manager `services.colima`
   # module (see ./colima.nix), so it's not listed here.
   docker
+  handy
   terminal-notifier
 
   # Better userland for macOS

@@ -25,6 +25,9 @@ let
   };
   # The enabled WMs we can drive via open-a, in `enabled` order.
   switchable = lib.filter (w: knownApp ? ${w}) cfg.enabled;
+  # Keep the logical backend key stable while following Nehir's 0.6 release
+  # candidates at the Homebrew boundary.
+  switchableCasks = map (w: if w == "nehir" then "nehir@rc" else w) switchable;
   enabledBash = lib.concatStringsSep " " switchable;
   # Quote each array element so a multi-word app name (none today) stays one value.
   appAssoc = lib.concatStringsSep " " (map (w: ''["${w}"]="${knownApp.${w}}"'') switchable);
@@ -126,10 +129,8 @@ in
 
     # Install a cask for every enabled cask-based WM (install-many / run-one).
     # paneru is NOT a cask — it installs via services.paneru in paneru.nix.
-    # nehir/omniwm: the Homebrew cask name equals the wm-key, so the open-a set
-    # (`switchable`) doubles as their cask list — adding an open-a WM is then a
-    # single edit to `knownApp`, not here too.
-    homebrew.casks = lib.optionals (lib.elem "aerospace" cfg.enabled) [ "aerospace" ] ++ switchable;
+    homebrew.casks =
+      lib.optionals (lib.elem "aerospace" cfg.enabled) [ "aerospace" ] ++ switchableCasks;
 
     launchd.user.agents = lib.mkMerge [
       # Launchd logging for yabai (only when yabai is active)

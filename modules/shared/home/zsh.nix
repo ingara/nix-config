@@ -1,9 +1,11 @@
 # Zsh shell configuration.
 #
-# Shared aliases live in `./aliases.nix` (also consumed by `./fish.nix`).
+# Portable aliases come from the CLI UX bundle; operator aliases live in
+# `./aliases.nix` (also consumed by `./fish.nix`).
 # initContent adds the `n` nvim helper and `zi` zoxide interactive mode.
 {
   config,
+  pkgs,
   ...
 }:
 
@@ -15,7 +17,7 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     cdpath = [ "~/.local/share/src" ];
-    shellAliases = import ./aliases.nix { };
+    shellAliases = (import ./cli-ux-aliases.nix { inherit pkgs; }) // (import ./aliases.nix { });
     oh-my-zsh = {
       enable = true;
       # No theme: starship (starship.nix) owns the prompt.

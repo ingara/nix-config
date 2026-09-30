@@ -2,7 +2,7 @@
 # Emit a compact git status for tmux's status bar.
 # Args: $1 = absolute path of the pane's cwd (typically #{pane_current_path}).
 #       $2 = max branch width in chars (default 24). Long branch names —
-#            common with Graphite stacks (`ingar/01-19-feat_…`) — get
+#            common with Graphite stacks (`user/01-19-feat_…`) — get
 #            tail-truncated with an ellipsis so the clock on the right
 #            doesn't fall off the bar.
 #

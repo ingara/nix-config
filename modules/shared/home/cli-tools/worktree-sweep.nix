@@ -20,4 +20,11 @@ let
 in
 {
   home.packages = [ worktreeSweep ];
+
+  myOptions.developerEnvironmentParity = {
+    packages.worktreeSweep = {
+      package = worktreeSweep;
+      commands = [ "worktree-sweep" ];
+    };
+  };
 }

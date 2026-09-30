@@ -163,4 +163,8 @@ in
 
     settings = starshipSettings;
   };
+
+  myOptions.developerEnvironmentParity.surfaces.cliUx.starship =
+    builtins.removeAttrs config.programs.starship
+      [ "package" ];
 }

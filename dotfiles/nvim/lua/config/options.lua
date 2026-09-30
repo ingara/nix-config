@@ -19,12 +19,11 @@ vim.opt.wrap = true
 
 vim.g.lazyvim_prettier_needs_config = true
 
--- Force OSC 52 clipboard in SSH sessions. LazyVim sets clipboard="" over SSH
--- to let Neovim auto-detect OSC 52, but Zellij swallows the XTGETTCAP query
--- that Neovim uses for detection. Paste uses internal register to avoid the
--- ~10s freeze from terminals that don't support OSC 52 reads — use Cmd+V instead.
--- Can be removed once zellij-org/zellij#4545 ships in a stable release.
-if vim.env.SSH_TTY then
+-- Force OSC 52 clipboard in SSH and Herdr sessions instead of relying on
+-- capability detection through nested terminals. Paste uses the internal
+-- register to avoid the ~10s freeze from terminals that don't support OSC 52
+-- reads — use Cmd+V instead.
+if vim.env.SSH_TTY or vim.env.HERDR_ENV == "1" then
   vim.opt.clipboard = "unnamedplus"
 
   local function paste()

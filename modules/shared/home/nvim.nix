@@ -5,21 +5,73 @@
 # dir must stay a real dir for the generated sidecar to coexist. defaultSkip
 # drops the repo cruft (LICENSE/README/stylua.toml) that lives in the source.
 #
-# The binary stays in shared/packages.nix, NOT here: darwin needs nvim at
-# system scope (paired with the system-level EDITOR=nvim; user scope would
-# break sudoedit), and an HM module can only add to home.packages.
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
   dots = import ./lib/dotfiles.nix { inherit lib; };
 in
 {
+  imports = [ ./nvim-theme.nix ];
+
+  # Nvim-treesitter builds parsers locally and Mason installs language tools;
+  # Darwin already supplies the required compiler through Xcode CLT.
+  home.packages = [
+    pkgs.neovim
+    pkgs.curl
+    pkgs.gzip
+    pkgs.gnutar
+    pkgs.nixd
+    pkgs.tree-sitter
+    pkgs.unzip
+  ]
+  ++ lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.stdenv.cc;
+
   xdg.configFile = dots.mkPerFileDots {
     inherit config;
     srcRel = "nvim";
     xdgRel = "nvim";
+  };
+
+  myOptions.developerEnvironmentParity = {
+    packages = {
+      nvim = {
+        package = pkgs.neovim;
+        commands = [ "nvim" ];
+      };
+      nvimCurl = {
+        package = pkgs.curl;
+        commands = [ "curl" ];
+      };
+      nvimGzip = {
+        package = pkgs.gzip;
+        commands = [ "gzip" ];
+      };
+      nvimTar = {
+        package = pkgs.gnutar;
+        commands = [ "tar" ];
+      };
+      nvimNixd = {
+        package = pkgs.nixd;
+        commands = [ "nixd" ];
+      };
+      nvimTreeSitter = {
+        package = pkgs.tree-sitter;
+        commands = [ "tree-sitter" ];
+      };
+      nvimUnzip = {
+        package = pkgs.unzip;
+        commands = [ "unzip" ];
+      };
+    }
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      nvimCompiler = {
+        package = pkgs.stdenv.cc;
+        commands = [ "cc" ];
+      };
+    };
   };
 }

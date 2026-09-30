@@ -18,7 +18,7 @@
 # issued mid-animation computes against in-flight geometry and mis-packs, and
 # no fixed sleep is reliably past the animation under rapid re-presses. Hence
 # the geometry-stability poll before the pack hop: sample the focused frame
-# until two consecutive reads match. (Verified against Nehir 0.5.1.)
+# until two consecutive reads match. (Verified against Nehir 0.6.0-rc.44.)
 #
 # Only /usr/bin tools + absolute paths: the skhd agent's launchd PATH has
 # neither Homebrew nor the Nix profile.

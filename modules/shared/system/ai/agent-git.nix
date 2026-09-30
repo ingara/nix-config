@@ -16,9 +16,10 @@
 #     token in the environment it falls back to the keyring account and hands
 #     git the operator's broad token, so scope would never bind.
 #
-# An owner absent from ownerTokens gets no credential and the operation fails.
-# That is the mechanism keeping agents off arbitrary upstream repos: it does not
-# depend on the token's own permissions being right.
+# An owner absent from ownerTokens gets no credential through the managed
+# defaults. Repository access is still bounded by the PAT's own owner,
+# repository, and permission scopes: routing prevents accidental credential
+# crossover and operator fallback, but is not an independent security boundary.
 {
   config,
   lib,
@@ -28,172 +29,74 @@
 
 let
   cfg = config.myOptions.agentGit;
-  userConfig = config.myOptions.user;
+  gitAuthor = config.myOptions.gitAuthors.agent;
 
   enabled = cfg.ownerTokens != { };
 
-  # Quote owner names so case treats them literally rather than as patterns.
-  ownerCases = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (
-      owner: tokenFile:
-      "    ${lib.escapeShellArg (lib.toLower owner)}) tokenFile=${lib.escapeShellArg tokenFile} ;;"
-    ) cfg.ownerTokens
+  agentGithubRouter =
+    if cfg.package != null then
+      cfg.package
+    else
+      pkgs.callPackage ../../../../packages/agent-github-router { };
+
+  ownerEntries = lib.mapAttrsToList (owner: tokenFile: {
+    owner = lib.toLower owner;
+    credential = "owner:${lib.toLower owner}";
+    inherit tokenFile;
+  }) cfg.ownerTokens;
+
+  normalizedOwners = map (entry: entry.owner) ownerEntries;
+
+  ownerCredentials = builtins.listToAttrs (
+    map (entry: lib.nameValuePair entry.credential { inherit (entry) tokenFile; }) ownerEntries
   );
+
+  ownerRoutes = builtins.listToAttrs (
+    map (entry: lib.nameValuePair entry.owner entry.credential) ownerEntries
+  );
+
+  credentials =
+    ownerCredentials
+    // lib.optionalAttrs (cfg.projectsToken != "") {
+      projects.tokenFile = cfg.projectsToken;
+    };
 
   agentAliases = pkgs.writeText "agent-git-aliases" (
     builtins.readFile ../../../../dotfiles/git-extra/aliases.gitconfig
   );
 
-  credentialHelper = pkgs.writeShellApplication {
-    name = "agent-git-credential";
-    runtimeInputs = [ pkgs.coreutils ];
-    text = ''
-      [ "''${1:-}" = get ] || exit 0
-
-      protocol=""
-      host=""
-      owner=""
-      while IFS= read -r line; do
-        [ -z "$line" ] && break
-        case "$line" in
-          protocol=*) protocol=''${line#protocol=} ;;
-          host=*) host=''${line#host=} ;;
-          # Requires credential.useHttpPath, else git never sends the repo path
-          # and there is nothing to key the owner off.
-          path=*)
-            owner=''${line#path=}
-            owner=''${owner%%/*}
-            ;;
-        esac
-      done
-
-      [ "$protocol" = https ] && [ "$host" = github.com ] || exit 0
-      owner=$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]')
-
-      tokenFile=""
-      case "$owner" in
-      ${ownerCases}
-        *) exit 0 ;;
-      esac
-
-      [ -r "$tokenFile" ] || exit 0
-      printf 'username=x-access-token\npassword=%s\n' "$(cat "$tokenFile")"
-    '';
-  };
-
   agentGhConfig = pkgs.writeTextDir "config.yml" ''
     version: 1
   '';
+
+  routerConfig = {
+    version = 1;
+    executables = {
+      gh = lib.getExe pkgs.gh;
+      git = lib.getExe pkgs.git;
+    };
+    ghConfigDir = agentGhConfig;
+    inherit credentials ownerRoutes;
+    projectsCredential = if cfg.projectsToken != "" then "projects" else null;
+  };
+
+  # This config must stay independent of agentGitconfig: agentGitconfig embeds
+  # its path in the Git credential helper command.
+  credentialRouterConfig = pkgs.writeText "agent-github-credential-router.json" (
+    builtins.toJSON (routerConfig // { allowedGitConfigs = [ ]; })
+  );
+
+  ghRouterConfig = pkgs.writeText "agent-github-gh-router.json" (
+    builtins.toJSON (routerConfig // { allowedGitConfigs = [ agentGitconfig ]; })
+  );
 
   agentGhWrapper = pkgs.writeShellApplication {
     name = "gh";
     text = ''
       case "''${GIT_CONFIG_GLOBAL:-}" in
         "") exec ${lib.getExe pkgs.gh} "$@" ;;
-        /nix/store/*-agent-gitconfig) ;;
-        *)
-          printf 'gh: unrecognized agent gitconfig; refusing operator credential fallback\n' >&2
-          exit 4
-          ;;
+        *) exec ${lib.getExe agentGithubRouter} --config ${ghRouterConfig} gh -- "$@" ;;
       esac
-
-      if [ "''${1:-}" = auth ]; then
-        printf 'gh: auth commands are unavailable in the agent environment\n' >&2
-        exit 4
-      fi
-
-      args=("$@")
-      for ((i = 0; i < ''${#args[@]}; i++)); do
-        case "''${args[$i]}" in
-          --hostname)
-            i=$((i + 1))
-            [ "''${args[$i]:-}" = github.com ] || {
-              printf 'gh: only github.com is available in the agent environment\n' >&2
-              exit 4
-            }
-            ;;
-          --hostname=*)
-            [ "''${args[$i]#--hostname=}" = github.com ] || {
-              printf 'gh: only github.com is available in the agent environment\n' >&2
-              exit 4
-            }
-            ;;
-          -R | --repo)
-            i=$((i + 1))
-            repo_arg=''${args[$i]:-}
-            case "$repo_arg" in
-              */*/*)
-                [ "''${repo_arg%%/*}" = github.com ] || {
-                  printf 'gh: only github.com is available in the agent environment\n' >&2
-                  exit 4
-                }
-                ;;
-            esac
-            ;;
-          --repo=*)
-            repo_arg=''${args[$i]#--repo=}
-            case "$repo_arg" in
-              */*/*)
-                [ "''${repo_arg%%/*}" = github.com ] || {
-                  printf 'gh: only github.com is available in the agent environment\n' >&2
-                  exit 4
-                }
-                ;;
-            esac
-            ;;
-        esac
-      done
-
-      if [ -n "''${GH_HOST:-}" ] && [ "$GH_HOST" != github.com ]; then
-        printf 'gh: only github.com is available in the agent environment\n' >&2
-        exit 4
-      fi
-
-      export GH_CONFIG_DIR=${agentGhConfig}
-      export GH_HOST=github.com
-      unset GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN
-
-      tokenFile=""
-      # Project routing supports the canonical `gh project ...` form.
-      if [ "''${1:-}" = project ]; then
-        tokenFile=${lib.escapeShellArg cfg.projectsToken}
-      else
-        if ! remote=$(${lib.getExe pkgs.git} remote get-url origin 2>/dev/null); then
-          printf 'gh: no origin remote; refusing operator credential fallback\n' >&2
-          exit 4
-        fi
-
-        case "$remote" in
-          https://github.com/*) repo=''${remote#https://github.com/} ;;
-          ssh://git@github.com/*) repo=''${remote#ssh://git@github.com/} ;;
-          git@github.com:*) repo=''${remote#git@github.com:} ;;
-          *)
-            printf 'gh: origin is not a supported GitHub remote; refusing operator credential fallback\n' >&2
-            exit 4
-            ;;
-        esac
-
-        owner=''${repo%%/*}
-        owner=''${owner,,}
-        case "$owner" in
-        ${ownerCases}
-          *) tokenFile="" ;;
-        esac
-      fi
-
-      if [ -z "$tokenFile" ] || [ ! -r "$tokenFile" ]; then
-        printf 'gh: no agent credential for this command; refusing operator credential fallback\n' >&2
-        exit 4
-      fi
-
-      GH_TOKEN=$(<"$tokenFile")
-      if [ -z "$GH_TOKEN" ]; then
-        printf 'gh: agent credential file is empty\n' >&2
-        exit 4
-      fi
-      export GH_TOKEN
-      unset GITHUB_TOKEN
-      exec ${lib.getExe pkgs.gh} "$@"
     '';
   };
 
@@ -228,15 +131,15 @@ let
     # (`git -c` and GIT_CONFIG_GLOBAL are still the agent's to set), just the
     # right default.
     [user]
-      name = ${userConfig.fullName}
-      email = ${userConfig.email}
+      name = ${gitAuthor.name}
+      email = ${gitAuthor.email}
     ${lib.optionalString (cfg.signingKeyFile != "") ''
       signingkey = ${cfg.signingKeyFile}
     ''}
     [credential]
       useHttpPath = true
     [credential "https://github.com"]
-      helper = ${lib.getExe credentialHelper}
+      helper = !${lib.getExe agentGithubRouter} --config ${credentialRouterConfig} credential
     [url "https://github.com/"]
       insteadOf = ssh://git@github.com/
       insteadOf = git@github.com:
@@ -293,13 +196,17 @@ let
   '';
 in
 lib.mkIf enabled {
-  # Options live in shared/options.nix — the myOptions tree is forwarded into
-  # home-manager, so a system-only declaration breaks HM's copy.
-  myOptions.agentGit.gitconfigPath = "${agentGitconfig}";
-
-  home-manager.sharedModules = [
+  assertions = [
     {
-      programs.gh.package = agentGh;
+      assertion = lib.length normalizedOwners == lib.length (lib.unique normalizedOwners);
+      message = "myOptions.agentGit.ownerTokens contains owner names that differ only by case";
     }
   ];
+
+  # Options live in shared/options.nix — the myOptions tree is forwarded into
+  # home-manager, so a system-only declaration breaks HM's copy.
+  myOptions.agentGit = {
+    ghPackage = agentGh;
+    gitconfigPath = "${agentGitconfig}";
+  };
 }

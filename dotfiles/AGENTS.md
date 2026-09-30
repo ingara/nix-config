@@ -1,13 +1,20 @@
 # Dotfiles
 
-Dotfiles are per-file `mkOutOfStoreSymlink`ed — edits are live without rebuilds.
-Each file in `public/dotfiles/<app>/` becomes an individual symlink at
-`~/.config/<app>/<file>`, so Nix-generated files (theme files, palette files) can
-coexist alongside live-edit dotfiles in the same `~/.config/<app>/` directory.
+Dotfiles are linked per file. Profiles with `myOptions.mutableDotfiles = true`
+use `mkOutOfStoreSymlink`, so edits are live without rebuilds; immutable
+profiles use store-backed sources. Each file in `public/dotfiles/<app>/` lands
+at `~/.config/<app>/<file>`, so Nix-generated files (theme files, palette files)
+can coexist with source dotfiles in the same `~/.config/<app>/` directory.
 
-Shell scripts are the exception: files in `scripts/` must be wrapped via
-`writeShellScriptBin` in `public/modules/shared/packages.nix` to land in
-`$PATH`.
+Shell scripts are the exception: files in `scripts/` must be wrapped by their
+owning Nix module to land in `$PATH`. Prefer `writeShellApplication` when the
+script invokes external runtime dependencies.
+
+Launchd plugins do not inherit interactive-shell PATH. Declare external tools
+through the owning service's runtime-package option; for SketchyBar, use
+`services.sketchybar.extraPackages`. Verify with the generated plist's
+environment. Literal `$HOME` and `$USER` in plist PATH entries are not
+expanded.
 
 ## Neovim
 
@@ -15,15 +22,10 @@ Base is **LazyVim**. Check `lazyvim.plugins.extras.*` imports in
 `lua/config/lazy.lua` before extending any plugin — extras may already register
 keybinds and commands.
 
-## Tmux + Zellij
+## Tmux
 
-Both multiplexers are deliberately maintained in parallel. Any keybind or theme
-change must land in **both**:
-
-- tmux: `public/modules/shared/home/tmux.nix` (Nix-generated, rebuild required)
-- zellij: `public/dotfiles/zellij/config.kdl` (live-edit) plus the Nix-generated
-  sidecars in `public/modules/shared/home/terminal-themes.nix`
-  (`themes/stylix.kdl`, `layouts/zjstatus.kdl`, `session-colors.sh`)
+Tmux is the maintained classic multiplexer. Its configuration lives in
+`public/modules/shared/home/tmux.nix` and requires a rebuild after changes.
 
 ## Theming
 
@@ -37,24 +39,22 @@ Single source of truth: `myOptions.theme.scheme` in
    `inputs.tinted-schemes/base16/<scheme>.yaml`
 2. `public/modules/shared/home/theme.nix` exposes `config.lib.myTheme.*`
    (scheme name, polarity, YAML path)
-3. `stylix-base.nix` (shared HM core) reads `myTheme` and sets
-   `stylix.base16Scheme` / `stylix.polarity`, plus the global fonts
-   (`stylix.fonts.*` — monospace is Pragmasevka) and `stylix.opacity.terminal`
-4. Stylix auto-themes apps via its targets (starship, tmux, fish, fzf, bat,
-   ghostty, wezterm, zellij, jankyborders, KDE Plasma) — terminal font and
-   opacity flow from the globals in 3, so don't set them per-app
-5. Custom adapters handle apps Stylix doesn't support:
+3. `cli-ux.nix` applies that palette to portable terminal targets (starship,
+   fish, fzf, bat); provider modules such as `tmux.nix` own their targets
+4. `stylix-base.nix` layers global fonts, terminal opacity, and graphical
+   targets onto full user profiles; terminal font and opacity flow from those
+   globals, so don't set them per-app
+5. Custom adapters handle apps that need more control than a Stylix target:
    - `nvim-theme.nix` → generates `nvim/lua/theme.lua` (palette + colorscheme
      name)
    - `sketchybar.nix` → generates `sketchybar/colors.sh` (30 `COLOR_*` vars)
-   - `terminal-themes.nix` → generates `zellij/themes/stylix.kdl`
 
 ### Edit patterns
 
-| Pattern                                    | Apps                                                                                                                                                                                     | Workflow                                                    |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Per-file `mkOutOfStoreSymlink` (live-edit) | nvim, zellij config.kdl, sketchybar plugins, aerospace, yabai, skhd, wezterm/extra, git/extra                                                                                            | Edit `~/.config/<app>/<file>` directly; changes are instant |
-| Nix-generated (rebuild required)           | starship, tmux, fish, fzf, bat, ghostty (`programs.ghostty`), lazygit (`programs.lazygit`), wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, `colors.sh`, `themes/stylix*` | Edit the Nix module; run `just switch`                      |
+| Pattern                          | Apps                                                                                                                                                                   | Workflow                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Per-file source links            | nvim, sketchybar plugins, aerospace, yabai, skhd, wezterm/extra, git/extra                                                                                             | Live in mutable profiles; rebuild in store-backed profiles |
+| Nix-generated (rebuild required) | starship, tmux, fish, fzf, bat, ghostty (`programs.ghostty`), lazygit (`programs.lazygit`), wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, `colors.sh` | Edit the Nix module; run `just switch`                     |
 
 ### Adding a new theme
 
