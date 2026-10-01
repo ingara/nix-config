@@ -84,6 +84,14 @@ in
         "ctrl+7=csi:55;5u"
         "ctrl+8=csi:56;5u"
         "ctrl+9=csi:57;5u"
+
+        # Word deletion as literal bytes, like Ghostty's default alt+arrow
+        # word motion (esc:b/esc:f): those pass through Herdr into every pane
+        # app, while the encoded Option+Backspace does not arrive reliably.
+        # Ctrl-W deletes the word backward; ESC d (the Alt+D sequence, which the
+        # window manager keeps for itself) deletes the word forward.
+        "alt+backspace=text:\\x17"
+        "alt+shift+backspace=esc:d"
       ];
     };
   };
