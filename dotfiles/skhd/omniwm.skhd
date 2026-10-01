@@ -1,6 +1,12 @@
-# OmniWM skhd bindings — intentionally empty.
-#
-# skhdrc .loads this file whenever OmniWM is enabled, but skhd grabs keys at the
-# event-tap level even when OmniWM isn't the active WM — so any bind here shadows
-# the active WM's own hotkeys. Leave it empty (OmniWM uses internal hotkeys)
-# until the rig only loads a WM's binds when that WM is active/default.
+# OmniWM v0.7.4 skhd layer — commands its native hotkey schema cannot bind.
+# Only active via wm-switch's active-wm.skhd; skhd consumes chords even when a
+# CLI command fails, so never include this beside another WM's bindings.
+# Absolute CLI path: skhd's launchd PATH does not include Homebrew or Nix.
+alt - comma : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command consume-window-into-column
+alt - period : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command expel-window-from-column
+alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus left
+alt - d : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus right
+shift + alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command move left
+shift + alt - d : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command move right
+alt - r : sh ~/.config/skhd/omniwm-ratio.sh 66.667% 33.333%
+shift + alt - r : sh ~/.config/skhd/omniwm-ratio.sh 33.333% 66.667%

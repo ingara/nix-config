@@ -5,9 +5,8 @@
 #     no hotkeys.toml action id, so they route through nehir-ratio.sh.
 #
 # Absolute nehirctl path — the skhd agent's launchd PATH has no Homebrew bin
-# dir. skhdrc loads this whenever nehir is *enabled* and skhd grabs at the
-# event-tap level regardless of which WM runs, so under another WM these keys
-# are dead rather than passed through.
+# dir. wm-switch selects this layer only while Nehir is active; loading it
+# alongside another WM would swallow that WM's native hotkeys.
 
 alt - a : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus left
 alt - d : /Applications/Nehir.app/Contents/MacOS/nehirctl command focus right

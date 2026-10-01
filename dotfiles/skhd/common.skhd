@@ -1,9 +1,8 @@
 # Terminal — Opt+Return → bare Ghostty; Opt+Shift+Return → Ghostty in the shared
 # `main` tmux session (docs/keybindings.md canonical terminal).
-# WM-agnostic: common.skhd loads on every enabled macOS WM. nehir/aerospace/
-# yabai don't bind Opt+Return (they're WMs, not launchers — verified). OmniWM's
-# native hotkeys are GUI-managed and not introspectable; if it ever binds
-# Opt+Return both could fire, but OmniWM isn't a default WM today (dormant).
+# WM-agnostic: common.skhd stays loaded across the Nehir/OmniWM run-one switch
+# (and under other enabled macOS WMs). The canonical terminal chord is reserved
+# for Ghostty here, not by either WM's native hotkey configuration.
 # `open -na` opens a new window each press (macOS has no CLI to add a window to
 # the running instance — Ghostty's +new-window is Linux-only); the per-launch
 # --window-save-state=never stops that instance from restoring the previous

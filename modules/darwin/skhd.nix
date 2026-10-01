@@ -7,9 +7,8 @@
 # TCC prompts, grabber + dext installation).
 #
 # Config files + entrypoint: written here (this module owns skhd's whole
-# concern). Selective per-WM .skhd links + the generated skhdrc that .loads only
-# the enabled WMs' bundles — skhdrc is generated, so a whole-dir symlink would
-# collide with it. Homebrew cask: homebrew.nix.
+# concern). The Nehir/OmniWM pair has one runtime-selected include, written by
+# wm-switch; generic WM loading remains unchanged. Homebrew cask: homebrew.nix.
 { lib, ... }:
 let
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
@@ -24,9 +23,27 @@ in
         # isDarwin guard the central dotfiles.nix used is implicit here.
         anyWM = wm.enabled != [ ];
         src = relPath: dots.mkSource { inherit config relPath; };
+        runOne = lib.elem wm.default [
+          "nehir"
+          "omniwm"
+        ];
       in
       {
         home.activation.restartSkhd = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+          ${lib.optionalString runOne ''
+            # Keep this atomic and under wm-switch's lock: a concurrent switch
+            # must not turn the placeholder write into a write through its
+            # mutable-dotfile symlink.
+            /bin/mkdir -p "$HOME/.local/state"
+            /usr/bin/lockf -t 120 "$HOME/.local/state/wm-switch.lock" /bin/sh -c '
+              layer="$HOME/.config/skhd/active-wm.skhd"
+              if [ ! -e "$layer" ]; then
+                tmp=$(/usr/bin/mktemp "$HOME/.config/skhd/.active-wm.XXXXXXXX") || exit 1
+                /usr/bin/printf "%s\n" "# no active WM-specific bindings" > "$tmp" || exit 1
+                /bin/mv -f "$tmp" "$layer"
+              fi
+            ' || exit 1
+          ''}
           # `skhd --restart-service` (SMAppService) fails with SpawnFailed in
           # the activation context — kickstart the agent via launchd instead.
           /bin/launchctl kickstart -k "gui/$(id -u)/com.jackielii.skhd" || true
@@ -43,8 +60,7 @@ in
                   ''.load "common.skhd"''
                 ]
                 ++ lib.optional (lib.elem "yabai" wm.enabled) ''.load "yabai.skhd"''
-                ++ lib.optional (lib.elem "omniwm" wm.enabled) ''.load "omniwm.skhd"''
-                ++ lib.optional (lib.elem "nehir" wm.enabled) ''.load "nehir.skhd"''
+                ++ lib.optional runOne ''.load "active-wm.skhd"''
               )
               + "\n";
           }
@@ -53,6 +69,7 @@ in
           }
           // lib.optionalAttrs (lib.elem "omniwm" wm.enabled) {
             "skhd/omniwm.skhd".source = src "skhd/omniwm.skhd";
+            "skhd/omniwm-ratio.sh".source = src "skhd/omniwm-ratio.sh";
           }
           // lib.optionalAttrs (lib.elem "nehir" wm.enabled) {
             "skhd/nehir.skhd".source = src "skhd/nehir.skhd";

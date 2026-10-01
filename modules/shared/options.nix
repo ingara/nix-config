@@ -222,6 +222,29 @@ in
           `enabled`). Drives the /etc/nix-config/wm-backend marker.
         '';
       };
+      omniwm.routing.arrangements = lib.mkOption {
+        type = lib.types.listOf (
+          lib.types.submodule {
+            options = {
+              id = lib.mkOption { type = lib.types.str; };
+              monitors = lib.mkOption {
+                type = lib.types.listOf (
+                  lib.types.submodule {
+                    options = {
+                      monitorName = lib.mkOption { type = lib.types.str; };
+                      monitorDisplayUUID = lib.mkOption { type = lib.types.str; };
+                      gridColumn = lib.mkOption { type = lib.types.int; };
+                      gridRow = lib.mkOption { type = lib.types.int; };
+                    };
+                  }
+                );
+              };
+            };
+          }
+        );
+        default = [ ];
+        description = "UUID-keyed OmniWM routing grids; an empty list follows the macOS arrangement.";
+      };
     };
     mutableDotfiles = lib.mkOption {
       type = lib.types.bool;

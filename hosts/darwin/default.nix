@@ -28,7 +28,7 @@ in
       "nehir"
       "omniwm"
     ];
-    default = "nehir";
+    default = "omniwm";
   };
 
   # The default Nix build user group ID changed from 30000 to 350; this

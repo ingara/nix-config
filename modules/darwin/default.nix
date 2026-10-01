@@ -57,6 +57,7 @@ in
           ./colima.nix
           ./paneru.nix
           ./nehir.nix
+          ./omniwm.nix
           ../shared/home
           ../shared/home/stylix-base.nix
         ];

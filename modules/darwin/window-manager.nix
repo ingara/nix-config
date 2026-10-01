@@ -6,8 +6,8 @@
 }:
 
 let
-  # `myOptions.windowManager` is declared in modules/shared/options.nix (shared
-  # so the HM side reads it too). `enabled` = installed WMs; `default` = active.
+  # `enabled` selects installed WMs; `default` is the login choice. A manual
+  # switch changes only runtime state, not this option.
   cfg = config.myOptions.windowManager;
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
 
@@ -29,55 +29,25 @@ let
   # candidates at the Homebrew boundary.
   switchableCasks = map (w: if w == "nehir" then "nehir@rc" else w) switchable;
   enabledBash = lib.concatStringsSep " " switchable;
+  # Detect a previously enabled app still running across a configuration
+  # change, even if it is no longer eligible as a target.
+  known = lib.attrNames knownApp;
+  knownBash = lib.concatStringsSep " " known;
   # Quote each array element so a multi-word app name (none today) stays one value.
-  appAssoc = lib.concatStringsSep " " (map (w: ''["${w}"]="${knownApp.${w}}"'') switchable);
+  appAssoc = lib.concatStringsSep " " (map (w: ''["${w}"]="${knownApp.${w}}"'') known);
 
-  # `wm-switch <backend>`: quit the other enabled WMs (guarded so a non-running
-  # one isn't cold-launched just to be quit — AppleScript `quit` otherwise
-  # launches the target), then `open -a` the target. No skhd reload needed for
-  # the nehir+omniwm pair: skhdrc statically loads omniwm.skhd whenever omniwm is
-  # enabled, and those bindings (→omniwmctl) are inert while omniwm isn't running;
-  # nehir uses internal hotkeys. (skhd reloads on config change via skhd.nix's
-  # activation hook.) Absolute tool paths — launchd's PATH is minimal. A live
-  # switch is transient; `default` is what returns on reboot/redeploy.
+  # Run-one lifecycle: exact /Applications casks, serialized quit-then-open,
+  # bounded state/IPC checks, and rollback if the new manager cannot start.
+  # The script also selects the only active WM-specific skhd layer; `default`
+  # still returns at login. Launchd's PATH is minimal, so use absolute tools.
   wmSwitch = pkgs.writeShellApplication {
     name = "wm-switch";
     text = ''
       ENABLED=( ${enabledBash} )
+      KNOWN=( ${knownBash} )
       declare -A APP=( ${appAssoc} )
-
-      if [ $# -ne 1 ]; then
-        echo "usage: wm-switch <''${ENABLED[*]}>" >&2
-        exit 2
-      fi
-      target="$1"
-
-      in_enabled=0
-      for w in "''${ENABLED[@]}"; do [ "$w" = "$target" ] && in_enabled=1; done
-      if [ "$in_enabled" != 1 ]; then
-        echo "wm-switch: '$target' not in switchable set (''${ENABLED[*]})" >&2
-        exit 1
-      fi
-
-      # Launch the target FIRST. If it can't launch (cask not yet installed, or
-      # not registered with LaunchServices), bail before quitting anything — a
-      # failed switch then leaves the current WM running instead of tearing it
-      # down with no replacement. `open -a` on an already-running app just
-      # focuses it (single-instance), so this is a no-op when target is live.
-      if ! /usr/bin/open -a "''${APP[$target]}"; then
-        echo "wm-switch: could not launch ''${APP[$target]} (cask installed?) — keeping current WM" >&2
-        exit 1
-      fi
-
-      # Now quit the other enabled WMs. The `is running` guard keeps a non-running
-      # WM from being cold-launched just to receive a quit. pkill -x is the fallback.
-      for w in "''${ENABLED[@]}"; do
-        [ "$w" = "$target" ] && continue
-        app="''${APP[$w]}"
-        /usr/bin/osascript -e "if application \"$app\" is running then tell application \"$app\" to quit" >/dev/null 2>&1 \
-          || /usr/bin/pkill -x "$app" >/dev/null 2>&1 || true
-      done
-    '';
+    ''
+    + builtins.readFile ./wm-switch.sh;
   };
 in
 {
@@ -98,9 +68,10 @@ in
             };
         in
         {
-          # `wm-switch` on the user's PATH for manual runtime switching — only on
-          # hosts that actually have a switchable WM (else it would always exit 1).
-          home.packages = lib.optionals (switchable != [ ]) [ wmSwitch ];
+          # `wm-switch` only supports hosts whose default uses this run-one
+          # lifecycle. A secondary cask beside yabai/aerospace cannot be
+          # safely switched while that different manager is running.
+          home.packages = lib.optionals (lib.elem cfg.default switchable) [ wmSwitch ];
           xdg.configFile =
             lib.optionalAttrs (lib.elem "yabai" wm.enabled) (mkDir "yabai")
             // lib.optionalAttrs (lib.elem "aerospace" wm.enabled) (mkDir "aerospace");
@@ -108,16 +79,9 @@ in
       )
     ];
 
-    # Marker files consumed by `just _post-switch-darwin` / `just restart-wm`.
-    # `wm-backend` is the active WM key (`default`), not the full enabled set;
-    # `wm-backend-app` is its LaunchServices app name when `default` is an
-    # open-a WM (empty otherwise), letting `restart-wm` quit+reopen it without
-    # re-encoding the knownApp map in the justfile. Both avoid a slow `nix eval`
-    # and a fragile regex-grep at recipe time.
+    # Configured login default for `just _post-switch-darwin` and `just restart-wm`;
+    # a manual wm-switch selection does not change this marker.
     environment.etc."nix-config/wm-backend".text = cfg.default;
-    environment.etc."nix-config/wm-backend-app".text = lib.optionalString (
-      knownApp ? ${cfg.default}
-    ) knownApp.${cfg.default};
 
     # Yabai service + scripting addition only when yabai is the active WM (the
     # SA carries a SIP-exception / sudoers cost — only pay it when it runs).
@@ -141,10 +105,9 @@ in
         };
       })
 
-      # Run-one autostart: launch `default` via wm-switch at login. Only for the
-      # open-a-lifecycle WMs (knownApp) — yabai self-starts via services.yabai,
-      # so no agent here when it's the default.
-      (lib.mkIf (knownApp ? ${cfg.default}) {
+      # Run-one autostart: launch `default` via wm-switch at login. A
+      # switchable cask on a host with another default has no run-one agent.
+      (lib.mkIf (lib.elem cfg.default switchable) {
         wm-autostart.serviceConfig = {
           ProgramArguments = [
             "${wmSwitch}/bin/wm-switch"
