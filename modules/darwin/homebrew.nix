@@ -57,6 +57,7 @@
       "upscayl"
       "vial"
       "visual-studio-code"
+      "vivaldi"
       "whatsapp"
       "zen"
       "zoom"
