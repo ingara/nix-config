@@ -2,8 +2,10 @@
 # Only active via wm-switch's active-wm.skhd; skhd consumes chords even when a
 # CLI command fails, so never include this beside another WM's bindings.
 # Absolute CLI path: skhd's launchd PATH does not include Homebrew or Nix.
-alt - comma : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command consume-window-into-column
-alt - period : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command expel-window-from-column
+# Comma/period as ANSI key codes (0x2B/0x2F): skhd.zig has no `comma`/`period`
+# literal and exits on the parse error, taking every layer down with it.
+alt - 0x2B : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command consume-window-into-column
+alt - 0x2F : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command expel-window-from-column
 alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus left
 alt - d : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus right
 shift + alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command move left
