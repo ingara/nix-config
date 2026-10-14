@@ -35,14 +35,12 @@ lib.mkIf (wm.enabled != [ ]) {
 
   # Ensure the shared screenshot target exists (satty's save path under
   # Hyprland, screenshot-path under niri) so saving never fails on a missing
-  # dir. .keep is the conventional placeholder for an otherwise-empty tracked
-  # directory.
+  # dir.
   home.file."Pictures/Screenshots/.keep".text = "";
 
-  # fuzzel is the launcher fallback. Not dotfile-managed, so the HM module +
-  # its Stylix target are the clean path (installs fuzzel and themes it). A
-  # per-host desktop shell overrides each WM's launcher bind; fuzzel stays
-  # installed as the shell-independent fallback.
+  # fuzzel is the launcher fallback: a per-host desktop shell overrides each
+  # WM's launcher bind, and fuzzel stays installed as the shell-independent
+  # fallback.
   programs.fuzzel.enable = true;
 
   # Polkit agent — required for privilege prompts (e.g. 1Password's
@@ -68,9 +66,8 @@ lib.mkIf (wm.enabled != [ ]) {
   # of the base16 scheme (rose-pine-cursor ships only the dark/Dawn pair, not a
   # per-scheme set). Stylix's cursor option wires home.pointerCursor with
   # x11.enable + gtk.enable, so XCURSOR_THEME/SIZE (read by both compositors
-  # and XWayland) and the GTK cursor all resolve the same theme. niri.nix
-  # additionally mirrors it into niri's own cursor block. Size 28 matches this
-  # machine's shared 4K display.
+  # and XWayland) and the GTK cursor all resolve the same theme. Size 28 matches
+  # this machine's shared 4K display.
   stylix.cursor = {
     package = pkgs.rose-pine-cursor;
     name = "BreezeX-RosePine-Linux";

@@ -7,6 +7,7 @@ return {
   { "rose-pine/neovim", name = "rose-pine" },
   { "folke/tokyonight.nvim" },
   { "rebelot/kanagawa.nvim" },
+  { "nyoom-engineering/oxocarbon.nvim" },
 
   -- Mode-aware cursor; preset config is base16-driven, see theme_reactive.lua.
   {

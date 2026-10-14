@@ -372,8 +372,9 @@ in
           "tokyo-night-light"
           "kanagawa"
           "kanagawa-dragon"
+          "oxocarbon-dark"
         ];
-        default = "rose-pine-moon";
+        default = "oxocarbon-dark";
         description = ''
           Active base16 color scheme. Drives Stylix across every themed
           surface (terminals, editors, status bars, GTK/Qt, KDE Plasma,

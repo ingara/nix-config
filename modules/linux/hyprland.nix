@@ -35,11 +35,38 @@ let
     c.base0D # blue
     c.base0E # magenta
   ];
+
+  gamesWorkspace = "2";
+
+  # Native Linux games set their own X11 class, so no class regex covers every
+  # Steam game. Steam exports SteamGameId only into the game's process tree
+  # (not the client or steamwebhelper), so on each new window this checks the
+  # owning PID's environment and applies the games-workspace treatment.
+  steamGameRules = pkgs.writeShellApplication {
+    name = "hypr-steam-games";
+    runtimeInputs = [
+      pkgs.gnugrep
+      pkgs.jq
+      pkgs.socat
+    ];
+    # hyprctl comes from the session PATH (system Hyprland, package = null).
+    text = ''
+      sock="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+      socat -U - "UNIX-CONNECT:$sock" | while IFS= read -r line; do
+        [[ $line == openwindow\>\>* ]] || continue
+        addr="''${line#openwindow>>}"
+        addr="0x''${addr%%,*}"
+        pid=$(hyprctl clients -j | jq -r --arg a "$addr" '.[] | select(.address == $a) | .pid') || continue
+        [[ $pid =~ ^[1-9][0-9]*$ ]] || continue
+        grep -qz '^SteamGameId=' "/proc/$pid/environ" 2>/dev/null || continue
+        hyprctl --batch "dispatch setfloating address:$addr; dispatch movetoworkspace ${gamesWorkspace},address:$addr" >/dev/null || true
+      done
+      # Hyprland drops socket2 clients that hang up or overflow; let systemd reconnect.
+      exit 1
+    '';
+  };
 in
 lib.mkIf (lib.elem "hyprland" wm.enabled) {
-  # ghostty (the terminal) is managed by programs.ghostty in shared/home/ghostty.nix
-  # — config + theme + the nixpkgs binary on NixOS, enabled on hasGui hosts — so
-  # it's deliberately absent from this host's package list.
   # Screenshots: grimblast is a self-contained grim+slurp+hyprctl wrapper
   # (it bundles its own grim/slurp/wl-clipboard via wrapper PATH); satty is
   # the post-capture editor. wl-clipboard is here for satty's copy-command.
@@ -79,11 +106,9 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
   #   - Switch  (hold Alt + Tab to cycle windows, release Alt to select) — the
   #     Windows-style alt-tab. Owns Alt+Tab.
   #   - Overview (Super + Tab) — expose all workspaces with live previews.
-  # config `version` is the current schema version.
   #
   # Theming: uses hyprshell's built-in GTK theme. There is no Stylix target; a
-  # base16 `style` (CSS from config.lib.stylix.colors) is a deliberate follow-up,
-  # not shipped here.
+  # base16 `style` (CSS from config.lib.stylix.colors) is a deliberate follow-up.
   services.hyprshell = {
     enable = true;
     systemd.enable = true; # runs `hyprshell run` under the wayland session
@@ -97,6 +122,22 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         };
       };
     };
+  };
+
+  systemd.user.services.hypr-steam-games = {
+    Unit = {
+      Description = "Float Steam games onto the games workspace";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      # graphical-session.target is shared with other compositors (niri).
+      ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+    };
+    Service = {
+      ExecStart = lib.getExe steamGameRules;
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # Compositor-specific Stylix target (the cross-WM ones — fuzzel/gtk/qt/cursor
@@ -146,10 +187,14 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       # unfocused window without raising or focusing it. Note hyprshell flips
       # this to 0 transiently while its switcher is open and restores this value.
       input.follow_mouse = 2;
+      # Crossing onto another monitor, or between a floating and a tiled window,
+      # doesn't move keyboard focus either; a game that drops fullscreen on
+      # focus loss stays put.
+      misc.mouse_move_focuses_monitor = false;
+      input.float_switch_override_focus = 0;
 
-      # Always-on VRR. The G8 is the only output, so global VRR (1) is correct;
-      # drop to 2 (fullscreen-only) if a second mixed-refresh output is ever
-      # added and the desktop flickers.
+      # Always-on VRR. Holds up with the mixed-refresh secondary attached; drop
+      # to 2 (fullscreen-only) if the desktop starts flickering.
       misc.vrr = 1;
 
       # Animations: snappy ease-out, no bounce. Hyprland's defaults use an
@@ -225,10 +270,12 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       # game is otherwise a tiled column underneath, so losing focus (e.g.
       # alt-tabbing to Steam) drops the fullscreen and reveals it half-width
       # beside the other tiled window. Floating keeps it at its own size; the
-      # dedicated workspace isolates it (launching a game follows there).
+      # dedicated workspace isolates it (launching a game follows there). The
+      # class match applies before the window maps; the hypr-steam-games service
+      # catches native games whose class it can't know.
       windowrule = [
         "float on, match:class ^(steam_app_[0-9]+|gamescope)$"
-        "workspace 2, match:class ^(steam_app_[0-9]+|gamescope)$"
+        "workspace ${gamesWorkspace}, match:class ^(steam_app_[0-9]+|gamescope)$"
       ];
 
       # ALT is the modifier to mirror the macOS workstation (nehir/aerospace)
@@ -238,9 +285,8 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       "$mod" = "ALT";
       "$terminal" = "ghostty";
       "$termmux" = "ghostty -e tmux new -A -s main";
-      # Generic launcher default. A per-host desktop-shell layer (e.g. a
-      # Noctalia/Quickshell shell) overrides this to the shell's own launcher;
-      # fuzzel stays installed as a shell-independent fallback.
+      # A per-host desktop-shell layer (e.g. a Noctalia/Quickshell shell)
+      # overrides this to the shell's own launcher.
       "$menu" = lib.mkDefault "fuzzel";
 
       bind = [
@@ -281,9 +327,8 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         "$mod, A, movefocus, l"
         "$mod, D, movefocus, r"
         "$mod, X, focuscurrentorlast" # alt+x: back-and-forth between two windows
-        # NOTE: alt+tab is intentionally NOT bound here — hyprshell (below, in
-        # the HM service block) self-registers it as the visual window switcher.
-        # A `cyclenext` bind on alt+tab would collide with hyprshell's grab.
+        # alt+tab belongs to hyprshell (services.hyprshell above); a bind here
+        # would collide with its grab.
 
         # Move the active window — alt+shift+hjkl. movewindow is layout-generic
         # and supported under scrolling (reorders columns h/l, moves within a
@@ -295,12 +340,12 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         "$mod SHIFT, A, movewindow, l"
         "$mod SHIFT, D, movewindow, r"
 
-        # Resize column width — Mod+-/= (convention resize tier; frees the
-        # Ctrl+Alt tier). colresize is the scrolling layout's native width
-        # control (relative fraction, ±0.1 ≈ a 10% nudge); resizeactive isn't
-        # documented to drive column width under this layout. Height resize has
-        # NO scrolling-layout message, so Mod+Shift+-/= (height) is left unbound
-        # — a documented gap vs the convention.
+        # Resize column width — Mod+-/= (convention resize tier). colresize is
+        # the scrolling layout's native width control (relative fraction,
+        # ±0.1 ≈ a 10% nudge); resizeactive isn't documented to drive column
+        # width under this layout. Height resize has NO scrolling-layout message,
+        # so Mod+Shift+-/= (height) is left unbound — a documented gap vs the
+        # convention.
         "$mod, minus, layoutmsg, colresize -0.1"
         "$mod, equal, layoutmsg, colresize +0.1"
 

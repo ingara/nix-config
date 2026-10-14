@@ -253,9 +253,6 @@ in
     };
   };
 
-  # The WM-agnostic session plumbing (launcher, polkit agent, cursor theme,
-  # playerctl, cross-WM Stylix targets, the screenshot dir) comes from
-  # wm-common.nix — this module renders only the niri config itself.
   config = lib.mkIf (lib.elem "niri" wm.enabled) {
     xdg.configFile."niri/config.kdl".source = validatedConfig;
   };

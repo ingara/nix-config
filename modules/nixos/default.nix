@@ -6,6 +6,7 @@
 {
   imports = [
     ./1password.nix
+    ./nixos-version.nix
   ];
 
   programs.nix-ld.enable = true;

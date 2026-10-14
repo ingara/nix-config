@@ -39,6 +39,7 @@
       "google-chrome"
       "jordanbaird-ice@beta"
       "lookaway"
+      "mattermost"
       "notion"
       "obsidian"
       "postico"

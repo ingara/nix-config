@@ -11,7 +11,7 @@ let
   cfg = config.myOptions.windowManager;
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
 
-  # Multi-WM run-one (design §3.3). nehir/omniwm are LSUIElement GUI `.app`
+  # Multi-WM run-one. nehir/omniwm are LSUIElement GUI `.app`
   # casks: their lifecycle is LaunchServices (`open -a`) + AppleScript quit, NOT
   # a bare-binary launchd agent (which loses Accessibility/TCC context and would
   # double-launch nehir's self-registered login item). So instead of per-WM

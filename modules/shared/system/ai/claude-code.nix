@@ -183,6 +183,8 @@ let
       "Read(**/.env)"
       "Read(**/*.pem)"
       "Read(**/*.age)"
+      # SOPS-encrypted secret stores; matches the OpenCode deny.
+      "Read(**/secrets/*)"
       # sops decryption to stdout. Best-effort only — shell argument matching is
       # not a trust boundary (the file-read denies and the sandbox are the real
       # control) — but it blocks the obvious forms per the never-decrypt rule.

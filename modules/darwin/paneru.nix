@@ -38,9 +38,8 @@ in
   services.paneru = {
     # paneru's upstream homeModule auto-starts (RunAtLoad) whenever enabled, so
     # in a multi-WM setup it would run at login even when it isn't `default`.
-    # Reconciling that (a runtime evictor for non-default agents) is part of the
-    # run-one mechanics still to land (design §3.3 / tasks.md 2.3). Today only
-    # single-WM hosts exist, so `enabled` membership == active and this is dormant.
+    # paneru sits outside the wm-switch run-one (window-manager.nix), so enable
+    # it only as a host's sole WM.
     enable = lib.elem "paneru" cfg.enabled;
     settings = {
       options = {
