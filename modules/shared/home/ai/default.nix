@@ -3,6 +3,7 @@ _: {
   imports = [
     ./herdr.nix
     ./herdr-agent-display.nix
+    ./herdr-agent-summary.nix
     ./herdr-plugins.nix
     ./opencode.nix
     ./lavish.nix

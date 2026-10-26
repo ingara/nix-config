@@ -119,6 +119,21 @@ let
       }
     ])
   ]
+  # Tokens from the agent-summary plugin; only one of the pair is set.
+  ++ lib.optional (cfg.agentDisplay.summaryRows == "all") [
+    {
+      token = "$agent_summary";
+      fg = colors.base04;
+      bold = false;
+      dim = true;
+    }
+    {
+      token = "$agent_summary_stale";
+      fg = colors.base03;
+      bold = false;
+      dim = true;
+    }
+  ]
   ++ lib.optional (cfg.agentDisplay.titleRows == "all") [
     {
       token = "$agent_title";
@@ -260,6 +275,18 @@ in
       ];
       default = "none";
       description = "Whether every agent has a stripped terminal-title row.";
+    };
+    summaryRows = lib.mkOption {
+      type = lib.types.enum [
+        "none"
+        "all"
+      ];
+      default = if cfg.agentSummary.enable or false then "all" else "none";
+      defaultText = lib.literalExpression ''if config.programs.herdr.agentSummary.enable then "all" else "none"'';
+      description = ''
+        Whether agents with an `agentSummary` line show it in a dimmed row below
+        their name.
+      '';
     };
     groupGap = lib.mkOption {
       type = lib.types.enum [

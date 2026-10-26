@@ -1,7 +1,7 @@
 # Gaming stack for NixOS (the `gaming` tag). programs.steam auto-pulls the
 # 32-bit libraries + udev rules; hardware.graphics.enable32Bit provides the
 # 32-bit GL/Vulkan that Proton and Wine titles need.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   programs.steam = {
     enable = true;
@@ -17,7 +17,16 @@
   };
 
   programs.gamescope.enable = true;
-  programs.gamemode.enable = true;
+  programs.gamemode = {
+    enable = true;
+    # The iGPU heuristic reads root-only RAPL energy_uj and fails every
+    # launch; the documented -1 doesn't disable it, only >= 10000
+    # short-circuits the read (FeralInteractive/gamemode#367).
+    settings.general.igpu_power_threshold = 10000;
+  };
+  # gamemode's polkit rule only lets this group run the governor/split-lock
+  # helpers; outside it every game launch raises a password prompt.
+  users.users.${config.myOptions.user.username}.extraGroups = [ "gamemode" ];
 
   # 32-bit OpenGL/Vulkan for Steam/Proton titles. (The driver itself —
   # videoDrivers + hardware.nvidia + hardware.graphics.enable — is the nvidia
