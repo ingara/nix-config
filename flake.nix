@@ -87,7 +87,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lavish-axi = {
-      url = "github:kunchenguid/lavish-axi/lavish-axi-v0.1.79";
+      url = "github:kunchenguid/lavish-axi/lavish-axi-v0.1.93";
       flake = false;
     };
     aerospace-scratchpad = {
