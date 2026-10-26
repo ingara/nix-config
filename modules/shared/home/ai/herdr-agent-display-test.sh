@@ -4,6 +4,7 @@ set -euo pipefail
 
 display_bin="$1"
 bash_bin="$2"
+rows_file="$3"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT
 
@@ -125,14 +126,14 @@ jq -e '
     ["impl", null, null, "\u200b        ! implementation"],
     ["worker", null, null, "\u200b        ✓ helper"],
     ["notes", null, "\u200b  notes", "\u200b  – plain"],
-    ["review", "project", "\u200bfeature-b", "\u200b  ◆ reviewer"],
+    ["review", "project", "\u200bfeature-b", "\u200b  ◇ reviewer"],
     ["writer", null, null, "\u200b        – writer"],
     ["root", null, "\u200b  project", "\u200b  ▶ root"],
     ["child", null, null, "\u200b        ✓ child"],
     ["solo", null, "\u200b  solo", "\u200b  ⋯ solo"],
     ["cleanup", null, null, "\u200b        ! cleanup"],
     ["orphan", null, "\u200b  missing", "\u200b  ? orphan"],
-    ["alone", null, "\u200b  alone", "\u200b  ◆ alone"],
+    ["alone", null, "\u200b  alone", "\u200b  ◇ alone"],
     ["first", null, "\u200b  fresh", "\u200b      – first"]
   ]
   and all(.[];
@@ -223,7 +224,7 @@ jq '
 HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/worker-age.json" "$display_bin" --all
 parse_reports
 jq -e '
-  .[0].tokens.agent_lead == "\u200b  ◆ alpha"
+  .[0].tokens.agent_lead == "\u200b  ◇ alpha"
   and .[1].tokens.agent_worker_quiet == "\u200b        – implementation"
   and .[1].tokens.agent_worker == null
 ' "$reports"
@@ -247,6 +248,38 @@ for status in working blocked 'done' idle unknown; do
   jq -e --arg mark "$mark" '.[0].tokens.agent_lead == "\u200b  " + $mark + " alpha"' "$reports"
 done
 
+# Rows must match a configured rule; Herdr reports done until a completion is seen.
+check_style() {
+  local pane="$1" status="$2" token="$3" expected="$4" bold="$5"
+  jq --arg pane "$pane" --arg status "$status" '
+    .result.snapshot.agents |= map(if .pane_id == $pane then .agent_status = $status else . end)
+  ' "$SNAPSHOT_FILE" >"$test_dir/style.json"
+  : >"$REPORT_LOG"
+  SNAPSHOT_FILE="$test_dir/style.json" "$display_bin" --all
+  parse_reports
+  style_fg="$(jq -er --arg pane "$pane" --arg token "$token" --arg expected "$expected" \
+    --argjson bold "$bold" --slurpfile rows "$rows_file" '
+    first(.[] | select(.pane == $pane)).tokens[$token] as $text
+    | first($rows[0][][] | objects | select(.token == "$" + $token)).rules as $rules
+    | first($rules[] | select(.contains as $mark | $text | contains($mark)))
+    | select($text == "\u200b" + $expected and .bold == $bold)
+    | .fg
+  ' "$reports")"
+}
+check_style alone 'done' agent_lead '  ◆ alone' true
+unread_fg="$style_fg"
+check_style alone idle agent_lead '  ◇ alone' false
+[ "$style_fg" = "$unread_fg" ]
+check_style alone 'done' agent_lead '  ◆ alone' true
+check_style alone working agent_lead '  ▶ alone' false
+check_style alone blocked agent_lead '  ! alone' true
+check_style notes working agent_lead '  ▶ plain' false
+check_style notes blocked agent_lead '  ! plain' true
+check_style lead idle agent_lead '  ⋯ alpha' false
+check_style review 'done' agent_lead '  ◆ reviewer' true
+check_style notes 'done' agent_lead '  ✓ plain' false
+check_style first working agent_worker '      ▶ first' false
+
 # Idle age is carried in owned metadata and advances only when a hook reruns this command.
 check_age() {
   local activity="$1" expected_token="$2" session="${3:-null}" state_seq="${4:-2}"
@@ -262,7 +295,7 @@ check_age() {
   HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/age.json" "$display_bin" --all
   parse_reports
   jq -e --arg token "$expected_token" '
-    .[0].tokens[$token] == "\u200b  ◆ alpha"
+    .[0].tokens[$token] == "\u200b  ◇ alpha"
     and ([.[0].tokens.agent_lead,
           .[0].tokens.agent_worker, .[0].tokens.agent_worker_quiet]
          | map(select(. != null)) | length) == 1
@@ -310,7 +343,7 @@ jq 'del(.result.snapshot.agents[0].tokens.agent_activity, .result.snapshot.agent
 HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/no-history.json" "$display_bin" --all
 parse_reports
 jq -e '
-  .[0].tokens.agent_lead == "\u200b  ◆ alpha"
+  .[0].tokens.agent_lead == "\u200b  ◇ alpha"
   and .[0].tokens.agent_activity == "term-lead|2|idle|"
 ' "$reports"
 

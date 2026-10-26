@@ -1,4 +1,4 @@
-_:
+{ lib, pkgs, ... }:
 
 let
   sessionVariables = {
@@ -8,5 +8,6 @@ let
 in
 {
   home = { inherit sessionVariables; };
+  systemd.user.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux sessionVariables;
   myOptions.developerEnvironmentParity.surfaces.cliPager = { inherit sessionVariables; };
 }

@@ -26,6 +26,7 @@ let
     "kanagawa" = "kanagawa-wave";
     "kanagawa-dragon" = "kanagawa-dragon";
     "oxocarbon-dark" = "oxocarbon";
+    "catppuccin-mocha" = "catppuccin-mocha";
   };
 
   # All 16 base16 slots, ordered.

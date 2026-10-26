@@ -8,6 +8,7 @@ return {
   { "folke/tokyonight.nvim" },
   { "rebelot/kanagawa.nvim" },
   { "nyoom-engineering/oxocarbon.nvim" },
+  { "catppuccin/nvim", name = "catppuccin" },
 
   -- Mode-aware cursor; preset config is base16-driven, see theme_reactive.lua.
   {

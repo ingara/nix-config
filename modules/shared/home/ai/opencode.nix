@@ -458,10 +458,14 @@ let
   herdrDirectories = [
     "${config.home.homeDirectory}/.config/opencode"
   ];
+  sessionVariables = {
+    # Exa-backed web search requires this gate outside the OpenCode providers.
+    OPENCODE_ENABLE_EXA = "1";
+  };
 in
 {
-  # Exa-backed web search requires this gate outside the OpenCode providers.
-  home.sessionVariables.OPENCODE_ENABLE_EXA = "1";
+  home = { inherit sessionVariables; };
+  systemd.user.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux sessionVariables;
 
   # Herdr 0.7.3 ignores XDG_CONFIG_HOME for this integration.
   programs.herdr.integrations.opencode.directories = herdrDirectories;
@@ -484,7 +488,7 @@ in
     surfaces.opencode = {
       inherit hostClass;
       settings = finalSettings;
-      sessionVariables.OPENCODE_ENABLE_EXA = "1";
+      inherit sessionVariables;
       herdr.directories = herdrDirectories;
     };
   };

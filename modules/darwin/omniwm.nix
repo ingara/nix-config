@@ -1,4 +1,4 @@
-# OmniWM v0.7.4 (settings schema 4). The Homebrew cask owns the app;
+# OmniWM v0.7.6 (settings schema 4). The Homebrew cask owns the app;
 # Home Manager owns only its complete, store-backed settings.toml.
 {
   config,
@@ -19,7 +19,7 @@ let
     inherit alpha;
   };
 
-  # One entry per assignable action in v0.7.4's ActionCatalog. The
+  # One entry per assignable action in v0.7.6's ActionCatalog. The
   # consumeOrExpelWindow{Left,Right} automation actions are unassignable.
   # The separate consume/expel actions are assignable but left to skhd:
   # binding both layers would handle Option+,/. twice.
@@ -132,6 +132,7 @@ let
       "raiseAllFloatingWindows"
       "rescueOffscreenWindows"
       "toggleFocusedWindowFloating"
+      "toggleFloatingFocus"
       "closeFocusedWindow"
       "openMenuAnywhere"
       "setWindowMark"
@@ -175,6 +176,7 @@ let
     toggleFullscreen = "Option+Shift+F";
     toggleFocusedWindowFloating = "Option+G";
     toggleOverview = "Option+Tab";
+    toggleQuakeTerminal = "Option+Grave";
   };
   workspaceBindings = lib.listToAttrs (
     lib.concatMap (n: [
@@ -267,6 +269,17 @@ let
       enabled = true;
       width = 3.0;
       color = color "base0D" 1.0;
+      # Solid borders draw square corners on macOS 26: their native layer API
+      # only exists on macOS 27. The gradient renderer follows window corners,
+      # so a single-color gradient looks solid but stays rounded.
+      # https://github.com/OmniNull/OmniWM/issues/726
+      # REMOVE WHEN: the host runs macOS 27 (check `sw_vers -productVersion`).
+      gradient = {
+        enabled = true;
+        direction = "topLeftToBottomRight";
+        start = color "base0D" 1.0;
+        end = color "base0D" 1.0;
+      };
     };
     overview = {
       enabled = true;
@@ -289,16 +302,20 @@ let
       systemStatsButton = false;
       deduplicateAppIcons = false;
       hideEmptyWorkspaces = false;
+      notificationBadges = "text";
+      notificationBadgeRefreshIntervalSeconds = 5.0;
       excludedBundleIDs = [ ];
       iconOverrides = { };
       reserveLayoutSpace = true;
       revealModifier = "off";
       revealHoldMilliseconds = 200.0;
       hideInNativeFullscreen = false;
-      height = 24.0;
+      # Same height and top offset as the SketchyBar bar (sketchybarrc), so the
+      # workspace pill sits flush inside it.
+      height = 32.0;
       backgroundOpacity = 0.1;
       xOffset = 0.0;
-      yOffset = 0.0;
+      yOffset = -2.0;
     };
     gestures = {
       scrollEnabled = true;
@@ -331,7 +348,7 @@ let
       ignoredTypes = [ ];
     };
     quakeTerminal = {
-      enabled = false;
+      enabled = true;
       position = "center";
       widthPercent = 50.0;
       heightPercent = 50.0;
@@ -351,7 +368,7 @@ let
       layoutType = "niri";
       monitorAssignment.type = if i == 3 || i == 4 then "secondary" else "main";
     }) workspaceIDs;
-    # Preserve the v0.7.4 built-in minimum-size rules when replacing the GUI file.
+    # Preserve the v0.7.6 built-in minimum-size rules when replacing the GUI file.
     appRules = [
       {
         id = "6A31F08A-4051-4354-B439-42F4C71894A3";

@@ -111,21 +111,65 @@ let
       offline_dir="$(mktemp -d)"
       trap 'rm -rf "$herdr_err" "$offline_dir"' EXIT
 
-      online=1
+      # Every session reads the same config.toml, but a reload reaches only the
+      # server it is addressed to, so reload each running one. This runs however
+      # the reconcile ends: it probed only one socket, and each session's server
+      # may run a different build. `--session` overrides HERDR_SOCKET_PATH and
+      # HERDR_SESSION, so neither the offline export nor an inherited pane
+      # environment can redirect a reload. The default session is included even
+      # though home-manager's own `onChange` may reload it as well: a repeat
+      # reload is harmless, whereas that bare reload follows whatever
+      # HERDR_SESSION or HERDR_SOCKET_PATH the activation inherited.
+      #
+      # A reload exits 0 even when it rejects the file; the outcome is the
+      # `status` and `diagnostics` it prints, which are surfaced unless clean.
+      # Each call is time-bounded, so a hung session server cannot stall the
+      # activation that runs this.
+      reload_running_sessions() {
+        local sessions_json running session output rc=0 limit=30
+        sessions_json="$(timeout -k 5 "$limit" herdr session list --json 2>"$herdr_err")" || rc=$?
+        if [[ "$rc" -ne 0 ]]; then
+          echo "herdr: could not list sessions to reload their config (exit $rc):" >&2
+          cat "$herdr_err" >&2
+          return 0
+        fi
+        running="$(jq -r '.sessions[]? | select(.running == true) | .name' \
+          <<<"$sessions_json" || true)"
+        while IFS= read -r session; do
+          [[ -n "$session" ]] || continue
+          rc=0
+          output="$(timeout -k 5 "$limit" herdr --session "$session" server reload-config \
+            2>"$herdr_err" </dev/null)" || rc=$?
+          if [[ "$rc" -eq 124 || "$rc" -eq 137 ]]; then
+            echo "herdr: config reload in session '$session' timed out after ''${limit}s." >&2
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "herdr: could not reload config in session '$session':" >&2
+            printf '%s\n' "$output" >&2
+            cat "$herdr_err" >&2
+          elif ! jq -e '.result.status == "applied" and (.result.diagnostics | length) == 0' \
+            <<<"$output" >/dev/null 2>&1; then
+            echo "herdr: config reload in session '$session' was not clean:" >&2
+            printf '%s\n' "$output" >&2
+            cat "$herdr_err" >&2
+          fi
+        done <<<"$running"
+      }
+
       if ! registry_json="$(herdr plugin list --json 2>"$herdr_err")"; then
         code="$(jq -r '.error.code // empty' <"$herdr_err" 2>/dev/null || true)"
         if [[ "$code" != "protocol_mismatch" ]]; then
           echo "herdr: could not read the plugin registry:" >&2
           cat "$herdr_err" >&2
+          reload_running_sessions
           exit 0
         fi
         # Point at a socket that cannot exist. herdr does not spawn a server to
         # satisfy it, so this selects the offline path rather than starting one.
-        online=0
         export HERDR_SOCKET_PATH="$offline_dir/absent.sock"
         if ! registry_json="$(herdr plugin list --json 2>"$herdr_err")"; then
           echo "herdr: could not read the plugin registry offline either:" >&2
           cat "$herdr_err" >&2
+          reload_running_sessions
           exit 0
         fi
         echo "herdr: server predates this build; reconciling the registry offline." >&2
@@ -202,11 +246,7 @@ let
         fi
       done <<<"$undeclared"
 
-      # Applies most UI settings without restarting panes. Pointless when we went
-      # offline — that server is the one refusing us — so only try when online.
-      if [[ "$online" -eq 1 ]]; then
-        herdr server reload-config >/dev/null 2>&1 || true
-      fi
+      reload_running_sessions
     '';
   };
 in
@@ -344,13 +384,18 @@ in
 
         home.packages = [ herdrRelink ];
 
-        home.activation.linkHerdrPlugins = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-          if [[ -n "''${DRY_RUN_CMD:-}" ]]; then
-            echo "Would reconcile Herdr plugins: ${lib.concatStringsSep ", " pluginNames}"
-          else
-            ${herdrRelink}/bin/herdr-relink
-          fi
-        '';
+        # After herdrMutableSettings, which writes config.toml in mutable mode,
+        # so the session reloads never apply a stale file. home-manager's DAG
+        # ignores a name that no entry defines.
+        home.activation.linkHerdrPlugins =
+          lib.hm.dag.entryAfter [ "linkGeneration" "herdrMutableSettings" ]
+            ''
+              if [[ -n "''${DRY_RUN_CMD:-}" ]]; then
+                echo "Would reconcile Herdr plugins: ${lib.concatStringsSep ", " pluginNames}"
+              else
+                ${herdrRelink}/bin/herdr-relink
+              fi
+            '';
       }
     ]
   );

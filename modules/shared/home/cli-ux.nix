@@ -80,6 +80,18 @@ in
       targets = stylixTargets;
     };
 
+    # Stylix's fish target sets the palette and default colours with escape
+    # codes at shell start. Herdr treats colours a shell sets as owned by that
+    # pane, so the pane would stop following the host terminal; reset them.
+    # The host terminal already carries the Stylix palette.
+    programs.fish.interactiveShellInit = lib.mkIf config.stylix.targets.fish.enable (
+      lib.mkAfter ''
+        if set -q HERDR_ENV
+          printf '\033]104\007\033]110\007\033]111\007'
+        end
+      ''
+    );
+
     myOptions.developerEnvironmentParity = {
       packages = {
         bat = {

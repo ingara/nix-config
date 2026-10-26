@@ -12,7 +12,7 @@ let
     {
       mark = "▶";
       fg = colors.base0E;
-      leadBold = true;
+      leadBold = false;
     }
     {
       mark = "!";
@@ -41,6 +41,11 @@ let
     }
     {
       mark = "◆";
+      fg = colors.base0D;
+      leadBold = true;
+    }
+    {
+      mark = "◇";
       fg = colors.base0D;
       leadBold = false;
     }
@@ -220,7 +225,8 @@ let
       }
       ''
         ${lib.getExe pkgs.bashNonInteractive} ${./herdr-agent-display-test.sh} \
-          ${lib.getExe agentDisplay} ${lib.getExe pkgs.bashNonInteractive}
+          ${lib.getExe agentDisplay} ${lib.getExe pkgs.bashNonInteractive} \
+          ${pkgs.writeText "herdr-agent-display-rows.json" (builtins.toJSON agentRows)}
 
         mkdir -p "$out/bin"
         ln -s ${lib.getExe agentDisplay} "$out/bin/herdr-agent-display"

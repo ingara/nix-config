@@ -69,7 +69,6 @@ in
           }
           // lib.optionalAttrs (lib.elem "omniwm" wm.enabled) {
             "skhd/omniwm.skhd".source = src "skhd/omniwm.skhd";
-            "skhd/omniwm-ratio.sh".source = src "skhd/omniwm-ratio.sh";
           }
           // lib.optionalAttrs (lib.elem "nehir" wm.enabled) {
             "skhd/nehir.skhd".source = src "skhd/nehir.skhd";

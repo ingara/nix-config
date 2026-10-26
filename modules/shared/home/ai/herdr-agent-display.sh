@@ -216,7 +216,9 @@ refresh_all() {
               then if any($all[]; .workspace_id == $agent.workspace_id
                     and (role((if (.name // "") != "" then .name else .agent end)) == "worker")
                     and (.agent_status == "working" or .agent_status == "blocked"))
-                then "⋯" else "◆" end
+                then "⋯"
+                elif $agent.agent_status == "done" then "◆"
+                else "◇" end
               else ($agent.agent_status | state_mark)
             end) as $mark
           | (if $repository_label == "" and $workspace_header == "" then 4 else 2 end

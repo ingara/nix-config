@@ -1,4 +1,4 @@
-# OmniWM v0.7.4 skhd layer — commands its native hotkey schema cannot bind.
+# OmniWM v0.7.6 skhd layer — commands its native hotkey schema cannot bind.
 # Only active via wm-switch's active-wm.skhd; skhd consumes chords even when a
 # CLI command fails, so never include this beside another WM's bindings.
 # Absolute CLI path: skhd's launchd PATH does not include Homebrew or Nix.
@@ -10,5 +10,3 @@ alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus left
 alt - d : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command focus right
 shift + alt - a : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command move left
 shift + alt - d : /Applications/OmniWM.app/Contents/MacOS/omniwmctl command move right
-alt - r : sh ~/.config/skhd/omniwm-ratio.sh 66.667% 33.333%
-shift + alt - r : sh ~/.config/skhd/omniwm-ratio.sh 33.333% 66.667%
