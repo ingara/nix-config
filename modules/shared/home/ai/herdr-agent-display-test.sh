@@ -276,7 +276,8 @@ check_style notes working agent_lead '▶ plain' base0E false false
 check_style notes blocked agent_lead '! plain' base08 true false
 check_style notes idle agent_lead '– plain' base05 false false
 check_style notes 'done' agent_lead '✓ plain' base0B false false
-check_style lead idle agent_lead '⋯ feature-a' base05 false true
+check_style lead idle agent_lead '⋯ feature-a' base0E false true
+check_style solo idle agent_lead '  ⋯ solo' base0E false true
 check_style review 'done' agent_lead '◆ feature-b' base0D true false
 check_style first working agent_worker '  ▶ first' base0E false false
 check_style first blocked agent_worker '  ! first' base08 true false

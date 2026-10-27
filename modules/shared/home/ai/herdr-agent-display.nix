@@ -30,7 +30,10 @@ let
       "✓".fg = colors.base0B;
       "–" = { };
       "?" = { };
-      "⋯".dim = true;
+      "⋯" = {
+        fg = colors.base0E;
+        dim = true;
+      };
       "◆" = {
         fg = colors.base0D;
         bold = true;
