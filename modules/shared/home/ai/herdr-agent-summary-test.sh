@@ -228,13 +228,13 @@ jq -se --arg cwd "$HERDR_PLUGIN_STATE_DIR/claude-cwd" --arg config "$test_dir/cl
 ' "$CLAUDE_LOG"
 last_report | jq -e '
   .pane == "lead" and .agent == "claude"
-  and .tokens == {agent_summary: "\u200b    Fixing the login test", agent_summary_stale: null}
+  and .tokens == {agent_summary: "\u200b  Fixing the login test", agent_summary_stale: null}
 '
 
 # Unchanged transcript: no model call, the stored line is shown as fresh.
 "$summary_bin" --final lead
 [ "$(calls)" = 1 ]
-last_report | jq -e '.tokens.agent_summary == "\u200b    Fixing the login test"'
+last_report | jq -e '.tokens.agent_summary == "\u200b  Fixing the login test"'
 
 # A turn-end job already queued for the pane makes another one exit at once.
 printf '%s\n' '{"type":"user","message":{"role":"user","content":"queued"}}' >>"$claude_transcript"
@@ -246,7 +246,7 @@ check_reply() {
     >>"$claude_transcript"
   printf '%s' "$1" >"$CLAUDE_MODE"
   "$summary_bin" --final lead
-  last_report | jq -e --arg expected "$2" '.tokens.agent_summary == "\u200b    " + $expected'
+  last_report | jq -e --arg expected "$2" '.tokens.agent_summary == "\u200b  " + $expected'
 }
 check_reply $'\n  **Summary:** "Reviewing `auth` module."\nSecond line' 'Reviewing auth module'
 # Octal UTF-8 bytes: \u escapes depend on the locale, which the build sandbox lacks.
@@ -261,7 +261,7 @@ for mode in fail error; do
   echo "$mode" >"$CLAUDE_MODE"
   "$summary_bin" --final lead
   last_report | jq -e '
-    .tokens == {agent_summary: null, agent_summary_stale: "\u200b    ◌ Fixing agent_summary tokens"}
+    .tokens == {agent_summary: null, agent_summary_stale: "\u200b  ◌ Fixing agent_summary tokens"}
   '
 done
 grep -q 'summary failed for lead' "$HERDR_PLUGIN_STATE_DIR/agent-summary.log"
@@ -270,7 +270,7 @@ grep -q 'summary failed for lead' "$HERDR_PLUGIN_STATE_DIR/agent-summary.log"
 # The fake model sleeps for 300 s; the outer timeout only guards the test.
 echo slow >"$CLAUDE_MODE"
 HERDR_AGENT_SUMMARY_TIMEOUT=1 timeout 60 "$summary_bin" --final lead
-last_report | jq -e '.tokens.agent_summary_stale == "\u200b    ◌ Fixing agent_summary tokens"'
+last_report | jq -e '.tokens.agent_summary_stale == "\u200b  ◌ Fixing agent_summary tokens"'
 
 # --- Event hook and refresh loop ----------------------------------------------
 
@@ -282,10 +282,10 @@ agent lead claude "" working "$claude_session"
 event='{"event":"pane_agent_status_changed","data":{"type":"pane_agent_status_changed","pane_id":"lead","agent_status":"working"}}'
 HERDR_PLUGIN_EVENT_JSON="$event" timeout 60 "$bash_bin" -c '"$0" --event | cat' "$summary_bin"
 # The grown transcript is marked stale until the loop replaces it.
-reports | jq -e '.[0].tokens.agent_summary_stale == "\u200b    ◌ Fixing agent_summary tokens"'
+reports | jq -e '.[0].tokens.agent_summary_stale == "\u200b  ◌ Fixing agent_summary tokens"'
 # The loop's first pass summarises the new request.
 wait_for '[ "$(calls)" -ge 1 ]'
-wait_for 'last_report | jq -e ".tokens.agent_summary == \"\\u200b    Working on logout\"" >/dev/null'
+wait_for 'last_report | jq -e ".tokens.agent_summary == \"\\u200b  Working on logout\"" >/dev/null'
 # A second loop for the same pane exits while the first keeps its lock.
 timeout 60 "$summary_bin" --loop lead
 loop_lock="$ns_dir/locks/lead.loop"
@@ -310,7 +310,7 @@ printf '%s\n' '{"type":"assistant","message":{"role":"assistant","content":[{"ty
 echo 'Finished logout retry' >"$CLAUDE_MODE"
 HERDR_PLUGIN_EVENT_JSON="${event/working/done}" "$summary_bin" --event
 wait_for '[ "$(calls)" = 3 ]'
-wait_for 'last_report | jq -e ".tokens.agent_summary == \"\\u200b    Finished logout retry\"" >/dev/null'
+wait_for 'last_report | jq -e ".tokens.agent_summary == \"\\u200b  Finished logout retry\"" >/dev/null'
 jq -se 'last.input | contains("Agent state: done")' "$CLAUDE_LOG"
 
 # A sleeping loop is woken by the next working event and picks up a new request.
@@ -367,7 +367,7 @@ unset HERDR_AGENT_SUMMARY_RPC_TIMEOUT
 
 mkdir -p "$BARRIER_DIR"
 idle_event="${event/working/idle}"
-old_line='"\u200b    Old lead task"'
+old_line='"\u200b  Old lead task"'
 # Starts a turn-end summary that blocks inside the model until released.
 start_held_summary() {
   rm -f "$BARRIER_DIR/called" "$BARRIER_DIR/release"
@@ -408,7 +408,7 @@ reports | jq -e '.[0].tokens == {agent_summary: null, agent_summary_stale: null}
 echo 'New session work' >"$CLAUDE_MODE"
 release_held_summary
 no_old_line
-last_report | jq -e '.tokens.agent_summary == "\u200b    New session work"'
+last_report | jq -e '.tokens.agent_summary == "\u200b  New session work"'
 jq -e '.identity == "claude:id:other-9"' "$ns_dir/panes/lead.json"
 
 # A worker takes the pane: every later report clears and the old result is dropped.
@@ -441,7 +441,7 @@ reports | jq -e 'all(.[]; .tokens == {agent_summary: null, agent_summary_stale: 
 echo 'Old lead task' >"$CLAUDE_MODE"
 agent lead claude "" idle "$claude_session"
 "$summary_bin" --final lead
-last_report | jq -e '.tokens.agent_summary == "\u200b    Old lead task"'
+last_report | jq -e '.tokens.agent_summary == "\u200b  Old lead task"'
 printf '%s\n' '{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"More work"}]}}' \
   >>"$claude_transcript"
 echo fail >"$CLAUDE_MODE"
@@ -463,7 +463,7 @@ exec 3>&- 4>&-
 wait_for 'flock -n "$ns_dir/locks/lead.final" true && flock -n "$model_lock" true'
 reports | jq -e '
   [.[] | select(.pane == "lead")] | length >= 2
-  and all(.[]; .tokens == {agent_summary: null, agent_summary_stale: "\u200b    ◌ Old lead task"})
+  and all(.[]; .tokens == {agent_summary: null, agent_summary_stale: "\u200b  ◌ Old lead task"})
 '
 
 # --- Startup, restore and cleanup ---------------------------------------------
@@ -471,7 +471,7 @@ reports | jq -e '
 echo 'Adding metrics' >"$CLAUDE_MODE"
 printf '%s\n' '{"type":"user","message":{"role":"user","content":"Now add metrics"}}' >>"$claude_transcript"
 "$summary_bin" --final lead
-last_report | jq -e '.tokens.agent_summary == "\u200b    Adding metrics"'
+last_report | jq -e '.tokens.agent_summary == "\u200b  Adding metrics"'
 jq -e '.failed == false' "$ns_dir/panes/lead.json"
 
 # Files left by an older layout or a permissive umask are tightened.
@@ -489,8 +489,8 @@ echo 'Splitting the parser' >"$CLAUDE_MODE"
 [ ! -e "$ns_dir/panes/fresh.json" ]
 # The stored summary is restored without a model call; OMP gets its first one.
 wait_for '[ "$(calls)" = 1 ]'
-wait_for 'reports | jq -e "any(.[]; .pane == \"omp\" and .tokens.agent_summary == \"\\u200b    Splitting the parser\")" >/dev/null'
-reports | jq -e 'any(.[]; .pane == "lead" and .tokens.agent_summary == "\u200b    Adding metrics")'
+wait_for 'reports | jq -e "any(.[]; .pane == \"omp\" and .tokens.agent_summary == \"\\u200b  Splitting the parser\")" >/dev/null'
+reports | jq -e 'any(.[]; .pane == "lead" and .tokens.agent_summary == "\u200b  Adding metrics")'
 jq -se 'last.input | contains("Session title: OMP refactor")' "$CLAUDE_LOG"
 wait_for '[ -e "$ns_dir/panes/omp.json" ]'
 [ -z "$(find "$HERDR_PLUGIN_STATE_DIR" \( -type d ! -perm 700 \) -o \( -type f ! -perm 600 \))" ]

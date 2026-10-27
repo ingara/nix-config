@@ -5,6 +5,7 @@ set -euo pipefail
 display_bin="$1"
 bash_bin="$2"
 rows_file="$3"
+palette_file="$4"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT
 
@@ -98,9 +99,9 @@ parse_reports() {
   jq -e '
     all(.[];
       if .tokens.agent_lead != null
-      then (.tokens.agent_lead | test("^\u200b(?: {2}| {4})[^ ]"))
+      then (.tokens.agent_lead | test("^\u200b(?: {2})?[^ ]"))
       elif (.tokens.agent_worker // .tokens.agent_worker_quiet) != null
-      then (.tokens.agent_worker // .tokens.agent_worker_quiet | test("^\u200b(?: {6}| {8})[^ ]"))
+      then (.tokens.agent_worker // .tokens.agent_worker_quiet | test("^\u200b(?: {2}| {4})[^ ]"))
       else true end)
   ' "$reports" >/dev/null
 }
@@ -122,19 +123,19 @@ jq -e '
 jq -e '
   map([.pane, .tokens.agent_repository_header, .tokens.agent_workspace_header,
        (.tokens.agent_lead // .tokens.agent_worker)]) == [
-    ["lead", "project", "\u200bfeature-a", "\u200b  ⋯ alpha"],
-    ["impl", null, null, "\u200b        ! implementation"],
-    ["worker", null, null, "\u200b        ✓ helper"],
-    ["notes", null, "\u200b  notes", "\u200b  – plain"],
-    ["review", "project", "\u200bfeature-b", "\u200b  ◇ reviewer"],
-    ["writer", null, null, "\u200b        – writer"],
-    ["root", null, "\u200b  project", "\u200b  ▶ root"],
-    ["child", null, null, "\u200b        ✓ child"],
-    ["solo", null, "\u200b  solo", "\u200b  ⋯ solo"],
-    ["cleanup", null, null, "\u200b        ! cleanup"],
-    ["orphan", null, "\u200b  missing", "\u200b  ? orphan"],
-    ["alone", null, "\u200b  alone", "\u200b  ◇ alone"],
-    ["first", null, "\u200b  fresh", "\u200b      – first"]
+    ["lead", "project", null, "\u200b⋯ feature-a"],
+    ["impl", null, null, "\u200b    ! implementation"],
+    ["worker", null, null, "\u200b    ✓ helper"],
+    ["notes", null, "\u200b  notes", "\u200b– plain"],
+    ["review", "project", null, "\u200b◇ feature-b"],
+    ["writer", null, null, "\u200b    – writer"],
+    ["root", null, null, "\u200b  ▶ root"],
+    ["child", null, null, "\u200b    ✓ child"],
+    ["solo", null, null, "\u200b  ⋯ solo"],
+    ["cleanup", null, null, "\u200b    ! cleanup"],
+    ["orphan", null, "\u200b  missing", "\u200b? orphan"],
+    ["alone", null, null, "\u200b  ◇ alone"],
+    ["first", null, "\u200b  fresh", "\u200b  – first"]
   ]
   and all(.[];
     .tokens.agent_title == null and .tokens.agent_group_gap == null
@@ -144,17 +145,16 @@ jq -e '
     and .tokens.agent_secondary == null)
 ' "$reports"
 
-# Continuation rows gain two cells; workers sit four columns beyond leads.
+# Continuation rows gain two cells; every row type keeps one absolute column.
 jq -e '
   def padding: sub("^\u200b"; "") | capture("^(?<spaces> *)").spaces | length;
   all(.[];
-    ([.tokens.agent_repository_header, .tokens.agent_workspace_header,
-      .tokens.agent_lead, .tokens.agent_worker] | map(select(. != null))) as $rows
-    | ($rows | to_entries | all(.[];
-        (.value | padding) + (if .key == 0 then 1 else 3 end)
-        == (if .key == ($rows | length) - 1
-            then (if .value | contains("      ") then 9 else 5 end)
-            elif .value == "project" then 1 else 3 end))))
+    . as $report
+    | [[["agent_repository_header", 1], ["agent_workspace_header", 3],
+        ["agent_lead", 3], ["agent_worker", 5], ["agent_worker_quiet", 5]][] as [$token, $column]
+      | $report.tokens[$token] | select(. != null) | {text: ., column: $column}]
+    | to_entries | all(.[];
+        (.value.text | padding) + (if .key == 0 then 1 else 3 end) == .value.column))
   and all(.[].tokens[]; . == null or (test("[└├│─]") | not))
 ' "$reports"
 
@@ -163,7 +163,7 @@ jq '.result.snapshot.agents[10].agent_status = "idle"' \
 : >"$REPORT_LOG"
 SNAPSHOT_FILE="$test_dir/unclassified.json" "$display_bin" --all
 parse_reports
-jq -e '.[10].tokens.agent_lead == "\u200b  – orphan"' "$reports"
+jq -e '.[10].tokens.agent_lead == "\u200b– orphan"' "$reports"
 
 # An unnamed worker uses its agent label in both its row and the wait scan.
 jq '.result.snapshot.agents |= .[:2]
@@ -172,8 +172,8 @@ jq '.result.snapshot.agents |= .[:2]
 HERDR_AGENT_DISPLAY_WORKER_PREFIXES='["claude"]' \
   SNAPSHOT_FILE="$test_dir/unnamed-worker.json" "$display_bin" --all
 parse_reports
-jq -e '.[0].tokens.agent_lead == "\u200b  ⋯ alpha"
-  and .[1].tokens.agent_worker == "\u200b        ! claude"' "$reports"
+jq -e '.[0].tokens.agent_lead == "\u200b⋯ feature-a"
+  and .[1].tokens.agent_worker == "\u200b    ! claude"' "$reports"
 
 jq '
   .result.snapshot.agents[0].agent_status = "done"
@@ -182,8 +182,8 @@ jq '
 : >"$REPORT_LOG"
 SNAPSHOT_FILE="$test_dir/working-worker.json" "$display_bin" --all
 parse_reports
-jq -e '.[0].tokens.agent_lead == "\u200b  ⋯ alpha"
-  and .[1].tokens.agent_worker == "\u200b        ▶ implementation"' "$reports"
+jq -e '.[0].tokens.agent_lead == "\u200b⋯ feature-a"
+  and .[1].tokens.agent_worker == "\u200b    ▶ implementation"' "$reports"
 
 jq '
   .result.snapshot.workspaces[] |=
@@ -195,19 +195,19 @@ HERDR_AGENT_DISPLAY_TITLE_ROWS=all HERDR_AGENT_DISPLAY_GROUP_GAP=repositories \
   SNAPSHOT_FILE="$test_dir/options.json" "$display_bin" --all
 parse_reports
 jq -e '
-  .[0].tokens.agent_title == "\u200b    Review changes"
-  and .[1].tokens.agent_title == "\u200b          Inspect result"
-  and .[2].tokens.agent_title == "\u200b          Apply changes"
-  and .[3].tokens.agent_title == "\u200b    Publish results"
-  and .[4].tokens.agent_title == "\u200b    Write draft"
-  and .[5].tokens.agent_title == "\u200b          修正 作業"
-  and .[6].tokens.agent_title == "\u200b    修正 作業"
-  and .[7].tokens.agent_title == "\u200b          π + 1"
-  and .[8].tokens.agent_title == "\u200b    Build > Test pipeline"
-  and .[9].tokens.agent_title == "\u200b          x->y rename"
-  and .[10].tokens.agent_title == "\u200b    A > B"
-  and .[11].tokens.agent_title == "\u200b    A + B"
-  and .[12].tokens.agent_title == "\u200b        修 > 作業"
+  .[0].tokens.agent_title == "\u200b  Review changes"
+  and .[1].tokens.agent_title == "\u200b    Inspect result"
+  and .[2].tokens.agent_title == "\u200b    Apply changes"
+  and .[3].tokens.agent_title == "\u200b  Publish results"
+  and .[4].tokens.agent_title == "\u200b  Write draft"
+  and .[5].tokens.agent_title == "\u200b    修正 作業"
+  and .[6].tokens.agent_title == "\u200b  修正 作業"
+  and .[7].tokens.agent_title == "\u200b    π + 1"
+  and .[8].tokens.agent_title == "\u200b  Build > Test pipeline"
+  and .[9].tokens.agent_title == "\u200b    x->y rename"
+  and .[10].tokens.agent_title == "\u200b  A > B"
+  and .[11].tokens.agent_title == "\u200b  A + B"
+  and .[12].tokens.agent_title == "\u200b    修 > 作業"
   and all(.[];
     (.tokens.agent_title | startswith("\u200b"))
     and (.tokens.agent_lead // .tokens.agent_worker) != null)
@@ -224,8 +224,8 @@ jq '
 HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/worker-age.json" "$display_bin" --all
 parse_reports
 jq -e '
-  .[0].tokens.agent_lead == "\u200b  ◇ alpha"
-  and .[1].tokens.agent_worker_quiet == "\u200b        – implementation"
+  .[0].tokens.agent_lead == "\u200b◇ feature-a"
+  and .[1].tokens.agent_worker_quiet == "\u200b    – implementation"
   and .[1].tokens.agent_worker == null
 ' "$reports"
 
@@ -245,40 +245,52 @@ for status in working blocked 'done' idle unknown; do
   done | idle) mark=⋯ ;;
   unknown) mark='?' ;;
   esac
-  jq -e --arg mark "$mark" '.[0].tokens.agent_lead == "\u200b  " + $mark + " alpha"' "$reports"
+  jq -e --arg mark "$mark" '.[0].tokens.agent_lead == "\u200b" + $mark + " feature-a"' "$reports"
 done
 
 # Rows must match a configured rule; Herdr reports done until a completion is seen.
 check_style() {
-  local pane="$1" status="$2" token="$3" expected="$4" bold="$5"
+  local pane="$1" status="$2" token="$3" expected="$4" slot="$5" bold="$6" dim="$7"
   jq --arg pane "$pane" --arg status "$status" '
     .result.snapshot.agents |= map(if .pane_id == $pane then .agent_status = $status else . end)
   ' "$SNAPSHOT_FILE" >"$test_dir/style.json"
   : >"$REPORT_LOG"
   SNAPSHOT_FILE="$test_dir/style.json" "$display_bin" --all
   parse_reports
-  style_fg="$(jq -er --arg pane "$pane" --arg token "$token" --arg expected "$expected" \
-    --argjson bold "$bold" --slurpfile rows "$rows_file" '
+  jq -e --arg pane "$pane" --arg token "$token" --arg expected "$expected" --arg slot "$slot" \
+    --argjson bold "$bold" --argjson dim "$dim" --slurpfile rows "$rows_file" \
+    --slurpfile palette "$palette_file" '
     first(.[] | select(.pane == $pane)).tokens[$token] as $text
     | first($rows[0][][] | objects | select(.token == "$" + $token)).rules as $rules
     | first($rules[] | select(.contains as $mark | $text | contains($mark)))
-    | select($text == "\u200b" + $expected and .bold == $bold)
-    | .fg
-  ' "$reports")"
+    | $text == "\u200b" + $expected
+      and .fg == $palette[0][$slot] and .bold == $bold and .dim == $dim
+  ' "$reports" >/dev/null
 }
-check_style alone 'done' agent_lead '  ◆ alone' true
-unread_fg="$style_fg"
-check_style alone idle agent_lead '  ◇ alone' false
-[ "$style_fg" = "$unread_fg" ]
-check_style alone 'done' agent_lead '  ◆ alone' true
-check_style alone working agent_lead '  ▶ alone' false
-check_style alone blocked agent_lead '  ! alone' true
-check_style notes working agent_lead '  ▶ plain' false
-check_style notes blocked agent_lead '  ! plain' true
-check_style lead idle agent_lead '  ⋯ alpha' false
-check_style review 'done' agent_lead '  ◆ reviewer' true
-check_style notes 'done' agent_lead '  ✓ plain' false
-check_style first working agent_worker '      ▶ first' false
+check_style alone 'done' agent_lead '  ◆ alone' base0D true false
+check_style alone idle agent_lead '  ◇ alone' base05 false false
+check_style alone working agent_lead '  ▶ alone' base0E false false
+check_style alone blocked agent_lead '  ! alone' base08 true false
+check_style alone unknown agent_lead '  ? alone' base05 false false
+check_style notes working agent_lead '▶ plain' base0E false false
+check_style notes blocked agent_lead '! plain' base08 true false
+check_style notes idle agent_lead '– plain' base05 false false
+check_style notes 'done' agent_lead '✓ plain' base0B false false
+check_style lead idle agent_lead '⋯ feature-a' base05 false true
+check_style review 'done' agent_lead '◆ feature-b' base0D true false
+check_style first working agent_worker '  ▶ first' base0E false false
+check_style first blocked agent_worker '  ! first' base08 true false
+check_style first idle agent_worker '  – first' base05 false true
+check_style first 'done' agent_worker '  ✓ first' base0B false true
+check_style first unknown agent_worker '  ? first' base05 false true
+check_style impl working agent_worker '    ▶ implementation' base0E false false
+check_style child 'done' agent_worker '    ✓ child' base0B false true
+
+# Text uses only base05 and accent slots, never the base03/base04 surface greys.
+jq -e --slurpfile palette "$palette_file" '
+  [.. | objects | select(has("fg")) | .fg] | unique
+  | all(.[]; . != $palette[0].base03 and . != $palette[0].base04)
+' "$rows_file" >/dev/null
 
 # Idle age is carried in owned metadata and advances only when a hook reruns this command.
 check_age() {
@@ -295,7 +307,7 @@ check_age() {
   HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/age.json" "$display_bin" --all
   parse_reports
   jq -e --arg token "$expected_token" '
-    .[0].tokens[$token] == "\u200b  ◇ alpha"
+    .[0].tokens[$token] == "\u200b◇ feature-a"
     and ([.[0].tokens.agent_lead,
           .[0].tokens.agent_worker, .[0].tokens.agent_worker_quiet]
          | map(select(. != null)) | length) == 1
@@ -343,7 +355,7 @@ jq 'del(.result.snapshot.agents[0].tokens.agent_activity, .result.snapshot.agent
 HERDR_AGENT_DISPLAY_NOW=10000 SNAPSHOT_FILE="$test_dir/no-history.json" "$display_bin" --all
 parse_reports
 jq -e '
-  .[0].tokens.agent_lead == "\u200b  ◇ alpha"
+  .[0].tokens.agent_lead == "\u200b◇ feature-a"
   and .[0].tokens.agent_activity == "term-lead|2|idle|"
 ' "$reports"
 
@@ -361,6 +373,52 @@ jq -e '
     and all(.tokens[]; . == null))
 ' "$reports"
 
+# A lane lead falls back to its own name when Herdr chose the workspace label.
+check_lane_label() {
+  local label="$1" expected="$2"
+  jq --arg label "$label" '
+    .result.snapshot.agents[0].agent_status = "working"
+    | .result.snapshot.workspaces |= map(if .workspace_id == "w1" then .label = $label else . end)
+    | .result.snapshot.panes = [{pane_id: "lead", workspace_id: "w1", cwd: "/src/checkout"}]
+  ' "$SNAPSHOT_FILE" >"$test_dir/lane.json"
+  : >"$REPORT_LOG"
+  SNAPSHOT_FILE="$test_dir/lane.json" "$display_bin" --all
+  parse_reports
+  jq -e --arg expected "$expected" '
+    .[0].tokens.agent_lead == "\u200b▶ " + $expected
+    and .[0].tokens.agent_workspace_header == null
+  ' "$reports" >/dev/null
+}
+check_lane_label project alpha
+check_lane_label repo alpha
+check_lane_label a alpha
+check_lane_label checkout alpha
+check_lane_label workspace alpha
+check_lane_label 'Feature A' 'Feature A'
+# An ancestor directory name is not a label Herdr derives.
+check_lane_label src src
+
+# The lane owner is the first eligible lead, wherever it sits in the workspace;
+# no agent of a lane workspace gets the workspace header.
+jq -n '{result: {snapshot: {
+  agents: [
+    {workspace_id: "w9", pane_id: "early", agent: "claude", name: "worker-early", tokens: {}, agent_status: "idle"},
+    {workspace_id: "w9", pane_id: "owner", agent: "claude", name: "lead-owner", tokens: {}, agent_status: "working"},
+    {workspace_id: "w9", pane_id: "second", agent: "claude", name: "lead-second", tokens: {}, agent_status: "idle"}
+  ],
+  workspaces: [{workspace_id: "w9", label: "Lane label"}]
+}}}' >"$test_dir/lane-owner.json"
+: >"$REPORT_LOG"
+SNAPSHOT_FILE="$test_dir/lane-owner.json" "$display_bin" --all
+parse_reports
+jq -e '
+  map([.pane, .tokens.agent_workspace_header, (.tokens.agent_lead // .tokens.agent_worker)]) == [
+    ["early", null, "\u200b    – early"],
+    ["owner", null, "\u200b  ▶ Lane label"],
+    ["second", null, "\u200b  ◇ second"]
+  ]
+' "$reports" >/dev/null
+
 # A root checkout can share one header with its family when their labels match.
 jq '.result.snapshot.agents |= map(select(.workspace_id == "w0"))' \
   "$SNAPSHOT_FILE" >"$test_dir/root.json"
@@ -370,8 +428,8 @@ parse_reports
 jq -e '
   .[0].tokens.agent_repository_header == "project"
   and .[0].tokens.agent_workspace_header == null
-  and .[0].tokens.agent_lead == "\u200b  ▶ root"
-  and .[1].tokens.agent_worker == "\u200b        ✓ child"
+  and .[0].tokens.agent_lead == "\u200b▶ root"
+  and .[1].tokens.agent_worker == "\u200b    ✓ child"
 ' "$reports"
 
 jq '.result.snapshot.agents[0].name = ("n" * 100)' "$SNAPSHOT_FILE" >"$test_dir/next.json"

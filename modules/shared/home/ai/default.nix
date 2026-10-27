@@ -5,6 +5,7 @@ _: {
     ./herdr-agent-display.nix
     ./herdr-agent-summary.nix
     ./herdr-plugins.nix
+    ./herdr-workspace-grouping.nix
     ./opencode.nix
     ./lavish.nix
     ./claude-theme.nix

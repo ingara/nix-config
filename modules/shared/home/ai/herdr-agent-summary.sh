@@ -255,7 +255,7 @@ report() {
   # Herdr trims token edges; the zero-width prefix keeps the indent, which lines
   # the text up with lead names on the agent-display continuation row.
   value="$(jq -rn --arg text "$text" --argjson stale "$stale" '
-    "\u200b    " + (if $stale then "◌ " else "" end) + $text | .[0:80]')"
+    "\u200b  " + (if $stale then "◌ " else "" end) + $text | .[0:80]')"
   if [ "$stale" = true ]; then
     herdr_cli pane report-metadata "$pane" --source "$source_id" --agent "$agent" \
       --seq "$(seq_now)" --token "agent_summary_stale=$value" \

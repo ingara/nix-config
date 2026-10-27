@@ -103,11 +103,28 @@ refresh_all() {
         then "repo:\($workspace.worktree.repo_key)"
         else "workspace:\($workspace.workspace_id)"
         end;
+      def basename: sub("/+$"; "") | split("/") | last // "";
+      # Labels Herdr can derive itself: the repository name, the basename of the
+      # repository root, checkout or a pane cwd, "~" for $HOME, or "workspace".
+      # Herdr does not record whether a label was set by hand.
+      def automatic_labels($snapshot; $workspace):
+        [$workspace.worktree.repo_name,
+          ($workspace.worktree.repo_root // "" | basename),
+          ($workspace.worktree.checkout_path // "" | basename),
+          ($snapshot.panes[]? | select(.workspace_id == $workspace.workspace_id)
+            | .cwd // "" | basename)]
+        + ["", "~", "workspace"];
       def prefix($name; $prefixes):
         first($prefixes[] | . as $candidate | select($name | startswith($candidate))) // "";
       def role($name):
         if any($worker_prefixes[]; . as $candidate | $name | startswith($candidate))
         then "worker" else "lead" end;
+      def agent_name: if (.name // "") != "" then .name else .agent end;
+      # A prefixed lead outside plain_leads uses wait marks and can own a lane row.
+      def lane_eligible:
+        agent_name as $name
+        | role($name) == "lead" and prefix($name; $lead_prefixes) != ""
+          and ($plain_leads | index($name)) == null;
       # Snapshot status reflects server acknowledgement, not per-TUI seen state.
       def state_mark:
         if . == "working" then "▶"
@@ -153,16 +170,18 @@ refresh_all() {
               then true
               else $all[$agent_index - 1].workspace_id != $agent.workspace_id
             end) as $first_workspace_run_agent
-          | (if (($agent.name // "") != "")
-              then $agent.name
-              else $agent.agent
-            end) as $name
+          | ($agent | agent_name) as $name
           | role($name) as $role
           | (if $role == "worker"
               then prefix($name; $worker_prefixes)
               else prefix($name; $lead_prefixes)
             end) as $prefix
           | ($name[($prefix | length):] | if . == "" then $name else . end | clip) as $display
+          | ($agent | lane_eligible) as $lane_lead
+          # The first eligible lead in a workspace owns its lane row; later ones
+          # keep their own names. A lane workspace has no separate header.
+          | (first($all[] | select(.workspace_id == $agent.workspace_id and lane_eligible)
+              | .pane_id) // null) as $lane_owner
           | (if (($agent.agent_session // null) | type) == "object"
               then ([$agent.agent_session.agent, $agent.agent_session.kind,
                     $agent.agent_session.value] | join(":"))
@@ -203,7 +222,8 @@ refresh_all() {
               then $repository
               else ""
             end) as $repository_label
-          | (if $first_workspace_run_agent and $workspace_label != $repository_label
+          | (if $first_workspace_run_agent and $lane_owner == null
+              and $workspace_label != $repository_label
               then $workspace_label
               else ""
             end) as $workspace_group_label
@@ -211,25 +231,30 @@ refresh_all() {
           | (if $workspace_group_label == "" then ""
               else padded((if $repository_label == "" then 2 else 0 end); $workspace_group_label)
             end) as $workspace_header
-          | (if $role == "lead" and $prefix != "" and ($plain_leads | index($name)) == null
-              and ($agent.agent_status == "idle" or $agent.agent_status == "done")
+          # A lane lead names its workspace instead of itself, unless the label is automatic.
+          | (if $agent.pane_id == $lane_owner
+              and (automatic_labels($snapshot; $workspace) | index([$workspace_label]) | not)
+              then $workspace_label | clip
+              else $display
+            end) as $agent_label
+          | (if $lane_lead and ($agent.agent_status == "idle" or $agent.agent_status == "done")
               then if any($all[]; .workspace_id == $agent.workspace_id
-                    and (role((if (.name // "") != "" then .name else .agent end)) == "worker")
+                    and (role(agent_name) == "worker")
                     and (.agent_status == "working" or .agent_status == "blocked"))
                 then "⋯"
                 elif $agent.agent_status == "done" then "◆"
                 else "◇" end
               else ($agent.agent_status | state_mark)
             end) as $mark
-          | (if $repository_label == "" and $workspace_header == "" then 4 else 2 end
-              + (if $role == "worker" then 4 else 0 end)) as $indent
-          | padded($indent; $mark + " " + $display) as $agent_row
+          | (if $role == "worker" then 2 else 0 end) as $role_indent
+          | ($role_indent + (if $repository_label == "" and $workspace_header == "" then 2 else 0 end)) as $indent
+          | padded($indent; $mark + " " + $agent_label) as $agent_row
           | (if $title_rows == "all" then
               ($agent.terminal_title_stripped // $agent.terminal_title // ""
                 | sub("^(\\p{Greek}|[^\\p{L}\\p{N}[:space:]])[[:space:]]+(>[[:space:]]*|[^\\p{ASCII}\\p{L}\\p{N}[:space:]]+[[:space:]]+)"; "")
                 | sub("^([^\\p{L}\\p{N}[:space:]]+[[:space:]]+)+"; "")
                 | if . == "" then " " else . end)
-              | padded($indent + 2; .)
+              | padded($role_indent + 2; .)
               else "" end) as $title_row
           | (if $group_gap == "repositories" and ($agent_index + 1) < ($all | length)
               and (workspace($snapshot; $all[$agent_index + 1].workspace_id) as $next

@@ -8,128 +8,123 @@
 let
   cfg = config.programs.herdr;
   colors = config.lib.stylix.colors.withHashtag;
-  marks = [
-    {
-      mark = "▶";
-      fg = colors.base0E;
-      leadBold = false;
-    }
-    {
-      mark = "!";
-      fg = colors.base08;
-      leadBold = true;
-    }
-    {
-      mark = "✓";
-      fg = colors.base0B;
-      leadBold = false;
-    }
-    {
-      mark = "–";
-      fg = colors.base04;
-      leadBold = false;
-    }
-    {
-      mark = "?";
-      fg = colors.base04;
-      leadBold = false;
-    }
-    {
-      mark = "⋯";
-      fg = colors.base04;
-      leadBold = false;
-    }
-    {
-      mark = "◆";
-      fg = colors.base0D;
-      leadBold = true;
-    }
-    {
-      mark = "◇";
-      fg = colors.base0D;
-      leadBold = false;
-    }
-  ];
+  # Slots the fixture test asserts on.
+  palette = lib.getAttrs [
+    "base03"
+    "base04"
+    "base05"
+    "base08"
+    "base09"
+    "base0B"
+    "base0D"
+    "base0E"
+  ] colors;
+  # Row style per status mark and role; a role omits marks it never shows.
+  markStyles = {
+    lead = {
+      "▶".fg = colors.base0E;
+      "!" = {
+        fg = colors.base08;
+        bold = true;
+      };
+      "✓".fg = colors.base0B;
+      "–" = { };
+      "?" = { };
+      "⋯".dim = true;
+      "◆" = {
+        fg = colors.base0D;
+        bold = true;
+      };
+      "◇" = { };
+    };
+    worker = {
+      "▶".fg = colors.base0E;
+      "!" = {
+        fg = colors.base08;
+        bold = true;
+      };
+      "✓" = {
+        fg = colors.base0B;
+        dim = true;
+      };
+      "–".dim = true;
+      "?".dim = true;
+    };
+  };
+  # Mark padding after the zero-width prefix: an entry's first row, then a
+  # continuation row, which Herdr indents two cells further.
+  markPadding = {
+    lead = [
+      "  "
+      ""
+    ];
+    worker = [
+      "    "
+      "  "
+    ];
+  };
   stateRules =
     role:
-    lib.concatMap (
-      state:
-      map
-        (indent: {
-          contains = "​${indent}${state.mark} ";
-          fg =
-            if role == "lead" && state.mark == "–" then
-              colors.base05
-            else if role == "lead" && state.mark == "◆" then
-              colors.base0D
-            else if role == "worker" && state.mark == "✓" then
-              colors.base04
-            else
-              state.fg;
-          bold = role == "lead" && state.leadBold;
-        })
-        (
-          if role == "lead" then
-            [
-              "  "
-              "    "
-            ]
-          else
-            [
-              "      "
-              "        "
-            ]
-        )
-    ) marks;
-  styledRow = token: fg: rules: {
-    inherit token fg;
-    bold = false;
-    inherit rules;
-  };
+    lib.concatLists (
+      lib.mapAttrsToList (
+        mark: style:
+        map (padding: {
+          contains = "​${padding}${mark} ";
+          fg = style.fg or colors.base05;
+          bold = style.bold or false;
+          dim = style.dim or false;
+        }) markPadding.${role}
+      ) markStyles.${role}
+    );
   agentRows = [
     [
       {
         token = "$agent_repository_header";
-        fg = colors.base03;
-        bold = false;
+        fg = colors.base09;
+        bold = true;
       }
     ]
     [
       {
         token = "$agent_workspace_header";
-        fg = colors.base04;
+        fg = colors.base05;
         bold = false;
       }
     ]
-    (map (entry: styledRow ("$" + entry.token) entry.fg (stateRules entry.role)) [
-      {
-        token = "agent_lead";
+    (map
+      (entry: {
+        token = "$" + entry.token;
         fg = colors.base05;
-        role = "lead";
-      }
-      {
-        token = "agent_worker";
-        fg = colors.base04;
-        role = "worker";
-      }
-      {
-        token = "agent_worker_quiet";
-        fg = colors.base04;
-        role = "worker";
-      }
-    ])
+        bold = false;
+        rules = stateRules entry.role;
+      })
+      [
+        {
+          token = "agent_lead";
+          role = "lead";
+        }
+        {
+          token = "agent_worker";
+          role = "worker";
+        }
+        {
+          token = "agent_worker_quiet";
+          role = "worker";
+        }
+      ]
+    )
   ]
   # Tokens from the agent-summary plugin; only one of the pair is set.
   ++ lib.optional (cfg.agentDisplay.summaryRows == "all") [
     {
       token = "$agent_summary";
-      fg = colors.base04;
+      fg = colors.base05;
       bold = false;
       dim = true;
     }
     {
       token = "$agent_summary_stale";
-      fg = colors.base03;
+      fg = colors.base05;
       bold = false;
       dim = true;
     }
@@ -137,8 +132,9 @@ let
   ++ lib.optional (cfg.agentDisplay.titleRows == "all") [
     {
       token = "$agent_title";
-      fg = colors.base03;
+      fg = colors.base05;
       bold = false;
+      dim = true;
     }
   ]
   ++ lib.optional (cfg.agentDisplay.groupGap == "repositories") [ "$agent_group_gap" ];
@@ -165,7 +161,7 @@ let
   manifest = (pkgs.formats.toml { }).generate "herdr-agent-display.toml" {
     id = "local.agent-display";
     name = "Agent Display";
-    version = "7.0.0";
+    version = "8.0.0";
     min_herdr_version = "0.9.0";
     description = "Shows grouped agent roles, attention states, and optional terminal titles";
     platforms = [
@@ -234,14 +230,15 @@ let
   };
 
   plugin =
-    pkgs.runCommand "herdr-agent-display-plugin-7.0.0"
+    pkgs.runCommand "herdr-agent-display-plugin-8.0.0"
       {
         nativeBuildInputs = [ pkgs.jq ];
       }
       ''
         ${lib.getExe pkgs.bashNonInteractive} ${./herdr-agent-display-test.sh} \
           ${lib.getExe agentDisplay} ${lib.getExe pkgs.bashNonInteractive} \
-          ${pkgs.writeText "herdr-agent-display-rows.json" (builtins.toJSON agentRows)}
+          ${pkgs.writeText "herdr-agent-display-rows.json" (builtins.toJSON agentRows)} \
+          ${pkgs.writeText "herdr-agent-display-palette.json" (builtins.toJSON palette)}
 
         mkdir -p "$out/bin"
         ln -s ${lib.getExe agentDisplay} "$out/bin/herdr-agent-display"
@@ -265,7 +262,11 @@ in
       plainLeads = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Lead names that use ordinary status marks instead of wait marks.";
+        description = ''
+          Prefixed lead names that use ordinary status marks and a name row
+          under the workspace header, instead of wait marks and one row showing
+          the custom workspace label.
+        '';
       };
     };
     titleRows = lib.mkOption {
