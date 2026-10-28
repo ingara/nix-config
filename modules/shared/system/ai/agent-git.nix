@@ -1,25 +1,24 @@
-# Agent git identity: HTTPS with a per-owner token, instead of the operator's
-# SSH key.
+# Agent git identity: HTTPS with the agent account's own GitHub token, instead
+# of the operator's SSH key.
 #
 # The interactive gitconfig rewrites https://github.com/ to ssh://, so every git
-# operation authenticates with an unscoped user SSH key and a scoped token has
-# no effect on what an agent can push. Agents therefore get their own
-# GIT_CONFIG_GLOBAL pointing at the file rendered here — HTTPS only, credentials
-# from a per-owner token file, no fallback.
+# operation would authenticate with the operator's SSH key. Agents therefore get
+# their own GIT_CONFIG_GLOBAL pointing at the file rendered here — HTTPS only,
+# credentials from gh, no fallback.
 #
-# Two mechanisms are load-bearing:
+# Load-bearing details:
 #   - GIT_CONFIG_SYSTEM must also be neutralised. It is a separate scope that
 #     GIT_CONFIG_GLOBAL does not override, and git's own etc/gitconfig sets a
 #     platform credential helper (osxkeychain) that satisfies pushes from cache
 #     on its own, masking a bad token.
-#   - `gh auth git-credential` is NOT usable as the helper: with an invalid
-#     token in the environment it falls back to the keyring account and hands
-#     git the operator's broad token, so scope would never bind.
+#   - The helper is `gh auth git-credential`, which returns the token gh holds
+#     for the agent's Unix account; that account has no access to the
+#     operator's keyring. It runs with GH_TOKEN/GITHUB_TOKEN unset so a stray
+#     environment token cannot override that, and a final helper answers `quit`
+#     so a missing token fails instead of prompting.
 #
-# An owner absent from ownerTokens gets no credential through the managed
-# defaults. Repository access is still bounded by the PAT's own owner,
-# repository, and permission scopes: routing prevents accidental credential
-# crossover and operator fallback, but is not an independent security boundary.
+# What an agent can reach is what its GitHub account can reach; this file only
+# decides which credential git uses.
 {
   config,
   lib,
@@ -31,82 +30,27 @@ let
   cfg = config.myOptions.agentGit;
   gitAuthor = config.myOptions.gitAuthors.agent;
 
-  enabled = cfg.ownerTokens != { };
-
-  agentGithubRouter =
-    if cfg.package != null then
-      cfg.package
-    else
-      pkgs.callPackage ../../../../packages/agent-github-router { };
-
-  ownerEntries = lib.mapAttrsToList (owner: tokenFile: {
-    owner = lib.toLower owner;
-    credential = "owner:${lib.toLower owner}";
-    inherit tokenFile;
-  }) cfg.ownerTokens;
-
-  normalizedOwners = map (entry: entry.owner) ownerEntries;
-
-  ownerCredentials = builtins.listToAttrs (
-    map (entry: lib.nameValuePair entry.credential { inherit (entry) tokenFile; }) ownerEntries
-  );
-
-  ownerRoutes = builtins.listToAttrs (
-    map (entry: lib.nameValuePair entry.owner entry.credential) ownerEntries
-  );
-
-  credentials =
-    ownerCredentials
-    // lib.optionalAttrs (cfg.projectsToken != "") {
-      projects.tokenFile = cfg.projectsToken;
-    };
-
   agentAliases = pkgs.writeText "agent-git-aliases" (
     builtins.readFile ../../../../dotfiles/git-extra/aliases.gitconfig
   );
 
-  agentGhConfig = pkgs.writeTextDir "config.yml" ''
-    version: 1
-  '';
-
-  routerConfig = {
-    version = 1;
-    executables = {
-      gh = lib.getExe pkgs.gh;
-      git = lib.getExe pkgs.git;
-    };
-    ghConfigDir = agentGhConfig;
-    inherit credentials ownerRoutes;
-    projectsCredential = if cfg.projectsToken != "" then "projects" else null;
-  };
-
-  # This config must stay independent of agentGitconfig: agentGitconfig embeds
-  # its path in the Git credential helper command.
-  credentialRouterConfig = pkgs.writeText "agent-github-credential-router.json" (
-    builtins.toJSON (routerConfig // { allowedGitConfigs = [ ]; })
-  );
-
-  ghRouterConfig = pkgs.writeText "agent-github-gh-router.json" (
-    builtins.toJSON (routerConfig // { allowedGitConfigs = [ agentGitconfig ]; })
-  );
-
-  agentGhWrapper = pkgs.writeShellApplication {
-    name = "gh";
+  ghCredential = pkgs.writeShellApplication {
+    name = "agent-gh-git-credential";
+    runtimeInputs = [ pkgs.gh ];
     text = ''
-      case "''${GIT_CONFIG_GLOBAL:-}" in
-        "") exec ${lib.getExe pkgs.gh} "$@" ;;
-        *) exec ${lib.getExe agentGithubRouter} --config ${ghRouterConfig} gh -- "$@" ;;
-      esac
+      unset GH_TOKEN GITHUB_TOKEN
+      exec gh auth git-credential "$@"
     '';
   };
 
-  agentGh = pkgs.symlinkJoin {
-    name = "gh-agent-aware-${pkgs.gh.version}";
-    paths = [ pkgs.gh ];
-    inherit (pkgs.gh) meta;
-    postBuild = ''
-      rm "$out/bin/gh"
-      ln -s ${lib.getExe agentGhWrapper} "$out/bin/gh"
+  # gh exits without answering `quit` when it has no token, so git would fall
+  # through to an interactive prompt.
+  credentialQuit = pkgs.writeShellApplication {
+    name = "agent-git-credential-quit";
+    text = ''
+      if [ "''${1:-}" = get ]; then
+        echo quit=1
+      fi
     '';
   };
 
@@ -136,10 +80,10 @@ let
     ${lib.optionalString (cfg.signingKeyFile != "") ''
       signingkey = ${cfg.signingKeyFile}
     ''}
-    [credential]
-      useHttpPath = true
     [credential "https://github.com"]
-      helper = !${lib.getExe agentGithubRouter} --config ${credentialRouterConfig} credential
+      helper =
+      helper = ${lib.getExe ghCredential}
+      helper = ${lib.getExe credentialQuit}
     [url "https://github.com/"]
       insteadOf = ssh://git@github.com/
       insteadOf = git@github.com:
@@ -195,18 +139,8 @@ let
       path = ${agentAliases}
   '';
 in
-lib.mkIf enabled {
-  assertions = [
-    {
-      assertion = lib.length normalizedOwners == lib.length (lib.unique normalizedOwners);
-      message = "myOptions.agentGit.ownerTokens contains owner names that differ only by case";
-    }
-  ];
-
+lib.mkIf cfg.enable {
   # Options live in shared/options.nix — the myOptions tree is forwarded into
   # home-manager, so a system-only declaration breaks HM's copy.
-  myOptions.agentGit = {
-    ghPackage = agentGh;
-    gitconfigPath = "${agentGitconfig}";
-  };
+  myOptions.agentGit.gitconfigPath = "${agentGitconfig}";
 }

@@ -262,45 +262,10 @@ in
     # myOptions tree is forwarded into home-manager, so a system-only
     # declaration breaks HM's copy.
     agentGit = {
-      package = lib.mkOption {
-        type = lib.types.nullOr lib.types.package;
-        default = null;
-        description = ''
-          GitHub credential routing package. When unset, the in-tree package is
-          used.
-        '';
-      };
-
-      ghPackage = lib.mkOption {
-        type = lib.types.nullOr lib.types.package;
-        default = null;
-        internal = true;
-        description = "Generated gh package with agent credential routing.";
-      };
-
-      ownerTokens = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = { };
-        example = lib.literalExpression ''{ someowner = "/run/secrets/github-token"; }'';
-        description = ''
-          Map of GitHub owner to a file holding a token with write access to
-          that owner's repos. One token per owner is a GitHub constraint: a
-          fine-grained PAT is scoped to a single resource owner. Routing
-          prevents accidental credential crossover and operator fallback;
-          repository and permission limits come from each token's GitHub scope.
-        '';
-      };
-
-      projectsToken = lib.mkOption {
-        type = lib.types.str;
-        default = "";
-        example = "/run/secrets/github-projects-token";
-        description = ''
-          File holding a token limited to GitHub Projects and the metadata read
-          scope required by the gh CLI. The router selects it automatically for
-          `gh project` commands and exposes it as the named Projects credential.
-        '';
-      };
+      enable = lib.mkEnableOption ''
+        the agent gitconfig: HTTPS-only GitHub transport with credentials from
+        the agent account's own gh login
+      '';
 
       signingKeyFile = lib.mkOption {
         type = lib.types.str;
