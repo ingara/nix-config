@@ -65,5 +65,7 @@
     "secrets/*.yaml" # sops-encrypted (ciphertext lines exceed yamllint max)
     "dotfiles/claude/settings.json" # runtime-mutable by Claude Code
     "public/dotfiles/nvim/LICENSE"
+    # Captured tool output, kept byte for byte.
+    "public/modules/shared/home/ai/herdr-agent-summary-fixtures/*.json"
   ];
 }

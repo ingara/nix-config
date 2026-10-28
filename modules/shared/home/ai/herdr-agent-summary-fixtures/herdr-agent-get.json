@@ -1,0 +1,33 @@
+{
+  "id": "cli:agent:get",
+  "result": {
+    "agent": {
+      "agent": "claude",
+      "agent_session": {
+        "agent": "claude",
+        "kind": "id",
+        "source": "herdr:claude",
+        "value": "00000000-0000-4000-8000-000000000000"
+      },
+      "agent_status": "working",
+      "cwd": "/home/user/src/repo",
+      "focused": false,
+      "foreground_cwd": "/home/user/src/repo",
+      "name": "worker-claude",
+      "pane_id": "w81:p3",
+      "revision": 7,
+      "state_change_seq": 346,
+      "tab_id": "w81:t3",
+      "terminal_id": "term_65ed1b9ca9a5844",
+      "terminal_title": "title",
+      "terminal_title_stripped": "title",
+      "tokens": {
+        "agent_activity": "example",
+        "agent_display": "example",
+        "agent_worker": "example"
+      },
+      "workspace_id": "w81"
+    },
+    "type": "agent_info"
+  }
+}

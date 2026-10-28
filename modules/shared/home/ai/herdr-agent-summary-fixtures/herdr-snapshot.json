@@ -1,0 +1,357 @@
+{
+  "id": "cli:api:snapshot",
+  "result": {
+    "snapshot": {
+      "agents": [
+        {
+          "agent": "omp",
+          "agent_session": {
+            "agent": "omp",
+            "kind": "path",
+            "source": "herdr:omp",
+            "value": "/home/user/.omp/agent/sessions/-home-user-src-repo/2026-01-01T00-00-00-000Z_session.jsonl"
+          },
+          "agent_status": "done",
+          "completion_seq": 339,
+          "cwd": "/home/user/src/repo",
+          "focused": false,
+          "foreground_cwd": "/home/user/src/repo",
+          "name": "lead-omp",
+          "pane_id": "w2K:p1",
+          "revision": 57017,
+          "screen_detection_skipped": true,
+          "state_change_seq": 339,
+          "tab_id": "w2K:t1",
+          "terminal_id": "term_65ec4a33d40b31",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_display": "example",
+            "agent_lead": "example",
+            "agent_repository_header": "example",
+            "agent_summary": "​  Example summary",
+            "agent_workspace_header": "example"
+          },
+          "workspace_id": "w2K"
+        },
+        {
+          "agent": "claude",
+          "agent_session": {
+            "agent": "claude",
+            "kind": "id",
+            "source": "herdr:claude",
+            "value": "00000000-0000-4000-8000-000000000000"
+          },
+          "agent_status": "working",
+          "cwd": "/home/user/src/repo",
+          "focused": true,
+          "foreground_cwd": "/home/user/src/repo",
+          "name": "lead-claude",
+          "pane_id": "w9:p4",
+          "revision": 24,
+          "state_change_seq": 349,
+          "tab_id": "w9:t1",
+          "terminal_id": "term_65ec4a33d45942",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_activity": "example",
+            "agent_display": "example",
+            "agent_lead": "example",
+            "agent_repository_header": "example",
+            "agent_summary_stale": "​  ◌ Example summary"
+          },
+          "workspace_id": "w9"
+        },
+        {
+          "agent": "claude",
+          "agent_session": {
+            "agent": "claude",
+            "kind": "id",
+            "source": "herdr:claude",
+            "value": "00000000-0000-4000-8000-000000000000"
+          },
+          "agent_status": "working",
+          "cwd": "/home/user/src/repo",
+          "focused": false,
+          "foreground_cwd": "/home/user/src/repo",
+          "name": "worker-claude",
+          "pane_id": "w81:p3",
+          "revision": 7,
+          "state_change_seq": 346,
+          "tab_id": "w81:t3",
+          "terminal_id": "term_65ed1b9ca9a5844",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_activity": "example",
+            "agent_display": "example",
+            "agent_worker": "example"
+          },
+          "workspace_id": "w81"
+        }
+      ],
+      "focused_pane_id": "w2K:p1",
+      "focused_tab_id": "w2K:t1",
+      "focused_workspace_id": "w2K",
+      "layouts": [
+        {
+          "area": {
+            "height": 109,
+            "width": 192,
+            "x": 0,
+            "y": 0
+          },
+          "focused_pane_id": "w2K:p1",
+          "panes": [
+            {
+              "focused": true,
+              "pane_id": "w2K:p1",
+              "rect": {
+                "height": 109,
+                "width": 192,
+                "x": 0,
+                "y": 0
+              }
+            }
+          ],
+          "splits": [],
+          "tab_id": "w2K:t1",
+          "workspace_id": "w2K",
+          "zoomed": false
+        },
+        {
+          "area": {
+            "height": 109,
+            "width": 192,
+            "x": 0,
+            "y": 0
+          },
+          "focused_pane_id": "w9:p4",
+          "panes": [
+            {
+              "focused": true,
+              "pane_id": "w9:p4",
+              "rect": {
+                "height": 109,
+                "width": 192,
+                "x": 0,
+                "y": 0
+              }
+            }
+          ],
+          "splits": [],
+          "tab_id": "w9:t1",
+          "workspace_id": "w9",
+          "zoomed": false
+        },
+        {
+          "area": {
+            "height": 109,
+            "width": 192,
+            "x": 0,
+            "y": 0
+          },
+          "focused_pane_id": "w81:p3",
+          "panes": [
+            {
+              "focused": true,
+              "pane_id": "w81:p3",
+              "rect": {
+                "height": 109,
+                "width": 192,
+                "x": 0,
+                "y": 0
+              }
+            }
+          ],
+          "splits": [],
+          "tab_id": "w81:t3",
+          "workspace_id": "w81",
+          "zoomed": false
+        }
+      ],
+      "panes": [
+        {
+          "agent": "omp",
+          "agent_session": {
+            "agent": "omp",
+            "kind": "path",
+            "source": "herdr:omp",
+            "value": "/home/user/.omp/agent/sessions/-home-user-src-repo/2026-01-01T00-00-00-000Z_session.jsonl"
+          },
+          "agent_status": "done",
+          "cwd": "/home/user/src/repo",
+          "focused": false,
+          "foreground_cwd": "/home/user/src/repo",
+          "pane_id": "w2K:p1",
+          "revision": 57017,
+          "scroll": {
+            "max_offset_from_bottom": 0,
+            "offset_from_bottom": 0,
+            "viewport_rows": 109
+          },
+          "tab_id": "w2K:t1",
+          "terminal_id": "term_65ec4a33d40b31",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_display": "example",
+            "agent_lead": "example",
+            "agent_repository_header": "example",
+            "agent_summary": "​  Example summary",
+            "agent_workspace_header": "example"
+          },
+          "workspace_id": "w2K"
+        },
+        {
+          "agent": "claude",
+          "agent_session": {
+            "agent": "claude",
+            "kind": "id",
+            "source": "herdr:claude",
+            "value": "00000000-0000-4000-8000-000000000000"
+          },
+          "agent_status": "working",
+          "cwd": "/home/user/src/repo",
+          "focused": true,
+          "foreground_cwd": "/home/user/src/repo",
+          "pane_id": "w9:p4",
+          "revision": 24,
+          "scroll": {
+            "max_offset_from_bottom": 0,
+            "offset_from_bottom": 0,
+            "viewport_rows": 109
+          },
+          "tab_id": "w9:t1",
+          "terminal_id": "term_65ec4a33d45942",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_activity": "example",
+            "agent_display": "example",
+            "agent_lead": "example",
+            "agent_repository_header": "example",
+            "agent_summary_stale": "​  ◌ Example summary"
+          },
+          "workspace_id": "w9"
+        },
+        {
+          "agent": "claude",
+          "agent_session": {
+            "agent": "claude",
+            "kind": "id",
+            "source": "herdr:claude",
+            "value": "00000000-0000-4000-8000-000000000000"
+          },
+          "agent_status": "working",
+          "cwd": "/home/user/src/repo",
+          "focused": false,
+          "foreground_cwd": "/home/user/src/repo",
+          "pane_id": "w81:p3",
+          "revision": 7,
+          "scroll": {
+            "max_offset_from_bottom": 0,
+            "offset_from_bottom": 0,
+            "viewport_rows": 109
+          },
+          "tab_id": "w81:t3",
+          "terminal_id": "term_65ed1b9ca9a5844",
+          "terminal_title": "title",
+          "terminal_title_stripped": "title",
+          "tokens": {
+            "agent_activity": "example",
+            "agent_display": "example",
+            "agent_worker": "example"
+          },
+          "workspace_id": "w81"
+        }
+      ],
+      "protocol": 22,
+      "tabs": [
+        {
+          "agent_status": "done",
+          "focused": false,
+          "label": "tab",
+          "number": 1,
+          "pane_count": 1,
+          "tab_id": "w2K:t1",
+          "workspace_id": "w2K"
+        },
+        {
+          "agent_status": "working",
+          "focused": true,
+          "label": "tab",
+          "number": 1,
+          "pane_count": 1,
+          "tab_id": "w9:t1",
+          "workspace_id": "w9"
+        },
+        {
+          "agent_status": "working",
+          "focused": false,
+          "label": "tab",
+          "number": 3,
+          "pane_count": 1,
+          "tab_id": "w81:t3",
+          "workspace_id": "w81"
+        }
+      ],
+      "version": "0.9.5",
+      "workspaces": [
+        {
+          "active_tab_id": "w2K:t1",
+          "agent_status": "done",
+          "focused": false,
+          "label": "workspace",
+          "number": 1,
+          "pane_count": 1,
+          "tab_count": 1,
+          "workspace_id": "w2K",
+          "worktree": {
+            "checkout_path": "/home/user/src/repo",
+            "is_linked_worktree": false,
+            "repo_key": "/home/user/src/repo",
+            "repo_name": "repo",
+            "repo_root": "/home/user/src/repo"
+          }
+        },
+        {
+          "active_tab_id": "w9:t1",
+          "agent_status": "working",
+          "focused": true,
+          "label": "workspace",
+          "number": 4,
+          "pane_count": 1,
+          "tab_count": 1,
+          "workspace_id": "w9",
+          "worktree": {
+            "checkout_path": "/home/user/src/repo",
+            "is_linked_worktree": false,
+            "repo_key": "/home/user/src/repo",
+            "repo_name": "repo",
+            "repo_root": "/home/user/src/repo"
+          }
+        },
+        {
+          "active_tab_id": "w81:t1",
+          "agent_status": "done",
+          "focused": false,
+          "label": "workspace",
+          "number": 15,
+          "pane_count": 3,
+          "tab_count": 3,
+          "workspace_id": "w81",
+          "worktree": {
+            "checkout_path": "/home/user/src/repo",
+            "is_linked_worktree": true,
+            "repo_key": "/home/user/src/repo",
+            "repo_name": "repo",
+            "repo_root": "/home/user/src/repo"
+          }
+        }
+      ]
+    },
+    "type": "session_snapshot"
+  }
+}

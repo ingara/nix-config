@@ -11,35 +11,43 @@ let
   summaryCfg = cfg.agentSummary;
   homePrefix = "${config.home.homeDirectory}/";
   # Expanded at run time so every account on a host shares one plugin build.
-  shellPath =
-    path:
-    if lib.hasPrefix homePrefix path then
-      ''"$HOME"/${lib.escapeShellArg (lib.removePrefix homePrefix path)}''
-    else
-      lib.escapeShellArg path;
+  homeRelative =
+    path: if lib.hasPrefix homePrefix path then "~/${lib.removePrefix homePrefix path}" else path;
 
-  agentSummary = pkgs.writeShellApplication {
-    name = "herdr-agent-summary";
-    runtimeInputs = [
-      cfg.package
-      pkgs.coreutils
-      pkgs.findutils
-      pkgs.flock
-      pkgs.gnugrep
-      pkgs.jq
-    ];
-    text = ''
-      worker_prefixes=${lib.escapeShellArg (builtins.toJSON cfg.agentDisplay.roles.workerPrefixes)}
-      interval=${toString summaryCfg.interval}
-      model=${lib.escapeShellArg summaryCfg.model}
-      model_timeout=${toString summaryCfg.timeout}
-      max_concurrent=${toString summaryCfg.maxConcurrent}
-      claude_bin=${lib.escapeShellArg (lib.getExe summaryCfg.claudePackage)}
-      claude_config_dir=${shellPath summaryCfg.claudeConfigDir}
-      omp_sessions_dir=${shellPath summaryCfg.ompSessionsDir}
-    ''
-    + builtins.readFile ./herdr-agent-summary.sh;
+  settings = {
+    worker_prefixes = cfg.agentDisplay.roles.workerPrefixes;
+    inherit (summaryCfg) interval model timeout;
+    max_concurrent = summaryCfg.maxConcurrent;
+    claude_bin = lib.getExe summaryCfg.claudePackage;
+    # Herdr passes HERDR_BIN_PATH to plugin commands; this covers its absence.
+    herdr_bin = lib.getExe cfg.package;
+    claude_config_dir = homeRelative summaryCfg.claudeConfigDir;
+    omp_sessions_dir = homeRelative summaryCfg.ompSessionsDir;
   };
+
+  # A fixed interpreter rather than the uv script lane in scripts/AGENTS.md:
+  # Herdr runs plugin commands with its server's environment, not this
+  # activation's PATH, and the hooks run on every agent status change. The
+  # store path doubles as the build identity the running process compares
+  # hooks against.
+  agentSummary =
+    pkgs.writers.writePython3Bin "herdr-agent-summary"
+      {
+        flakeIgnore = [
+          # The system prompt and the substituted CONFIG_JSON line are as long
+          # as they need to be.
+          "E501"
+          # Any --ignore replaces flake8's default list, which skips this
+          # pre-PEP 8 rule.
+          "W503"
+        ];
+      }
+      (
+        builtins.replaceStrings
+          [ ''CONFIG_JSON = "@config@"'' ]
+          [ "CONFIG_JSON = ${builtins.toJSON (builtins.toJSON settings)}" ]
+          (builtins.readFile ./herdr-agent-summary.py)
+      );
 
   manifest = (pkgs.formats.toml { }).generate "herdr-agent-summary.toml" {
     id = "local.agent-summary";
@@ -99,22 +107,18 @@ let
         ];
   };
 
-  plugin =
-    pkgs.runCommand "herdr-agent-summary-plugin-1.0.0"
-      {
-        nativeBuildInputs = [
-          pkgs.flock
-          pkgs.jq
-        ];
-      }
-      ''
-        ${lib.getExe pkgs.bashNonInteractive} ${./herdr-agent-summary-test.sh} \
-          ${lib.getExe agentSummary} ${lib.getExe pkgs.bashNonInteractive}
+  plugin = pkgs.runCommand "herdr-agent-summary-plugin-1.0.0" { } ''
+    ${lib.getExe pkgs.python3} -I ${./herdr-agent-summary-test.py} \
+      ${./herdr-agent-summary.py} ${./herdr-agent-summary-fixtures}
+    # The built script parses its substituted settings; without a server
+    # socket the process exits at its first reconcile.
+    HERDR_PLUGIN_STATE_DIR="$TMPDIR/state" HERDR_SOCKET_PATH="$TMPDIR/sock" \
+      HERDR_BIN_PATH=${pkgs.coreutils}/bin/false ${lib.getExe agentSummary} --serve
 
-        mkdir -p "$out/bin"
-        ln -s ${lib.getExe agentSummary} "$out/bin/herdr-agent-summary"
-        cp ${manifest} "$out/herdr-plugin.toml"
-      '';
+    mkdir -p "$out/bin"
+    ln -s ${lib.getExe agentSummary} "$out/bin/herdr-agent-summary"
+    cp ${manifest} "$out/herdr-plugin.toml"
+  '';
 in
 {
   options.programs.herdr.agentSummary = {
