@@ -22,12 +22,9 @@ in
   };
 
   # Window manager: list installed WMs in `enabled`, set the active one as
-  # `default` (yabai/aerospace/omniwm/paneru/nehir).
+  # `default` (yabai/aerospace/omniwm/paneru).
   myOptions.windowManager = {
-    enabled = [
-      "nehir"
-      "omniwm"
-    ];
+    enabled = [ "omniwm" ];
     default = "omniwm";
   };
 

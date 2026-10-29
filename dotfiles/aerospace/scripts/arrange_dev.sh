@@ -7,7 +7,7 @@ aerospace workspace dev
 
 # Get window IDs
 arc_id=$(aerospace list-windows --workspace dev --format '%{window-id}|%{app-name}' | grep '|Arc$' | head -1 | cut -d'|' -f1)
-editor_ids=$(aerospace list-windows --workspace dev --format '%{window-id}|%{app-name}' | grep -E '\|(Cursor|Code|Claude)$' | cut -d'|' -f1)
+editor_ids=$(aerospace list-windows --workspace dev --format '%{window-id}|%{app-name}' | grep -E '\|(Code|Claude)$' | cut -d'|' -f1)
 
 if [ -z "$arc_id" ] || [ -z "$editor_ids" ]; then
   echo "Need both Arc and editor windows on dev workspace" >&2

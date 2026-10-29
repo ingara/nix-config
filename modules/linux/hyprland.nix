@@ -278,7 +278,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         "workspace ${gamesWorkspace}, match:class ^(steam_app_[0-9]+|gamescope)$"
       ];
 
-      # ALT is the modifier to mirror the macOS workstation (nehir/aerospace)
+      # ALT is the modifier to mirror the macOS workstation (omniwm/aerospace)
       # muscle memory: alt+hjkl focus, alt+shift+hjkl move, alt+-/= resize.
       # Bound Alt chords are consumed before apps; leave Alt+B/F free for
       # terminal word navigation.

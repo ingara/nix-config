@@ -92,16 +92,16 @@
     "brew-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1789661079,
-        "narHash": "sha256-geVTQ51PGZ1mLULM5k7wO7qt/6xenOR/YG8X7Q3eCaI=",
+        "lastModified": 1793000687,
+        "narHash": "sha256-8mCor0DDjNhi+0e+FllfqiMABujBl+/RxYW+wgMpcto=",
         "owner": "Homebrew",
         "repo": "brew",
-        "rev": "edb70f031e4170c780799633a1226ff73e1077f4",
+        "rev": "c6069d2a943b71b0a90d91fc1ac93cb9c1634dcc",
         "type": "github"
       },
       "original": {
         "owner": "Homebrew",
-        "ref": "7.0.4",
+        "ref": "7.0.11",
         "repo": "brew",
         "type": "github"
       }
@@ -438,22 +438,6 @@
         "type": "github"
       }
     },
-    "homebrew-boring-notch": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1790329758,
-        "narHash": "sha256-K4sNTMAqkz6m+wg9/NeWJwz/NPWqdTdats/6YtyDEGI=",
-        "owner": "TheBoredTeam",
-        "repo": "homebrew-boring-notch",
-        "rev": "9d87cc331146181f1ebe896ae39b6dff4277c599",
-        "type": "github"
-      },
-      "original": {
-        "owner": "TheBoredTeam",
-        "repo": "homebrew-boring-notch",
-        "type": "github"
-      }
-    },
     "homebrew-bundle": {
       "flake": false,
       "locked": {
@@ -502,22 +486,6 @@
         "type": "github"
       }
     },
-    "homebrew-felixkratz": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791580578,
-        "narHash": "sha256-E2lxCwGyWui+8+7AlntHhzaFENVm2o/CeVHNEeSEGPU=",
-        "owner": "FelixKratz",
-        "repo": "homebrew-formulae",
-        "rev": "e38ef7a0e90101100ca6fa66c1e1da80f3c1dc87",
-        "type": "github"
-      },
-      "original": {
-        "owner": "FelixKratz",
-        "repo": "homebrew-formulae",
-        "type": "github"
-      }
-    },
     "homebrew-graphite": {
       "flake": false,
       "locked": {
@@ -530,22 +498,6 @@
       },
       "original": {
         "owner": "withgraphite",
-        "repo": "homebrew-tap",
-        "type": "github"
-      }
-    },
-    "homebrew-nehir": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786653846,
-        "narHash": "sha256-ueXHG0aCphl7lfltAvh4b13rI0TD3obscLzpyL5Brs4=",
-        "owner": "guria",
-        "repo": "homebrew-tap",
-        "rev": "a4e9881c9e5e17464a8162ffecbaf418f1fbca32",
-        "type": "github"
-      },
-      "original": {
-        "owner": "guria",
         "repo": "homebrew-tap",
         "type": "github"
       }
@@ -661,7 +613,9 @@
     },
     "nix-homebrew": {
       "inputs": {
-        "brew-src": "brew-src"
+        "brew-src": [
+          "brew-src"
+        ]
       },
       "locked": {
         "lastModified": 1789928041,
@@ -760,6 +714,7 @@
     "root": {
       "inputs": {
         "aerospace-scratchpad": "aerospace-scratchpad",
+        "brew-src": "brew-src",
         "claude-code-nix": "claude-code-nix",
         "codex-cli-nix": "codex-cli-nix",
         "darwin": "darwin",
@@ -768,13 +723,10 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "homebrew-aerospace": "homebrew-aerospace",
-        "homebrew-boring-notch": "homebrew-boring-notch",
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
-        "homebrew-felixkratz": "homebrew-felixkratz",
         "homebrew-graphite": "homebrew-graphite",
-        "homebrew-nehir": "homebrew-nehir",
         "homebrew-skhd-zig": "homebrew-skhd-zig",
         "import-tree": "import-tree",
         "lavish-axi": "lavish-axi",

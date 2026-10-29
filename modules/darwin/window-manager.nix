@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   pkgs,
   lib,
   ...
@@ -11,23 +12,19 @@ let
   cfg = config.myOptions.windowManager;
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
 
-  # Multi-WM run-one. nehir/omniwm are LSUIElement GUI `.app`
-  # casks: their lifecycle is LaunchServices (`open -a`) + AppleScript quit, NOT
-  # a bare-binary launchd agent (which loses Accessibility/TCC context and would
-  # double-launch nehir's self-registered login item). So instead of per-WM
+  # Multi-WM run-one. omniwm is an LSUIElement GUI `.app` cask: its lifecycle
+  # is LaunchServices (`open -a`) + AppleScript quit, NOT a bare-binary launchd
+  # agent (which loses Accessibility/TCC context and can double-launch an app's
+  # self-registered login item). So instead of per-WM
   # agents we ship one `wm-switch` script + a single autostart agent that runs
   # `wm-switch <default>` at login. yabai/aerospace/paneru have other lifecycles
   # and are intentionally absent from this map (deny-by-default: a WM not listed
   # here isn't switchable via wm-switch).
   knownApp = {
-    nehir = "Nehir";
     omniwm = "OmniWM";
   };
   # The enabled WMs we can drive via open-a, in `enabled` order.
   switchable = lib.filter (w: knownApp ? ${w}) cfg.enabled;
-  # Keep the logical backend key stable while following Nehir's 0.6 release
-  # candidates at the Homebrew boundary.
-  switchableCasks = map (w: if w == "nehir" then "nehir@rc" else w) switchable;
   enabledBash = lib.concatStringsSep " " switchable;
   # Detect a previously enabled app still running across a configuration
   # change, even if it is no longer eligible as a target.
@@ -93,8 +90,10 @@ in
 
     # Install a cask for every enabled cask-based WM (install-many / run-one).
     # paneru is NOT a cask — it installs via services.paneru in paneru.nix.
-    homebrew.casks =
-      lib.optionals (lib.elem "aerospace" cfg.enabled) [ "aerospace" ] ++ switchableCasks;
+    homebrew.casks = lib.optionals (lib.elem "aerospace" cfg.enabled) [ "aerospace" ] ++ switchable;
+    nix-homebrew.taps = lib.mkIf (lib.elem "aerospace" cfg.enabled) {
+      "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
+    };
 
     launchd.user.agents = lib.mkMerge [
       # Launchd logging for yabai (only when yabai is active)

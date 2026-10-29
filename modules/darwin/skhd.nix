@@ -7,8 +7,9 @@
 # TCC prompts, grabber + dext installation).
 #
 # Config files + entrypoint: written here (this module owns skhd's whole
-# concern). The Nehir/OmniWM pair has one runtime-selected include, written by
-# wm-switch; generic WM loading remains unchanged. Homebrew cask: homebrew.nix.
+# concern). Run-one WMs (window-manager.nix) get one runtime-selected include,
+# written by wm-switch; other WM layers load statically. Homebrew cask:
+# homebrew.nix.
 { lib, ... }:
 let
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
@@ -23,10 +24,7 @@ in
         # isDarwin guard the central dotfiles.nix used is implicit here.
         anyWM = wm.enabled != [ ];
         src = relPath: dots.mkSource { inherit config relPath; };
-        runOne = lib.elem wm.default [
-          "nehir"
-          "omniwm"
-        ];
+        runOne = wm.default == "omniwm";
       in
       {
         home.activation.restartSkhd = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
@@ -69,10 +67,6 @@ in
           }
           // lib.optionalAttrs (lib.elem "omniwm" wm.enabled) {
             "skhd/omniwm.skhd".source = src "skhd/omniwm.skhd";
-          }
-          // lib.optionalAttrs (lib.elem "nehir" wm.enabled) {
-            "skhd/nehir.skhd".source = src "skhd/nehir.skhd";
-            "skhd/nehir-ratio.sh".source = src "skhd/nehir-ratio.sh";
           };
       }
     )

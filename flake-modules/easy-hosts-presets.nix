@@ -113,11 +113,7 @@ in
                     "homebrew/homebrew-core" = inputs.homebrew-core;
                     "homebrew/homebrew-cask" = inputs.homebrew-cask;
                     "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
-                    "felixkratz/homebrew-formulae" = inputs.homebrew-felixkratz;
                     "withgraphite/homebrew-tap" = inputs.homebrew-graphite;
-                    "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
-                    "theboredteam/homebrew-boring-notch" = inputs.homebrew-boring-notch;
-                    "guria/homebrew-tap" = inputs.homebrew-nehir;
                     "jackielii/homebrew-tap" = inputs.homebrew-skhd-zig;
                   };
                 };

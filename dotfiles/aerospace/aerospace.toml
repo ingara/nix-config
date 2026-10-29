@@ -76,10 +76,6 @@ run = 'layout floating'
 
 # App-to-workspace assignments (replaces move_app_windows)
 [[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92' # Cursor
-run = 'move-node-to-workspace dev'
-
-[[on-window-detected]]
 if.app-id = 'com.microsoft.VSCode'
 run = 'move-node-to-workspace dev'
 
@@ -223,7 +219,6 @@ cmd-ctrl-t = 'exec-and-forget open /Applications/Ghostty.app'
 cmd-ctrl-m = 'exec-and-forget open /Applications/Airmail.app'
 cmd-ctrl-w = 'exec-and-forget open /Applications/WhatsApp.app'
 cmd-ctrl-r = 'exec-and-forget open /System/Applications/Reminders.app'
-cmd-ctrl-x = 'exec-and-forget aerospace-scratchpad show TIDAL || open /Applications/TIDAL.app/'
 
 # Setup management (cmd + shift + alt + key)
 cmd-shift-alt-h = 'exec-and-forget ~/.config/aerospace/scripts/apply_setup.sh home'

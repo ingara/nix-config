@@ -53,10 +53,8 @@ in
       {
         imports = [
           inputs.paneru.homeModules.paneru
-          ./dotfiles.nix
           ./colima.nix
           ./paneru.nix
-          ./nehir.nix
           ./omniwm.nix
           ../shared/home
           ../shared/home/stylix-base.nix

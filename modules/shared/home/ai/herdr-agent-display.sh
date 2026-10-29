@@ -24,11 +24,15 @@ case "$mode" in
 esac
 
 refresh_all() {
-  local snapshot seq now
+  local snapshot repos seq now
   local -a names values args
 
   seq="${EPOCHREALTIME/./}"
   if ! snapshot="$("$herdr_bin" api snapshot 2>/dev/null)"; then
+    return 0
+  fi
+  repos='{}'
+  if [ "$clear" -eq 0 ] && ! repos="$(timeout -k 2 10 herdr-workspace-repos <<<"$snapshot")"; then
     return 0
   fi
   now="${HERDR_AGENT_DISPLAY_NOW:-$EPOCHSECONDS}"
@@ -87,6 +91,7 @@ refresh_all() {
   done < <(
     jq -jn \
       --argjson response "$snapshot" \
+      --argjson repos "$repos" \
       --argjson clear "$clear" \
       --argjson now "$now" \
       --argjson lead_prefixes "$lead_prefixes" \
@@ -99,16 +104,13 @@ refresh_all() {
         first($snapshot.workspaces[]? | select(.workspace_id == $id))
           // { workspace_id: $id, label: $id };
       def family_key($workspace):
-        if (($workspace.worktree.repo_key // "") != "")
-        then "repo:\($workspace.worktree.repo_key)"
-        else "workspace:\($workspace.workspace_id)"
-        end;
+        "repo:" + ($repos[$workspace.workspace_id].repo_key // "unclassified");
       def basename: sub("/+$"; "") | split("/") | last // "";
       # Labels Herdr can derive itself: the repository name, the basename of the
       # repository root, checkout or a pane cwd, "~" for $HOME, or "workspace".
       # Herdr does not record whether a label was set by hand.
       def automatic_labels($snapshot; $workspace):
-        [$workspace.worktree.repo_name,
+        [$repos[$workspace.workspace_id].repo_name,
           ($workspace.worktree.repo_root // "" | basename),
           ($workspace.worktree.checkout_path // "" | basename),
           ($snapshot.panes[]? | select(.workspace_id == $workspace.workspace_id)
@@ -213,15 +215,9 @@ refresh_all() {
               then (($now - $last_activity) / 60 | if . < 0 then 0 else . end)
               else null
             end) as $idle_minutes
-          | (if (($workspace.worktree.repo_key // "") != "")
-              then ($workspace.worktree.repo_name // $workspace.label // $workspace.workspace_id)
-              else ""
-            end) as $repository
+          | ($repos[$workspace.workspace_id].repo_name // "unclassified") as $repository
+          | (if $first_family_run_agent then $repository else "" end) as $repository_label
           | ($workspace.label // $workspace.workspace_id) as $workspace_label
-          | (if $first_family_run_agent and (($workspace.worktree.repo_key // "") != "")
-              then $repository
-              else ""
-            end) as $repository_label
           | (if $first_workspace_run_agent and $lane_owner == null
               and $workspace_label != $repository_label
               then $workspace_label
@@ -257,10 +253,8 @@ refresh_all() {
               | padded($role_indent + 2; .)
               else "" end) as $title_row
           | (if $group_gap == "repositories" and ($agent_index + 1) < ($all | length)
-              and (workspace($snapshot; $all[$agent_index + 1].workspace_id) as $next
-                | family_key($next) != $family_key
-                  and ($next.worktree.repo_key // "") != "")
-              and any($all[0:$agent_index + 1][]; (workspace($snapshot; .workspace_id).worktree.repo_key // "") != "")
+              and (workspace($snapshot; $all[$agent_index + 1].workspace_id)
+                | family_key(.) != $family_key)
               then "\u200b" else "" end) as $gap_row
           | ([$identity, ($state_change_seq | tostring), ($agent.agent_status // "unknown"),
               ($last_activity // "" | tostring)] | join("|")) as $activity_record

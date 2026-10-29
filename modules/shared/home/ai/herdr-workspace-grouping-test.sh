@@ -4,13 +4,31 @@ set -euo pipefail
 
 grouping_bin="$1"
 bash_bin="$2"
+# shellcheck source=herdr-workspace-repos-fixture.sh
+source "$3"
 test_dir="$(mktemp -d)"
+server_log="$test_dir/server.log"
 server_pid=""
+# Every failure prints the fake server's log. A failure with the server gone is
+# the environment's, not the plugin's: exit 75 (EX_TEMPFAIL) so the build reruns
+# the fixtures.
 cleanup() {
+  local status=$? server_status=0
+  if [ "$status" -ne 0 ] && [ -n "$server_pid" ]; then
+    if kill -0 "$server_pid" 2>/dev/null; then
+      printf 'The fake server is still running; its log follows.\n' >&2
+    else
+      wait "$server_pid" || server_status=$?
+      printf 'The fake server exited with status %s; its log follows.\n' "$server_status" >&2
+      status=75
+    fi
+    cat "$server_log" >&2
+  fi
   if [ -n "$server_pid" ]; then
     kill "$server_pid" 2>/dev/null || true
   fi
   rm -rf "$test_dir"
+  exit "$status"
 }
 trap cleanup EXIT
 
@@ -28,7 +46,7 @@ printf '#!%s\n' "$bash_bin" >"$HERDR_BIN_PATH"
 cat >>"$HERDR_BIN_PATH" <<'EOF'
 set -euo pipefail
 case "$1:$2" in
-  workspace:list)
+  api:snapshot)
     order="$(cat "$WORKSPACES_FILE")"
     sleep "${LIST_DELAY:-0}"
     printf '%s\n' "$order"
@@ -53,7 +71,7 @@ if [ -e "$REJECT_FILE" ]; then
 fi
 jq --argjson request "$line" '
   $request.params.workspace_ids as $ids
-  | .result.workspaces |= (
+  | .result.snapshot.workspaces |= (
       map(select(.workspace_id as $id | $ids | index([$id]) | not)) as $rest
       | (first(range($rest | length)
           | select($rest[.].workspace_id == $request.params.before_workspace_id))
@@ -61,24 +79,32 @@ jq --argjson request "$line" '
       | $rest[:$at] + map(select(.workspace_id as $id | $ids | index([$id]))) + $rest[$at:])
 ' "$WORKSPACES_FILE" >"$WORKSPACES_FILE.next"
 mv "$WORKSPACES_FILE.next" "$WORKSPACES_FILE"
-jq -c '{id: "workspace-grouping", result: .result}' "$WORKSPACES_FILE"
+jq -c '{id: "workspace-grouping", result: {type:"workspace_list",workspaces:.result.snapshot.workspaces}}' "$WORKSPACES_FILE"
 EOF
 chmod +x "$handler"
 
-socat "UNIX-LISTEN:$HERDR_SOCKET_PATH,fork" "EXEC:$handler" 2>/dev/null &
+socat -d -d "UNIX-LISTEN:$HERDR_SOCKET_PATH,fork" "EXEC:$handler" 2>"$server_log" &
 server_pid=$!
-for _ in $(seq 50); do
-  [ -S "$HERDR_SOCKET_PATH" ] && break
+# Ready once the server listens: a connection is queued before it is accepted.
+# The probe sends no request.
+ready_deadline=$((SECONDS + 30))
+until socat -u /dev/null "UNIX-CONNECT:$HERDR_SOCKET_PATH" 2>/dev/null; do
+  kill -0 "$server_pid" 2>/dev/null || exit 1
+  if [ "$SECONDS" -ge "$ready_deadline" ]; then
+    printf 'The fake server was not listening within 30 s.\n' >&2
+    exit 1
+  fi
   sleep 0.1
 done
 
 # Arguments: ordered "id:repo" entries, where an empty repo has no worktree.
 workspaces() {
   : >"$REQUEST_LOG"
-  jq -n --args '{result: {type: "workspace_list", workspaces: [$ARGS.positional[]
+  jq -n --args '{result: {snapshot: {workspaces: [$ARGS.positional[]
     | split(":") as [$id, $repo]
     | {workspace_id: $id, label: $id}
-      + if $repo == "" then {} else {worktree: {repo_key: "/src/\($repo)/.git", repo_name: $repo}} end]}}' \
+      + if $repo == "" then {} else {worktree: {repo_key: "/src/\($repo)/.git", repo_name: $repo}} end],
+    tabs:[],panes:[],layouts:[]}}}' \
     -- "$@" >"$WORKSPACES_FILE"
 }
 
@@ -93,18 +119,20 @@ created() {
 # Arguments: "id:delay" pairs, the delay of that hook's workspace list.
 created_together() {
   local -a pids=()
-  local entry
+  local entry status=0
   for entry in "$@"; do
     LIST_DELAY="${entry#*:}" created "${entry%%:*}" &
     pids+=("$!")
   done
+  # Every hook finishes before a failure is reported, so none outlives the fixtures.
   for pid in "${pids[@]}"; do
-    wait "$pid"
+    wait "$pid" || status=$?
   done
+  return "$status"
 }
 
 expect_order() {
-  jq -e --arg expected "$*" '[.result.workspaces[].workspace_id] | join(" ") == $expected' \
+  jq -e --arg expected "$*" '[.result.snapshot.workspaces[].workspace_id] | join(" ") == $expected' \
     "$WORKSPACES_FILE" >/dev/null
 }
 
@@ -144,7 +172,7 @@ expect_no_request w2
 # The only workspace of its repository.
 workspaces w1:alpha w2:gamma w3:beta
 expect_no_request w3
-# Without worktree provenance.
+# An unresolvable generic workspace stays put.
 workspaces w1:alpha w2: w3:alpha
 expect_no_request w2
 # Already closed again.
@@ -159,7 +187,7 @@ expect_order w1 w2 w3
 # Two new workspaces of one repository after an older run both join it.
 workspaces a0:alpha b0:beta a1:alpha a2:alpha
 created_together a1:0.3 a2:0.3
-jq -e '[.result.workspaces[] | .workspace_id] | .[0] == "a0" and .[3] == "b0"' \
+jq -e '[.result.snapshot.workspaces[] | .workspace_id] | .[0] == "a0" and .[3] == "b0"' \
   "$WORKSPACES_FILE" >/dev/null
 
 # New workspaces of two repositories created together each join their own run.
@@ -174,6 +202,48 @@ workspaces w1:alpha w2:alpha
 HERDR_PLUGIN_EVENT_JSON='{"event":"workspace.created","data":{"type":"workspace_created"}}' \
   "$grouping_bin"
 [ ! -s "$REQUEST_LOG" ]
+
+# Creation-time grouping uses inferred identities for both the new workspace
+# and the existing run. The first listed tab wins over stable tab numbers.
+repo_fixture "$test_dir/git"
+for id in linked duplicate; do
+  cp "$test_dir/git/repos.json" "$WORKSPACES_FILE"
+  : >"$REQUEST_LOG"
+  created "$id"
+  jq -e --arg id "$id" '
+    [.result.snapshot.workspaces[].workspace_id] | .[0:3] == ["primary",$id,"plain"]
+  ' "$WORKSPACES_FILE" >/dev/null
+done
+# With the explicit-worktree workspace removed, the inferred run still matches.
+jq '.result.snapshot.workspaces |= (map(select(.workspace_id != "primary")) | .[1:2] + .[:1] + .[2:])' \
+  "$test_dir/git/repos.json" >"$WORKSPACES_FILE"
+: >"$REQUEST_LOG"
+created linked
+expect_order plain duplicate linked mixed missing bare unusual empty no-layout
+expect_requests '[{"id":"workspace-grouping","method":"workspace.move_block",
+  "params":{"workspace_ids":["linked"],"before_workspace_id":"mixed"}}]'
+for id in mixed plain missing bare empty no-layout; do
+  cp "$test_dir/git/repos.json" "$WORKSPACES_FILE"
+  : >"$REQUEST_LOG"
+  expect_no_request "$id"
+done
+
+# Failed or timed-out resolution must not move anything, even with a partial map.
+printf '{"result":' >"$WORKSPACES_FILE"
+: >"$REQUEST_LOG"
+created linked 2>"$test_dir/invalid.stderr"
+[ ! -s "$REQUEST_LOG" ]
+grep -Fq linked "$test_dir/invalid.stderr"
+cp "$test_dir/git/repos.json" "$WORKSPACES_FILE"
+(
+  git() { sleep 30; }
+  export -f git
+  export HERDR_PLUGIN_EVENT_JSON='{"data":{"workspace":{"workspace_id":"linked"}}}'
+  timeout -k 2 15 "$grouping_bin"
+) 2>"$test_dir/timeout.stderr"
+[ ! -s "$REQUEST_LOG" ]
+grep -Fq linked "$test_dir/timeout.stderr"
+[ "$(wc -l <"$test_dir/timeout.stderr")" -eq 1 ]
 
 # A rejected move fails the hook so Herdr records it in the plugin log.
 touch "$REJECT_FILE"

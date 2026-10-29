@@ -6,6 +6,8 @@ display_bin="$1"
 bash_bin="$2"
 rows_file="$3"
 palette_file="$4"
+# shellcheck source=herdr-workspace-repos-fixture.sh
+source "$5"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT
 
@@ -126,12 +128,12 @@ jq -e '
     ["lead", "project", null, "\u200b⋯ feature-a"],
     ["impl", null, null, "\u200b    ! implementation"],
     ["worker", null, null, "\u200b    ✓ helper"],
-    ["notes", null, "\u200b  notes", "\u200b– plain"],
+    ["notes", "unclassified", "\u200bnotes", "\u200b– plain"],
     ["review", "project", null, "\u200b◇ feature-b"],
     ["writer", null, null, "\u200b    – writer"],
     ["root", null, null, "\u200b  ▶ root"],
     ["child", null, null, "\u200b    ✓ child"],
-    ["solo", null, null, "\u200b  ⋯ solo"],
+    ["solo", "unclassified", null, "\u200b⋯ solo"],
     ["cleanup", null, null, "\u200b    ! cleanup"],
     ["orphan", null, "\u200b  missing", "\u200b? orphan"],
     ["alone", null, null, "\u200b  ◇ alone"],
@@ -211,7 +213,7 @@ jq -e '
   and all(.[];
     (.tokens.agent_title | startswith("\u200b"))
     and (.tokens.agent_lead // .tokens.agent_worker) != null)
-  and ([.[] | select(.tokens.agent_group_gap != null) | .pane] == ["notes", "writer"])
+  and ([.[] | select(.tokens.agent_group_gap != null) | .pane] == ["worker", "notes", "writer", "child"])
   and .[4].tokens.agent_repository_header == "other"
   and .[6].tokens.agent_repository_header == "project"
 ' "$reports"
@@ -277,7 +279,7 @@ check_style notes blocked agent_lead '! plain' base08 true false
 check_style notes idle agent_lead '– plain' base05 false false
 check_style notes 'done' agent_lead '✓ plain' base0B false false
 check_style lead idle agent_lead '⋯ feature-a' base0E false true
-check_style solo idle agent_lead '  ⋯ solo' base0E false true
+check_style solo idle agent_lead '⋯ solo' base0E false true
 check_style review 'done' agent_lead '◆ feature-b' base0D true false
 check_style first working agent_worker '  ▶ first' base0E false false
 check_style first blocked agent_worker '  ! first' base08 true false
@@ -414,7 +416,7 @@ SNAPSHOT_FILE="$test_dir/lane-owner.json" "$display_bin" --all
 parse_reports
 jq -e '
   map([.pane, .tokens.agent_workspace_header, (.tokens.agent_lead // .tokens.agent_worker)]) == [
-    ["early", null, "\u200b    – early"],
+    ["early", null, "\u200b  – early"],
     ["owner", null, "\u200b  ▶ Lane label"],
     ["second", null, "\u200b  ◇ second"]
   ]
@@ -439,5 +441,54 @@ mv "$test_dir/next.json" "$SNAPSHOT_FILE"
 "$display_bin" --all
 parse_reports
 jq -e '.[0].tokens | (.agent_display | length) == 80 and (.agent_lead | length) == 80' "$reports"
+
+# Generic workspaces share repository headings with explicit worktrees; later
+# tabs and split panes cannot change identity. Tab position beats stable number.
+repo_fixture "$test_dir/git"
+jq '.result.snapshot.agents = [.result.snapshot.workspaces[] | {
+  workspace_id, pane_id:(.workspace_id+":p1"), agent:"codex",
+  name:("lead-"+.workspace_id), agent_status:"working", tokens:{}
+}]' "$test_dir/git/repos.json" >"$test_dir/generic.json"
+: >"$REPORT_LOG"
+HERDR_AGENT_DISPLAY_GROUP_GAP=repositories SNAPSHOT_FILE="$test_dir/generic.json" "$display_bin" --all
+parse_reports
+jq -e '
+  map([.pane, .tokens.agent_repository_header, .tokens.agent_group_gap]) == [
+    ["primary:p1","primary repo","\u200b"],
+    ["plain:p1","unclassified","\u200b"],
+    ["linked:p1","primary repo",null],
+    ["duplicate:p1",null,"\u200b"],
+    ["mixed:p1","other","\u200b"],
+    ["missing:p1","unclassified",null],
+    ["bare:p1",null,"\u200b"],
+    ["unusual:p1",("odd\t\nname\n"),"\u200b"],
+    ["empty:p1","unclassified",null],
+    ["no-layout:p1",null,null]
+  ]
+' "$reports"
+
+# Invalid helper input and a stalled Git process must preserve existing metadata.
+cp "$REPORT_LOG" "$test_dir/preserved-reports"
+printf '{"result":' >"$test_dir/invalid.json"
+SNAPSHOT_FILE="$test_dir/invalid.json" "$display_bin" --all 2>"$test_dir/invalid.stderr"
+cmp "$REPORT_LOG" "$test_dir/preserved-reports"
+(
+  git() { sleep 30; }
+  export -f git
+  SNAPSHOT_FILE="$test_dir/generic.json" timeout -k 2 15 "$display_bin" --all
+)
+cmp "$REPORT_LOG" "$test_dir/preserved-reports"
+
+# Clearing metadata must remain available even when Git resolution stalls.
+jq '.result.snapshot.agents = [.result.snapshot.agents[0] | .tokens.agent_display = "stale"]' \
+  "$test_dir/generic.json" >"$test_dir/clear.json"
+: >"$REPORT_LOG"
+(
+  git() { sleep 30; }
+  export -f git
+  SNAPSHOT_FILE="$test_dir/clear.json" timeout -k 2 5 "$display_bin" --clear
+)
+parse_reports
+jq -e 'map(.pane) == ["primary:p1"] and all(.[].tokens[]; . == null)' "$reports"
 
 printf 'Agent display fixtures passed.\n'

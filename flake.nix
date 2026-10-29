@@ -29,8 +29,18 @@
       flake = false;
     };
     nix-homebrew = {
-      # Note: nix-homebrew declares no nixpkgs input, so no `follows` needed
+      # Note: nix-homebrew declares no nixpkgs input, so no nixpkgs `follows` needed
       url = "github:zhaofengli/nix-homebrew";
+      inputs.brew-src.follows = "brew-src";
+    };
+    # The cask tap uses DSL newer than nix-homebrew's bundled brew can parse:
+    # `zap :not_required` needs brew >= 7.0.11 (Homebrew/brew#24315).
+    # REMOVE WHEN nix-homebrew's own brew-src is >= 7.0.11; check with
+    # `nix flake metadata github:zhaofengli/nix-homebrew --json | jq -r '.locks.nodes."brew-src".original.ref'`.
+    # Bump this to the latest Homebrew release whenever the homebrew taps are bumped.
+    brew-src = {
+      url = "github:Homebrew/brew/7.0.11";
+      flake = false;
     };
 
     homebrew-core = {
@@ -46,24 +56,12 @@
       flake = false;
     };
 
-    homebrew-felixkratz = {
-      url = "github:FelixKratz/homebrew-formulae";
-      flake = false;
-    };
     homebrew-graphite = {
       url = "github:withgraphite/homebrew-tap";
       flake = false;
     };
     homebrew-aerospace = {
       url = "github:nikitabobko/homebrew-tap";
-      flake = false;
-    };
-    homebrew-boring-notch = {
-      url = "github:TheBoredTeam/homebrew-boring-notch";
-      flake = false;
-    };
-    homebrew-nehir = {
-      url = "github:guria/homebrew-tap";
       flake = false;
     };
     homebrew-skhd-zig = {

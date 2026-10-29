@@ -10,7 +10,7 @@
 # Bound to: cmd + shift + alt - l
 #
 # Space Layout:
-#   1 (dev)      -> Arc dev window + Cursor instances
+#   1 (dev)      -> Arc dev window + editors
 #   2 (terminal) -> Ghostty/terminals
 #   3 (social)   -> Slack, WhatsApp, Messages
 #   4 (work)     -> Airmail, Notion, Fantastical, Arc work window

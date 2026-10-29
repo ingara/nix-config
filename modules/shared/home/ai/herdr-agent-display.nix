@@ -149,7 +149,9 @@ let
     name = "herdr-agent-display";
     runtimeInputs = [
       cfg.package
+      pkgs.coreutils
       pkgs.jq
+      (pkgs.callPackage ./herdr-workspace-repos.nix { })
     ];
     text = ''
       lead_prefixes=${lib.escapeShellArg (builtins.toJSON cfg.agentDisplay.roles.leadPrefixes)}
@@ -164,7 +166,7 @@ let
   manifest = (pkgs.formats.toml { }).generate "herdr-agent-display.toml" {
     id = "local.agent-display";
     name = "Agent Display";
-    version = "8.0.0";
+    version = "8.1.0";
     min_herdr_version = "0.9.0";
     description = "Shows grouped agent roles, attention states, and optional terminal titles";
     platforms = [
@@ -233,15 +235,21 @@ let
   };
 
   plugin =
-    pkgs.runCommand "herdr-agent-display-plugin-8.0.0"
+    pkgs.runCommand "herdr-agent-display-plugin-8.1.0"
       {
-        nativeBuildInputs = [ pkgs.jq ];
+        nativeBuildInputs = [
+          pkgs.jq
+          pkgs.git
+        ];
       }
       ''
+        export HOME="$TMPDIR/home"
+        mkdir -p "$HOME"
         ${lib.getExe pkgs.bashNonInteractive} ${./herdr-agent-display-test.sh} \
           ${lib.getExe agentDisplay} ${lib.getExe pkgs.bashNonInteractive} \
           ${pkgs.writeText "herdr-agent-display-rows.json" (builtins.toJSON agentRows)} \
-          ${pkgs.writeText "herdr-agent-display-palette.json" (builtins.toJSON palette)}
+          ${pkgs.writeText "herdr-agent-display-palette.json" (builtins.toJSON palette)} \
+          ${./herdr-workspace-repos-fixture.sh}
 
         mkdir -p "$out/bin"
         ln -s ${lib.getExe agentDisplay} "$out/bin/herdr-agent-display"
@@ -250,7 +258,12 @@ let
 in
 {
   options.programs.herdr.agentDisplay = {
-    enable = lib.mkEnableOption "grouped agent roles and status marks in the sidebar";
+    enable = lib.mkEnableOption ''
+      grouped agent roles and status marks in the sidebar. Repository headings
+      use worktree provenance or the first pane in layout order of the first
+      listed tab. Unresolvable workspaces share an unclassified heading.
+      Repository resolution failure or timeout skips the refresh; clearing
+      metadata does not resolve repositories'';
     roles = {
       leadPrefixes = lib.mkOption {
         type = lib.types.listOf lib.types.str;

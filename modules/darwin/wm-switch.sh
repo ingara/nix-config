@@ -80,9 +80,7 @@ start_app() {
   # Running status alone does not prove IPC is ready. Neither this probe nor
   # open can prove actual tiling; that needs a supervised live window check.
   for ((i = 0; i < 120; i++)); do
-    if [ "$w" = omniwm ]; then
-      if /Applications/OmniWM.app/Contents/MacOS/omniwmctl ping >/dev/null 2>&1; then return 0; fi
-    elif /Applications/Nehir.app/Contents/MacOS/nehirctl query windows --format json >/dev/null 2>&1; then
+    if [ "$w" = omniwm ] && /Applications/OmniWM.app/Contents/MacOS/omniwmctl ping >/dev/null 2>&1; then
       return 0
     fi
     state=$(app_state "$w") || return 1

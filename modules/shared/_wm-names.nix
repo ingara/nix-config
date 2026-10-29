@@ -8,7 +8,6 @@
     "aerospace"
     "omniwm"
     "paneru"
-    "nehir"
   ];
   linux = [
     "hyprland"

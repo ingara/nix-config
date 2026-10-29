@@ -5,8 +5,8 @@
 #   debugging; the bar configuration itself is in the sketchybar dotfiles.
 # - `services.jankyborders` — highlights the focused window with a colored
 #   border. Auto-disabled when the active window manager is `omniwm` (which
-#   ships its own borders), `paneru` (optional native border under
-#   [decorations.active.border]), or `nehir` (native focus borders).
+#   ships its own borders) or `paneru` (optional native border under
+#   [decorations.active.border]).
 {
   config,
   lib,
@@ -34,8 +34,7 @@ in
     # (system-level Stylix darwinModule). Disabled whenever a native-border WM is
     # installed — jankyborders plus a native border renders double borders.
     jankyborders = {
-      enable =
-        !(lib.elem "omniwm" cfg.enabled || lib.elem "paneru" cfg.enabled || lib.elem "nehir" cfg.enabled);
+      enable = !(lib.elem "omniwm" cfg.enabled || lib.elem "paneru" cfg.enabled);
       style = "round";
       width = 3.0;
       hidpi = true;

@@ -1,9 +1,18 @@
 { config, lib, ... }:
+let
+  hmUser = config.home-manager.users.${config.homebrew.user} or null;
+in
 {
   homebrew = {
     enable = true;
     onActivation = {
       cleanup = "zap";
+      # brew keeps its trust store under XDG_CONFIG_HOME when set, which
+      # activation's sudo drops. Pass the user's value so `brew bundle` writes
+      # the store the shell's brew reads.
+      extraEnv = lib.mkIf (hmUser != null && hmUser.xdg.enable) {
+        XDG_CONFIG_HOME = hmUser.xdg.configHome;
+      };
       autoUpdate = false;
       # Activation must not depend on third-party CDNs. `brew bundle` runs
       # before home-manager activation under `set -e`, so one cask failing to
@@ -21,47 +30,32 @@
       "balenaetcher" # flash ISOs to USB (not in nixpkgs — removed over old-Electron CVEs)
       "bettertouchtool"
       "claude"
-      "codex-app" # OpenAI Codex desktop app (GUI; CLI comes from codex-cli-nix)
-      # AI usage meters + widgets.
-      # A cask rather than nixpkgs' package because macOS ties Keychain grants
-      # to the bundle path, and a store path moves on every bump.
-      "codexbar"
-      "conductor"
-      "cursor"
-      "cursor-cli"
       "discord"
       "element"
       "elgato-stream-deck"
-      "fedora-media-writer"
       "figma"
       "firefox"
       "ghostty" # config + theming: shared/home/ghostty.nix (programs.ghostty, package=null on darwin)
       "google-chrome"
       "jordanbaird-ice@beta"
       "lookaway"
-      "mattermost"
       "notion"
       "obsidian"
       "postico"
       "protonvpn"
       "qmk-toolbox"
-      "rapidapi"
       "raycast"
       "shottr" # screenshot tool
-      "signal"
       "slack"
       "spotify"
       "steam"
       "steermouse"
       "tailscale-app"
-      "tidal"
-      "upscayl"
       "vial"
       "visual-studio-code"
       "vivaldi"
       "whatsapp"
       "zen"
-      "zoom"
 
       # skhd.zig — hotkey daemon
       "skhd-zig"
@@ -75,9 +69,10 @@
       "graphite"
       "switchaudio-osx"
     ];
-    # Brewfile `trusted: true` on each non-official tap satisfies brew's tap
-    # trust gate without `brew trust` state, which `brew bundle` cleanup deletes
-    # mid-activation. Short-named brews and casks inherit trust from their tap.
+    # Brewfile `trusted: true` is the only effective trust. nix-homebrew's
+    # `brew trust` step lacks extraEnv and writes a store the shell doesn't
+    # read; `--force-cleanup` resets the shell's store to Brewfile entries
+    # (zhaofengli/nix-homebrew#161).
     taps = map (
       key:
       let

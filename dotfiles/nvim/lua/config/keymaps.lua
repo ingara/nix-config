@@ -52,7 +52,7 @@ if vim.g.vscode then
     require("vscode").action("editor.action.formatDocument")
   end, { desc = "Format Document" })
 
-  -- Cursor AI Actions (adjust command names if needed for your Cursor version)
+  -- AI chat and agent actions
   map("n", "<leader>ic", function()
     require("vscode").action("workbench.panel.chat.view.focus")
   end, { desc = "Focus Chat Panel" })
@@ -60,30 +60,6 @@ if vim.g.vscode then
   map("n", "<leader>ia", function()
     require("vscode").action("composerMode.agent")
   end, { desc = "AI Agent" })
-
-  map("v", "<leader>ib", function()
-    require("vscode").action("cursor.chatWithSelection")
-  end, { desc = "Chat with Selection" })
-
-  map("v", "<leader>iE", function()
-    require("vscode").action("cursor.explainCode")
-  end, { desc = "Explain Code" })
-
-  map("v", "<leader>iF", function()
-    require("vscode").action("cursor.fixCode")
-  end, { desc = "Fix Code" })
-
-  map("v", "<leader>iO", function()
-    require("vscode").action("cursor.optimizeCode")
-  end, { desc = "Optimize Code" })
-
-  map("v", "<leader>iD", function()
-    require("vscode").action("cursor.documentCode")
-  end, { desc = "Document Code" })
-
-  map("v", "<leader>iT", function()
-    require("vscode").action("cursor.addTests")
-  end, { desc = "Add Tests" })
 
   -- WhichKey (if using WhichKey extension)
   map("n", "<leader>", function()

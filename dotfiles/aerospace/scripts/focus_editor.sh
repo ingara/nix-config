@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-EDITOR_PATTERN='\|(Code|Cursor|Claude)$'
+EDITOR_PATTERN='\|(Code|Claude)$'
 
 current_ws=$(aerospace list-workspaces --focused)
 
@@ -24,7 +24,7 @@ focused_info=$(aerospace list-windows --focused --format '%{window-id}|%{app-nam
 focused_id=$(echo "$focused_info" | cut -d'|' -f1)
 focused_app=$(echo "$focused_info" | cut -d'|' -f2)
 
-if ! echo "$focused_app" | grep -qE '^(Code|Cursor|Claude)$'; then
+if ! echo "$focused_app" | grep -qE '^(Code|Claude)$'; then
   aerospace focus --window-id "${editor_ids[0]}"
   exit 0
 fi

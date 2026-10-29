@@ -46,8 +46,6 @@ alt - c: yabai -m window --focus stack.next || yabai -m window --focus stack.fir
 # Focus specific windows
 alt - a: ~/.config/yabai/window_finders/focus_arc.sh dev
 shift + alt - a: ~/.config/yabai/window_finders/focus_arc.sh other
-alt - s: ~/.config/yabai/window_finders/focus_cursor.sh screening
-alt - d: ~/.config/yabai/window_finders/focus_cursor.sh screening-2
 
 # Swap windows
 shift + alt - x: yabai -m window --swap recent

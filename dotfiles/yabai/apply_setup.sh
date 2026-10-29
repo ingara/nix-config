@@ -48,7 +48,7 @@ arrange_dev_bsp() {
 
   # Step 1: Get window IDs
   arc_id=$(yabai -m query --windows | jq -r '[.[] | select(.app == "Arc")] | sort_by(.id) | .[0].id // empty')
-  readarray -t editor_ids < <(yabai -m query --windows | jq -r '[.[] | select(.app == "Cursor" or .app == "Code" or .app == "Claude")] | sort_by(.id) | .[].id')
+  readarray -t editor_ids < <(yabai -m query --windows | jq -r '[.[] | select(.app == "Code" or .app == "Claude")] | sort_by(.id) | .[].id')
 
   # Exit if no windows found
   if [ -z "$arc_id" ] || [ ${#editor_ids[@]} -eq 0 ]; then
@@ -109,7 +109,6 @@ setup_home() {
   yabai -m space other --layout bsp
 
   # Move windows to correct spaces (spaces auto-follow their assigned displays)
-  move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
   move_arc_windows other # First Arc to dev, second Arc to other
@@ -149,7 +148,6 @@ setup_office() {
   yabai -m space other --layout stack
 
   # Move windows to correct spaces (spaces auto-follow their assigned displays)
-  move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
   move_arc_windows work # First Arc to dev, second Arc to work
@@ -177,7 +175,6 @@ setup_mobile() {
   yabai -m space work --layout stack
 
   # Move windows to correct spaces (single display)
-  move_app_windows "Cursor" dev
   move_app_windows "Code" dev
   move_app_windows "Claude" dev
   move_arc_windows work # First Arc to dev, second Arc to work

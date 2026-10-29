@@ -4,7 +4,7 @@
   ...
 }:
 let
-  # Selectable window managers (darwin: yabai..nehir; linux: hyprland/niri),
+  # Selectable window managers (darwin: yabai..paneru; linux: hyprland/niri),
   # partitioned by class in _wm-names.nix — the single source for the
   # windowManager `enabled`/`default` enums below and the per-class validity
   # assertion in home/default.nix, so adding a WM is one edit there.
@@ -196,14 +196,14 @@ in
       # the active/login WM (drives the /etc/nix-config/wm-backend marker and
       # single-active surfaces like yabai's scripting addition). Both scopes
       # (system + HM) on both platforms read this; per-platform modules gate on
-      # `elem` membership. Darwin WMs: yabai/aerospace/omniwm/paneru/nehir;
+      # `elem` membership. Darwin WMs: yabai/aerospace/omniwm/paneru;
       # Linux WMs: hyprland/niri. The per-class validity rule (no darwin WM in
       # `enabled` on Linux, and `default ∈ enabled`) is enforced by assertions
       # in shared/home/default.nix, not by type narrowing.
       #
-      # Multi-WM *run-one*: for the open-a-lifecycle WMs (nehir/omniwm) a 2+
-      # `enabled` list installs all of them, and a single `wm-autostart` agent
-      # runs `wm-switch <default>` at login to launch exactly one (see
+      # Multi-WM *run-one*: every enabled open-a-lifecycle WM (currently only
+      # omniwm) is installed, and a single `wm-autostart` agent runs
+      # `wm-switch <default>` at login to launch exactly one (see
       # modules/darwin/window-manager.nix). yabai self-starts via services.yabai.
       enabled = lib.mkOption {
         type = lib.types.listOf (lib.types.enum wmNames);
