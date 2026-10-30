@@ -47,33 +47,6 @@ let
   };
   exec = key: command: bind key "exec_cmd(${builtins.toJSON command})";
 
-  # Native Linux games set their own X11 class, so no class regex covers every
-  # Steam game. Steam exports SteamGameId only into the game's process tree
-  # (not the client or steamwebhelper), so on each new window this checks the
-  # owning PID's environment and applies the games-workspace treatment.
-  steamGameRules = pkgs.writeShellApplication {
-    name = "hypr-steam-games";
-    runtimeInputs = [
-      pkgs.gnugrep
-      pkgs.jq
-      pkgs.socat
-    ];
-    # hyprctl comes from the session PATH (system Hyprland, package = null).
-    text = ''
-      sock="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
-      socat -U - "UNIX-CONNECT:$sock" | while IFS= read -r line; do
-        [[ $line == openwindow\>\>* ]] || continue
-        addr="''${line#openwindow>>}"
-        addr="0x''${addr%%,*}"
-        pid=$(hyprctl clients -j | jq -r --arg a "$addr" '.[] | select(.address == $a) | .pid') || continue
-        [[ $pid =~ ^[1-9][0-9]*$ ]] || continue
-        grep -qz '^SteamGameId=' "/proc/$pid/environ" 2>/dev/null || continue
-        hyprctl --batch "dispatch hl.dsp.window.float({action='on', window='address:$addr'}); dispatch hl.dsp.window.move({workspace=${gamesWorkspace}, window='address:$addr'})" >/dev/null || true
-      done
-      # Hyprland drops socket2 clients that hang up or overflow; let systemd reconnect.
-      exit 1
-    '';
-  };
 in
 lib.mkIf (lib.elem "hyprland" wm.enabled) {
   # Screenshots: grimblast is a self-contained grim+slurp+hyprctl wrapper
@@ -132,22 +105,6 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     };
   };
 
-  systemd.user.services.hypr-steam-games = {
-    Unit = {
-      Description = "Float Steam games onto the games workspace";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      # graphical-session.target is shared with other compositors (niri).
-      ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
-    };
-    Service = {
-      ExecStart = lib.getExe steamGameRules;
-      Restart = "on-failure";
-      RestartSec = 1;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
   # Stylix merges colours into settings.config for the Lua config manager.
   stylix.targets.hyprland.enable = true;
 
@@ -162,6 +119,34 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     systemd.enable = false;
 
     settings = {
+      # Native games have arbitrary classes; SteamGameId is scoped to their process tree.
+      # open_early precedes layout attachment, which the float dispatcher requires.
+      on = [
+        {
+          _args = [
+            "window.open"
+            (lua ''
+              function(window)
+                local pid = window.pid
+                if not pid or pid <= 0 then return end
+                -- Synchronous proc IO may stall the compositor; accept this for a just-mapped process.
+                local file = io.open("/proc/" .. pid .. "/environ", "rb")
+                if not file then return end
+                local environ = file:read("*a")
+                file:close()
+                if not environ then return end
+                if not environ:match("^SteamGameId=")
+                  and not environ:find("\0SteamGameId=", 1, true) then return end
+                hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
+                hl.dispatch(hl.dsp.window.move({ workspace = ${gamesWorkspace}, window = window }))
+                -- Floating keeps the window's scrolling-tape position, which can be off-screen.
+                hl.dispatch(hl.dsp.window.center({ window = window }))
+              end
+            '')
+          ];
+        }
+      ];
+
       env = map (args: { _args = args; }) [
         [
           "LIBVA_DRIVER_NAME"
@@ -325,7 +310,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         monitor = "DP-2";
       }) (lib.range 4 9);
 
-      # Match before mapping; the service catches native games with unknown classes.
+      # Match before mapping; the environment handler catches native games with unknown classes.
       # Floating games on their own workspace keeps focus-loss fullscreen drops off the tiling tape.
       window_rule = [
         {
