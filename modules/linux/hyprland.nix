@@ -38,6 +38,15 @@ let
 
   gamesWorkspace = "2";
 
+  lua = lib.generators.mkLuaInline;
+  bind = key: action: {
+    _args = [
+      key
+      (lua "hl.dsp.${action}")
+    ];
+  };
+  exec = key: command: bind key "exec_cmd(${builtins.toJSON command})";
+
   # Native Linux games set their own X11 class, so no class regex covers every
   # Steam game. Steam exports SteamGameId only into the game's process tree
   # (not the client or steamwebhelper), so on each new window this checks the
@@ -59,7 +68,7 @@ let
         pid=$(hyprctl clients -j | jq -r --arg a "$addr" '.[] | select(.address == $a) | .pid') || continue
         [[ $pid =~ ^[1-9][0-9]*$ ]] || continue
         grep -qz '^SteamGameId=' "/proc/$pid/environ" 2>/dev/null || continue
-        hyprctl --batch "dispatch setfloating address:$addr; dispatch movetoworkspace ${gamesWorkspace},address:$addr" >/dev/null || true
+        hyprctl --batch "dispatch hl.dsp.window.float({action='on', window='address:$addr'}); dispatch hl.dsp.window.move({workspace=${gamesWorkspace}, window='address:$addr'})" >/dev/null || true
       done
       # Hyprland drops socket2 clients that hang up or overflow; let systemd reconnect.
       exit 1
@@ -98,8 +107,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
   # hyprshell — GTK4 window switcher + workspace overview driven by Hyprland IPC.
   # It is a standalone app, NOT a compositor plugin, so it carries no ABI-match
   # risk against the system Hyprland (unlike hyprexpo/hyprspace/the archived
-  # hycov) — a hyprland bump can't break it at load. Needs hyprland >= 0.55
-  # (system is 0.55.x).
+  # hycov). IPC compatibility still matters: 4.10.8 supports the Lua manager.
   #
   # It self-registers its keybinds from config.json (no Hyprland `bind` lines
   # here — a static bind on the same key would collide):
@@ -140,260 +148,310 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  # Compositor-specific Stylix target (the cross-WM ones — fuzzel/gtk/qt/cursor
-  # — live in wm-common.nix). Writes colors into
-  # wayland.windowManager.hyprland's settings (respecting configType =
-  # "hyprlang").
+  # Stylix merges colours into settings.config for the Lua config manager.
   stylix.targets.hyprland.enable = true;
 
   wayland.windowManager.hyprland = {
     enable = true;
     package = null; # use the system Hyprland (programs.hyprland) — avoid version skew
     portalPackage = null; # likewise xdg-desktop-portal-hyprland
-    configType = "hyprlang"; # pin to hyprlang (proven on the box); HM's default is shifting to "lua"
+    configType = "lua";
 
-    # UWSM owns the systemd session (programs.hyprland.withUWSM in
-    # nixos/graphical.nix) and only one session manager may run: HM's
-    # integration injects `exec-once = … systemctl --user stop
-    # hyprland-session.target`, whose PropagatesStopTo=graphical-session.target
-    # cascades through uwsm's wayland-session@ binding and kills the compositor
-    # mid-login. Nothing is orphaned — every user unit is
-    # WantedBy=graphical-session.target, which uwsm starts once Hyprland's
-    # `uwsm finalize` has exported the session variables.
+    # UWSM owns graphical-session.target. HM must not independently stop it
+    # through hyprland-session.target; session units follow UWSM's lifecycle.
     systemd.enable = false;
 
     settings = {
-      env = [
-        "LIBVA_DRIVER_NAME,nvidia"
-        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-        "NVD_BACKEND,direct"
-        # Do NOT set AQ_DRM_DEVICES to a PCI by-path: Aquamarine splits on ':'
-        # and a by-path's colons (pci-0000:01:00.0) parse as bad paths → no GPU.
+      env = map (args: { _args = args; }) [
+        [
+          "LIBVA_DRIVER_NAME"
+          "nvidia"
+        ]
+        [
+          "__GLX_VENDOR_LIBRARY_NAME"
+          "nvidia"
+        ]
+        [
+          "NVD_BACKEND"
+          "direct"
+        ]
       ];
 
-      cursor = {
-        # NVIDIA hardware cursor planes are often broken — render in software.
-        no_hardware_cursors = true;
-        # No cursor-follows-focus: don't warp the pointer to a window when focus
-        # changes via keybind/workspace switch. Pairs with follow_mouse = 2
-        # below — the cursor isn't warped on focus change, and hovering doesn't
-        # move keyboard focus, so the two stay independent.
-        no_warps = true;
+      config = {
+        cursor = {
+          # NVIDIA cursor planes are unreliable; keep pointer and keyboard focus independent.
+          no_hardware_cursors = true;
+          no_warps = true;
+        };
+        input = {
+          # Hover/scroll reaches an unfocused window without moving keyboard focus.
+          follow_mouse = 2;
+          float_switch_override_focus = 0;
+        };
+        misc = {
+          mouse_move_focuses_monitor = false;
+          # Drop to 2 (fullscreen-only) if always-on VRR causes desktop flicker.
+          vrr = 1;
+        };
+        animations.enabled = true;
+        general = {
+          layout = "scrolling";
+          border_size = 3;
+        };
+        decoration.rounding = 8;
+        # +conf wraps: two entries make Mod+W a half/full toggle.
+        scrolling.explicit_column_widths = "0.5, 1.0";
+        # Give XWayland games native pixels, accepting small desktop X11 UIs.
+        xwayland.force_zero_scaling = true;
       };
 
-      # Detached mouse focus (follow_mouse = 2): the window under the cursor
-      # receives pointer events — scroll/hover interact with it — but keyboard
-      # focus only moves on click (or via the alt+hjkl binds). Lets you scroll an
-      # unfocused window without raising or focusing it. Note hyprshell flips
-      # this to 0 transiently while its switcher is open and restores this value.
-      input.follow_mouse = 2;
-      # Crossing onto another monitor, or between a floating and a tiled window,
-      # doesn't move keyboard focus either; a game that drops fullscreen on
-      # focus loss stays put.
-      misc.mouse_move_focuses_monitor = false;
-      input.float_switch_override_focus = 0;
+      # Non-overshooting curves keep short animations crisp without springy motion.
+      curve = [
+        {
+          _args = [
+            "easeOut"
+            {
+              type = "bezier";
+              points = [
+                [
+                  0.16
+                  1
+                ]
+                [
+                  0.3
+                  1
+                ]
+              ];
+            }
+          ];
+        }
+        {
+          _args = [
+            "snappy"
+            {
+              type = "bezier";
+              points = [
+                [
+                  0.2
+                  1
+                ]
+                [
+                  0.2
+                  1
+                ]
+              ];
+            }
+          ];
+        }
+      ];
+      animation = [
+        {
+          leaf = "windows";
+          enabled = true;
+          speed = 3;
+          bezier = "easeOut";
+          style = "slide";
+        }
+        {
+          leaf = "windowsOut";
+          enabled = true;
+          speed = 3;
+          bezier = "easeOut";
+          style = "slide";
+        }
+        {
+          leaf = "border";
+          enabled = true;
+          speed = 5;
+          bezier = "default";
+        }
+        {
+          leaf = "fade";
+          enabled = true;
+          speed = 3;
+          bezier = "easeOut";
+        }
+        {
+          leaf = "workspaces";
+          enabled = true;
+          speed = 4;
+          bezier = "snappy";
+          style = "slide";
+        }
+      ];
 
-      # Always-on VRR. Holds up with the mixed-refresh secondary attached; drop
-      # to 2 (fullscreen-only) if the desktop starts flickering.
-      misc.vrr = 1;
-
-      # Animations: snappy ease-out, no bounce. Hyprland's defaults use an
-      # *overshoot* bezier (myBezier = 0.05,0.9,0.1,1.05 — the >1.0 final
-      # control point is the spring) on ~7-decisecond durations, which reads as
-      # bouncy + floaty on a 240Hz panel. easeOut lands cleanly at 1.0 (no
-      # overshoot) and short durations (3-4 ds) keep the motion cue without the
-      # lag. Durations are in deciseconds; the leading `1` enables each curve.
-      animations = {
-        enabled = true;
-        bezier = [
-          "easeOut, 0.16, 1, 0.3, 1"
-          "snappy, 0.2, 1, 0.2, 1"
-        ];
-        animation = [
-          "windows, 1, 3, easeOut, slide"
-          "windowsOut, 1, 3, easeOut, slide"
-          "border, 1, 5, default"
-          "fade, 1, 3, easeOut"
-          "workspaces, 1, 4, snappy, slide"
-        ];
-      };
-
-      # Native scrolling layout — built into Hyprland (no plugin). Windows live
-      # on a horizontal tape of columns (the niri-like feel). Coarser than niri
-      # (no in-column stacking); accepted trade-off vs niri's NVIDIA caveat.
-      general.layout = "scrolling";
-
-      # Hyprland's default 1px border is near-invisible on a 4K panel at 1.2 scale.
-      general.border_size = 3;
-      decoration.rounding = 8;
-
-      # `colresize +conf` picks the first preset strictly greater than the
-      # current width, wrapping to the first when there is none — so a
-      # two-entry list is a half↔full toggle rather than a cycle. Every ±conf
-      # bind shares this one list; lengthening it costs Mod+W its toggle.
-      scrolling.explicit_column_widths = "0.5, 1.0";
-
-      # Odyssey G8 (DP-3): native 4K@240, 10-bit, at 1.2 scale for readable
-      # text (3840/1.2=3200, 2160/1.2=1800 — clean integer transform). Desktop
-      # stays SDR (desktop-wide HDR washes out SDR content); HDR is per-game
-      # via gamescope. Secondary (DP-2, 2560x1600@120) sits directly below the
-      # primary — y=1800 is the primary's logical height at scale 1.2 — at
-      # 1.25 scale (2560/1.25=2048, also clean). The fallback line drives any
-      # other display at preferred mode/auto position/scale 1.
+      # Primary: native 4K/240, 10-bit SDR. HDR stays per-game via gamescope.
+      # 3840/1.2=3200, 2160/1.2=1800 logical pixels; secondary y=1800 avoids overlap.
       monitor = [
-        "DP-3,3840x2160@240,0x0,1.2,bitdepth,10"
-        "DP-2,2560x1600@120,0x1800,1.25"
-        ",preferred,auto,1"
+        {
+          output = "DP-3";
+          mode = "3840x2160@240";
+          position = "0x0";
+          scale = 1.2;
+          bitdepth = 10;
+        }
+        {
+          output = "DP-2";
+          mode = "2560x1600@120";
+          position = "0x1800";
+          scale = 1.25;
+        }
+        {
+          output = "";
+          mode = "preferred";
+          position = "auto";
+          scale = 1;
+        }
       ];
-
-      # Hand XWayland clients the monitor's native resolution instead of the
-      # scaled logical one — otherwise Hyprland upscales their buffers and
-      # every XWayland surface (most Steam games) blurs. Games render
-      # pixel-perfect at real 3840x2160; the cost is XWayland *desktop* UIs
-      # (Steam's own client) drawing small, which is accepted.
-      xwayland.force_zero_scaling = true;
-
-      # The primary (G8) carries only workspaces 1 + 2 — 2 is the dedicated
-      # games workspace (see the games windowrule below). Every other numbered
-      # workspace (all nine have binds) is pinned to the secondary so nothing
-      # else ever opens on the primary by default; one default per monitor
-      # keeps the initial layout stable.
-      workspace = [
-        "1, monitor:DP-3, default:true"
-        "2, monitor:DP-3"
-        "3, monitor:DP-2, default:true"
+      # Only desktop + games on primary; other numbered workspaces on secondary.
+      workspace_rule = [
+        {
+          workspace = "1";
+          monitor = "DP-3";
+          default = true;
+        }
+        {
+          workspace = gamesWorkspace;
+          monitor = "DP-3";
+        }
+        {
+          workspace = "3";
+          monitor = "DP-2";
+          default = true;
+        }
       ]
-      ++ map (n: "${toString n}, monitor:DP-2") (lib.range 4 9);
+      ++ map (n: {
+        workspace = toString n;
+        monitor = "DP-2";
+      }) (lib.range 4 9);
 
-      # Steam/Proton (`steam_app_<id>`) and gamescope-wrapped games float and
-      # land on workspace 2 instead of joining the scrolling layout. A fullscreen
-      # game is otherwise a tiled column underneath, so losing focus (e.g.
-      # alt-tabbing to Steam) drops the fullscreen and reveals it half-width
-      # beside the other tiled window. Floating keeps it at its own size; the
-      # dedicated workspace isolates it (launching a game follows there). The
-      # class match applies before the window maps; the hypr-steam-games service
-      # catches native games whose class it can't know.
-      windowrule = [
-        "float on, match:class ^(steam_app_[0-9]+|gamescope)$"
-        "workspace ${gamesWorkspace}, match:class ^(steam_app_[0-9]+|gamescope)$"
+      # Match before mapping; the service catches native games with unknown classes.
+      # Floating games on their own workspace keeps focus-loss fullscreen drops off the tiling tape.
+      window_rule = [
+        {
+          name = "steam-games";
+          match.class = "^(steam_app_[0-9]+|gamescope)$";
+          float = true;
+          workspace = gamesWorkspace;
+        }
       ];
 
-      # ALT is the modifier to mirror the macOS workstation (omniwm/aerospace)
-      # muscle memory: alt+hjkl focus, alt+shift+hjkl move, alt+-/= resize.
-      # Bound Alt chords are consumed before apps; leave Alt+B/F free for
-      # terminal word navigation.
-      "$mod" = "ALT";
-      "$terminal" = "ghostty";
-      "$termmux" = "ghostty -e tmux new -A -s main";
-      # A per-host desktop-shell layer (e.g. a Noctalia/Quickshell shell)
-      # overrides this to the shell's own launcher.
-      "$menu" = lib.mkDefault "fuzzel";
+      terminal._var = "ghostty";
+      termmux._var = "ghostty -e tmux new -A -s main";
+      # Kept as a merged setting so the desktop-shell module can override it.
+      menu._var = lib.mkDefault "fuzzel";
 
       bind = [
-        # Core WM actions
-        "$mod, Return, exec, $terminal"
-        "$mod SHIFT, Return, exec, $termmux"
-        "$mod, Space, exec, $menu"
-        # 1Password Quick Access. Wayland blocks apps from grabbing global keys,
-        # so 1Password's own shortcut is dead under Hyprland — drive it via CLI.
-        "$mod SHIFT, Space, exec, 1password --quick-access"
-        "$mod, Q, killactive"
-        # SIGKILL the focused window's PID directly, for apps too wedged to
-        # service the graceful close request killactive sends.
-        "$mod SHIFT, Q, forcekillactive"
-        "$mod SHIFT, E, exit"
-        "$mod SHIFT, F, fullscreen"
-        "$mod, G, togglefloating"
+        (bind "ALT + Return" "exec_cmd(terminal)")
+        (bind "ALT + SHIFT + Return" "exec_cmd(termmux)")
+        (bind "ALT + Space" "exec_cmd(menu)")
+        # Wayland blocks global key grabs, so drive 1Password Quick Access through its CLI.
+        (exec "ALT + SHIFT + Space" "1password --quick-access")
+        (bind "ALT + Q" "window.close()")
+        # SIGKILL the focused PID when an app cannot handle a graceful close.
+        (bind "ALT + SHIFT + Q" "window.kill()")
+        (bind "ALT + SHIFT + E" "exit()")
+        (bind "ALT + SHIFT + F" "window.fullscreen()")
+        (bind "ALT + G" "window.float({ action = 'toggle' })")
 
-        # Screenshots (Shottr-style: grab → satty editor → Enter copies / Ctrl+S
-        # saves to ~/Pictures/Screenshots). --freeze freezes the screen while you
-        # drag the region, like the macOS overlay. `save … -` pipes PNG to satty.
-        #   Print            region select → editor
-        #   $mod+Print       active window → editor
-        #   $mod+Shift+Print focused monitor → clipboard (quick path, no editor)
-        ", Print, exec, grimblast --freeze save area - | satty --filename -"
-        "$mod, Print, exec, grimblast save active - | satty --filename -"
-        "$mod SHIFT, Print, exec, grimblast --notify copy output"
+        # Region / active window → satty; monitor → clipboard.
+        (exec "Print" "grimblast --freeze save area - | satty --filename -")
+        (exec "ALT + Print" "grimblast save active - | satty --filename -")
+        (exec "ALT + SHIFT + Print" "grimblast --notify copy output")
+        (bind "ALT + X" "focus({ last = true })")
 
-        # Focus — alt+hjkl. Under the scrolling layout left/right move between
-        # columns, up/down between windows within the focused column.
-        "$mod, H, movefocus, l"
-        "$mod, J, movefocus, d"
-        "$mod, K, movefocus, u"
-        "$mod, L, movefocus, r"
-        # Left-hand aliases for the horizontal pair. Alt+D is claimed globally
-        # as a result — browsers lose address-bar focus, the shell loses
-        # kill-word — accepted for the one-handed reach.
-        "$mod, A, movefocus, l"
-        "$mod, D, movefocus, r"
-        "$mod, X, focuscurrentorlast" # alt+x: back-and-forth between two windows
-        # alt+tab belongs to hyprshell (services.hyprshell above); a bind here
-        # would collide with its grab.
-
-        # Move the active window — alt+shift+hjkl. movewindow is layout-generic
-        # and supported under scrolling (reorders columns h/l, moves within a
-        # column j/k).
-        "$mod SHIFT, H, movewindow, l"
-        "$mod SHIFT, J, movewindow, d"
-        "$mod SHIFT, K, movewindow, u"
-        "$mod SHIFT, L, movewindow, r"
-        "$mod SHIFT, A, movewindow, l"
-        "$mod SHIFT, D, movewindow, r"
-
-        # Resize column width — Mod+-/= (convention resize tier). colresize is
-        # the scrolling layout's native width control (relative fraction,
-        # ±0.1 ≈ a 10% nudge); resizeactive isn't documented to drive column
-        # width under this layout. Height resize has NO scrolling-layout message,
-        # so Mod+Shift+-/= (height) is left unbound — a documented gap vs the
-        # convention.
-        "$mod, minus, layoutmsg, colresize -0.1"
-        "$mod, equal, layoutmsg, colresize +0.1"
-
-        # Scrolling-layout column ops (hyprlang `layoutmsg`). consume/expel take
-        # no args and ride Mod+,/. per the convention. No viewport-scroll bind:
-        # Mod+h/l already scrolls the tape, so `move ±col` is non-canonical.
-        # Payloads verified against the scrolling layout source
-        # (ScrollingAlgorithm.cpp); the *feel* is tuned on-box.
-        "$mod, comma, layoutmsg, consume" # pull window into the column
-        "$mod, period, layoutmsg, expel" # push window out to its own column
-        # Half↔full toggle, not the cycle the payload name suggests — it rides
-        # the two-entry explicit_column_widths above.
-        "$mod, W, layoutmsg, colresize +conf"
-        # No center bind: the scrolling layout has no standalone center op (the
-        # viewport auto-centers on focus via scrolling:focus_fit_method), so the
-        # convention's `c` is an accepted Hyprland gap.
-
-        # Monitor nav — Mod+m/n focus, Mod+Shift+m/n move window across monitors
-        # (movewindow needs the `mon:` prefix to mean "to monitor", not a
-        # direction). focusmonitor takes the relative index directly.
-        "$mod, M, focusmonitor, +1"
-        "$mod, N, focusmonitor, -1"
-        "$mod SHIFT, M, movewindow, mon:+1"
-        "$mod SHIFT, N, movewindow, mon:-1"
-
+        # The scrolling layout has no height-resize or standalone center action.
+        (bind "ALT + minus" "layout('colresize -0.1')")
+        (bind "ALT + equal" "layout('colresize +0.1')")
+        (bind "ALT + comma" "layout('consume')")
+        (bind "ALT + period" "layout('expel')")
+        (bind "ALT + W" "layout('colresize +conf')")
+        (bind "ALT + M" "focus({ monitor = '+1' })")
+        (bind "ALT + N" "focus({ monitor = '-1' })")
+        (bind "ALT + SHIFT + M" "window.move({ monitor = '+1' })")
+        (bind "ALT + SHIFT + N" "window.move({ monitor = '-1' })")
       ]
-      # Workspaces — alt+1..9 focus, alt+shift+1..9 move. Generated as one map so
-      # the focus/move pair can't drift out of sync.
+      # Alt+Tab and Super+Tab belong to hyprshell; do not duplicate its grabs.
+      ++
+        lib.concatMap
+          (entry: [
+            (bind "ALT + ${entry.key}" "focus({ direction = '${entry.direction}' })")
+            (bind "ALT + SHIFT + ${entry.key}" "window.move({ direction = '${entry.direction}' })")
+          ])
+          [
+            {
+              key = "H";
+              direction = "left";
+            }
+            {
+              key = "J";
+              direction = "down";
+            }
+            {
+              key = "K";
+              direction = "up";
+            }
+            {
+              key = "L";
+              direction = "right";
+            }
+            {
+              key = "A";
+              direction = "left";
+            }
+            {
+              key = "D";
+              direction = "right";
+            }
+          ]
       ++ lib.concatMap (n: [
-        "$mod, ${toString n}, workspace, ${toString n}"
-        "$mod SHIFT, ${toString n}, movetoworkspace, ${toString n}"
-      ]) (lib.range 1 9);
-
-      # Media + volume keys. `bindl` (locked) so they fire even when the
-      # session is idle/locked — the standard flag for media keys. play/pause
-      # talks to the browser's MPRIS player via playerctl; volume/mute go
-      # through wpctl (wireplumber, from the system pipewire service).
-      #   -l 1.0 caps RaiseVolume at 100% so we can't overdrive past unity.
-      bindl = [
-        ", XF86AudioPlay, exec, playerctl play-pause"
-        ", XF86AudioPause, exec, playerctl play-pause"
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPrev, exec, playerctl previous"
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"
-        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-        ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-      ];
+        (bind "ALT + ${toString n}" "focus({ workspace = ${toString n} })")
+        (bind "ALT + SHIFT + ${toString n}" "window.move({ workspace = ${toString n} })")
+      ]) (lib.range 1 9)
+      # Media keys work while locked, without adding key repeat.
+      ++
+        map
+          (entry: {
+            _args = [
+              entry.key
+              (lua "hl.dsp.exec_cmd(${builtins.toJSON entry.command})")
+              { locked = true; }
+            ];
+          })
+          [
+            {
+              key = "XF86AudioPlay";
+              command = "playerctl play-pause";
+            }
+            {
+              key = "XF86AudioPause";
+              command = "playerctl play-pause";
+            }
+            {
+              key = "XF86AudioNext";
+              command = "playerctl next";
+            }
+            {
+              key = "XF86AudioPrev";
+              command = "playerctl previous";
+            }
+            {
+              key = "XF86AudioRaiseVolume";
+              command = "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+";
+            }
+            {
+              key = "XF86AudioLowerVolume";
+              command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+            }
+            {
+              key = "XF86AudioMute";
+              command = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+            }
+            {
+              key = "XF86AudioMicMute";
+              command = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+            }
+          ];
     };
   };
 }
