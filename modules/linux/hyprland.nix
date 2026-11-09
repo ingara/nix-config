@@ -37,6 +37,48 @@ let
   ];
 
   gamesWorkspace = "2";
+  gamesMonitor = "DP-3";
+
+  # Wine/Proton games open on the X11 primary output, which XWayland leaves
+  # unset; point it at the games monitor so a game sizes itself for the screen
+  # it is moved to.
+  x11Primary = pkgs.writeShellApplication {
+    name = "hyprland-x11-primary";
+    runtimeInputs = [
+      pkgs.xrandr
+      pkgs.gnugrep
+      pkgs.coreutils
+    ];
+    text = ''
+      # XWayland learns about outputs after Hyprland does, and naming a missing
+      # output clears the primary instead of failing, so wait for it.
+      for _ in $(seq 20); do
+        # Not grep -q: exiting early can SIGPIPE xrandr and fail the pipeline.
+        if xrandr --query 2> /dev/null | grep '^${gamesMonitor} connected' > /dev/null; then
+          exec xrandr --output ${gamesMonitor} --primary
+        fi
+        sleep 0.5
+      done
+      echo "${gamesMonitor} not connected; X11 primary unchanged" >&2
+    '';
+  };
+  setX11Primary = lua "function() hl.exec_cmd(${builtins.toJSON (lib.getExe x11Primary)}) end";
+
+  # Lua predicate: games have arbitrary classes, but SteamGameId is scoped to
+  # their process tree.
+  isGame = ''
+    (function(window)
+      local pid = window.pid
+      if not pid or pid <= 0 then return false end
+      -- Synchronous proc IO may stall the compositor; it runs only on open and maximize.
+      local file = io.open("/proc/" .. pid .. "/environ", "rb")
+      if not file then return false end
+      local environ = file:read("*a")
+      file:close()
+      if not environ then return false end
+      return environ:match("^SteamGameId=") ~= nil
+        or environ:find("\0SteamGameId=", 1, true) ~= nil
+    end)'';
 
   lua = lib.generators.mkLuaInline;
   bind = key: action: {
@@ -105,6 +147,11 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     };
   };
 
+  # The HM unit lacks PartOf, so a compositor exit makes Restart=on-failure
+  # revive hyprshell outside any session. It then finds no Hyprland socket,
+  # registers no binds, and stays active, so the next session never restarts it.
+  systemd.user.services.hyprshell.Unit.PartOf = [ config.services.hyprshell.systemd.target ];
+
   # Stylix merges colours into settings.config for the Lua config manager.
   stylix.targets.hyprland.enable = true;
 
@@ -119,30 +166,53 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     systemd.enable = false;
 
     settings = {
-      # Native games have arbitrary classes; SteamGameId is scoped to their process tree.
-      # open_early precedes layout attachment, which the float dispatcher requires.
       on = [
         {
           _args = [
+            # Not open_early: that precedes layout attachment, which the float
+            # dispatcher requires.
             "window.open"
             (lua ''
               function(window)
-                local pid = window.pid
-                if not pid or pid <= 0 then return end
-                -- Synchronous proc IO may stall the compositor; accept this for a just-mapped process.
-                local file = io.open("/proc/" .. pid .. "/environ", "rb")
-                if not file then return end
-                local environ = file:read("*a")
-                file:close()
-                if not environ then return end
-                if not environ:match("^SteamGameId=")
-                  and not environ:find("\0SteamGameId=", 1, true) then return end
+                if not ${isGame}(window) then return end
                 hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
                 hl.dispatch(hl.dsp.window.move({ workspace = ${gamesWorkspace}, window = window }))
                 -- Floating keeps the window's scrolling-tape position, which can be off-screen.
                 hl.dispatch(hl.dsp.window.center({ window = window }))
               end
             '')
+          ];
+        }
+        {
+          _args = [
+            "window.fullscreen"
+            # Borderless-windowed games ask to be maximized, then resize until
+            # they cover the monitor; maximize keeps the bar's space, so they
+            # never settle. Fullscreen covers the monitor.
+            (lua ''
+              function(window)
+                if window.fullscreen ~= 1 or not ${isGame}(window) then return end
+                hl.dispatch(hl.dsp.window.fullscreen({ window = window, action = "set", mode = "fullscreen" }))
+              end
+            '')
+          ];
+        }
+        {
+          _args = [
+            "hyprland.start"
+            setX11Primary
+          ];
+        }
+        {
+          _args = [
+            "monitor.layout_changed"
+            setX11Primary
+          ];
+        }
+        {
+          _args = [
+            "config.reloaded"
+            setX11Primary
           ];
         }
       ];
@@ -297,7 +367,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         }
         {
           workspace = gamesWorkspace;
-          monitor = "DP-3";
+          monitor = gamesMonitor;
         }
         {
           workspace = "3";
@@ -341,6 +411,8 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
 
         # Region / active window → satty; monitor → clipboard.
         (exec "Print" "grimblast --freeze save area - | satty --filename -")
+        # Region capture for keyboards without a Print key.
+        (exec "SUPER + SHIFT + S" "grimblast --freeze save area - | satty --filename -")
         (exec "ALT + Print" "grimblast save active - | satty --filename -")
         (exec "ALT + SHIFT + Print" "grimblast --notify copy output")
         (bind "ALT + X" "focus({ last = true })")

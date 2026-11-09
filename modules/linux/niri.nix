@@ -143,6 +143,8 @@ let
         // (grimblast drives hyprctl), so the annotate-in-satty flow is
         // Hyprland-session-only.
         Print { screenshot; }
+        // Region capture for keyboards without a Print key.
+        Super+Shift+S { screenshot; }
         Alt+Print { screenshot-window; }
         Alt+Shift+Print { screenshot-screen; }
 
