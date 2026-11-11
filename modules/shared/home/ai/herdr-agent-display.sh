@@ -154,7 +154,13 @@ refresh_all() {
           or has("agent_primary_stale")
           or has("agent_activity");
       $response.result.snapshot as $snapshot
-      | [$snapshot.agents[]? | select((.agent // "") != "")] as $all
+      # Herdr can drop the detected label of a live agent while its reported
+      # session remains; skipping it would misplace every header after it.
+      | [$snapshot.agents[]?
+          | .agent = (if (.agent // "") != "" then .agent
+              elif (.agent_session | type) == "object" then (.agent_session.agent // "")
+              else "" end)
+          | select(.agent != "")] as $all
       | ($all | to_entries[])
       | .key as $agent_index
       | .value as $agent

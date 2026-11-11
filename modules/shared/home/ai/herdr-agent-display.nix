@@ -166,7 +166,7 @@ let
   manifest = (pkgs.formats.toml { }).generate "herdr-agent-display.toml" {
     id = "local.agent-display";
     name = "Agent Display";
-    version = "8.1.0";
+    version = "8.1.1";
     min_herdr_version = "0.9.0";
     description = "Shows grouped agent roles, attention states, and optional terminal titles";
     platforms = [
@@ -235,7 +235,7 @@ let
   };
 
   plugin =
-    pkgs.runCommand "herdr-agent-display-plugin-8.1.0"
+    pkgs.runCommand "herdr-agent-display-plugin-8.1.1"
       {
         nativeBuildInputs = [
           pkgs.jq

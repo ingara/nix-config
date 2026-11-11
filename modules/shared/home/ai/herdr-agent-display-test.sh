@@ -177,6 +177,20 @@ parse_reports
 jq -e '.[0].tokens.agent_lead == "\u200b⋯ feature-a"
   and .[1].tokens.agent_worker == "\u200b    ! claude"' "$reports"
 
+# A lead whose detected label is gone still owns its lane through its session.
+jq '.result.snapshot.agents |= .[:2]
+  | .result.snapshot.agents[0] |= (del(.agent)
+      + {agent_status: "unknown", agent_session: {agent: "codex", kind: "id", value: "lead-session"}})' \
+  "$SNAPSHOT_FILE" >"$test_dir/undetected-lead.json"
+: >"$REPORT_LOG"
+SNAPSHOT_FILE="$test_dir/undetected-lead.json" "$display_bin" --all
+parse_reports
+jq -e 'map([.pane, .agent, .tokens.agent_repository_header,
+    (.tokens.agent_lead // .tokens.agent_worker)]) == [
+    ["lead", "codex", "project", "\u200b? feature-a"],
+    ["impl", "claude", null, "\u200b    ! implementation"]
+  ]' "$reports"
+
 jq '
   .result.snapshot.agents[0].agent_status = "done"
   | .result.snapshot.agents[1].agent_status = "working"

@@ -18,6 +18,10 @@ let
       package = pkgs.just;
       commands = [ "just" ];
     };
+    lefthook = {
+      package = pkgs.lefthook;
+      commands = [ "lefthook" ];
+    };
     nixfmt = {
       package = pkgs.nixfmt;
       commands = [ "nixfmt" ];
