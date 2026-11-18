@@ -9,7 +9,7 @@
 # custom commands live.
 #
 # Theme: no Stylix target exists for gh-dash, so this bridges the base16
-# palette manually (same pattern as nvim-theme.nix / sketchybar.nix).
+# palette manually (same pattern as nvim-theme.nix).
 # gh-dash falls back per-color when one is unset, but the full documented
 # set is pinned here so no surface mixes palette and terminal-ANSI defaults.
 { config, ... }:

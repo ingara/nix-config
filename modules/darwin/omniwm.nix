@@ -1,5 +1,9 @@
-# OmniWM v0.7.6 (settings schema 4). The Homebrew cask owns the app;
-# Home Manager owns only its complete, store-backed settings.toml.
+# OmniWM v0.8.0 (settings schema 5). The Homebrew cask owns the app;
+# Home Manager owns its complete, store-backed settings.toml, the Stylix
+# OmniShell palette (shell/themes/stylix.toml) and the `nix` OmniShell profile
+# (dotfiles omniwm/shell/nix, inheriting from the app-managed default/). The
+# top-level shell/shell.toml stays app-owned: Settings writes it, and it selects
+# the profile.
 {
   config,
   lib,
@@ -9,6 +13,7 @@
 
 let
   cfg = config.myOptions.windowManager;
+  dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
   routingArrangements = cfg.omniwm.routing.arrangements;
   colors = config.lib.stylix.colors;
   channel = name: component: lib.toInt colors."${name}-rgb-${component}" / 255.0;
@@ -19,132 +24,46 @@ let
     inherit alpha;
   };
 
-  # One entry per assignable action in v0.7.6's ActionCatalog. The
-  # consumeOrExpelWindow{Left,Right} automation actions are unassignable.
-  # The separate consume/expel actions are assignable but left to skhd:
-  # binding both layers would handle Option+,/. twice.
-  numbered =
-    prefix: from: to:
-    map (n: "${prefix}.${toString n}") (lib.range from to);
-  requiredActions =
-    lib.concatMap (prefix: numbered prefix 1 10) [
-      "toggleScratchpad"
-      "assignFocusedWindowToScratchpad"
-    ]
-    ++ lib.concatMap (prefix: numbered prefix 0 8) [
-      "switchWorkspace"
-      "moveToWorkspace"
-      "moveColumnToWorkspace"
-      "focusColumn"
-    ]
-    ++ lib.concatMap (prefix: numbered prefix 1 9) [
-      "switchWorkspaceSlot"
-      "moveToWorkspaceSlot"
-      "focusWindowInColumn"
-      "moveColumnToIndex"
-    ]
-    ++ [
-      "workspaceBackAndForth"
-      "switchWorkspace.next"
-      "switchWorkspace.previous"
-      "focus.left"
-      "focus.down"
-      "focus.up"
-      "focus.right"
-      "focusPrevious"
-      "focusDownOrLeft"
-      "focusUpOrRight"
-      "focusWindowTop"
-      "focusWindowBottom"
-      "focusWindowDownOrTop"
-      "focusWindowUpOrBottom"
-      "focusWindowOrWorkspaceDown"
-      "focusWindowOrWorkspaceUp"
-      "centerColumn"
-      "centerVisibleColumns"
-      "moveWindowToWorkspaceUp"
-      "moveWindowToWorkspaceDown"
-      "moveColumnToWorkspaceUp"
-      "moveColumnToWorkspaceDown"
-      "move.left"
-      "move.down"
-      "move.up"
-      "move.right"
-      "moveWindowDown"
-      "moveWindowUp"
-      "moveWindowDownOrToWorkspaceDown"
-      "moveWindowUpOrToWorkspaceUp"
-      "consumeWindowIntoColumn"
-      "expelWindowFromColumn"
-      "focusMonitorNext"
-      "focusMonitorPrevious"
-      "focusMonitorLast"
-      "moveWorkspaceToMonitor.left"
-      "moveWorkspaceToMonitor.right"
-      "moveWorkspaceToMonitor.up"
-      "moveWorkspaceToMonitor.down"
-      "moveWindowToMonitor.left"
-      "moveWindowToMonitor.right"
-      "moveWindowToMonitor.up"
-      "moveWindowToMonitor.down"
-      "toggleFullscreen"
-      "toggleNativeFullscreen"
-      "moveColumn.left"
-      "moveColumn.right"
-      "moveColumn.up"
-      "moveColumn.down"
-      "moveColumnToFirst"
-      "moveColumnToLast"
-      "toggleColumnTabbed"
-      "focusColumnFirst"
-      "focusColumnLast"
-      "cycleSizeForward"
-      "cycleSizeBackward"
-      "cycleWindowPrimarySpanForward"
-      "cycleWindowPrimarySpanBackward"
-      "cycleWindowSecondarySpanForward"
-      "cycleWindowSecondarySpanBackward"
-      "toggleContainerFullPrimarySpan"
-      "expandContainerToAvailablePrimarySpan"
-      "resetWindowSecondarySpan"
-      "setContainerPrimarySpan.decrease10Percent"
-      "setContainerPrimarySpan.increase10Percent"
-      "setWindowPrimarySpan.decrease10Percent"
-      "setWindowPrimarySpan.increase10Percent"
-      "setWindowSecondarySpan.decrease10Percent"
-      "setWindowSecondarySpan.increase10Percent"
-      "balanceSizes"
-      "moveToRoot"
-      "toggleSplit"
-      "swapSplit"
-      "resizeGrow.horizontal"
-      "resizeGrow.vertical"
-      "resizeShrink.horizontal"
-      "resizeShrink.vertical"
-      "resizeFocusedWindow.grow"
-      "resizeFocusedWindow.shrink"
-      "preselect.left"
-      "preselect.right"
-      "preselect.up"
-      "preselect.down"
-      "preselectClear"
-      "openCommandPalette"
-      "raiseAllFloatingWindows"
-      "rescueOffscreenWindows"
-      "toggleFocusedWindowFloating"
-      "toggleFloatingFocus"
-      "closeFocusedWindow"
-      "openMenuAnywhere"
-      "setWindowMark"
-      "removeWindowMark"
-      "toggleWorkspaceBarVisibility"
-      "toggleHiddenBarPanel"
-      "toggleQuakeTerminal"
-      "toggleWorkspaceLayout"
-      "toggleOverview"
-      "toggleSystemStats"
-    ];
+  # OmniShell palette roles (dark appearance only; OmniWM keeps its native light
+  # palette for a missing [light] table and derives the container roles).
+  # `badge` stays native system red: badge text is white and does not read on
+  # the pastel reds of base16 schemes.
+  hex = colors.withHashtag;
+  shellPalette = {
+    background = hex.base00;
+    surface = hex.base01;
+    elevatedSurface = hex.base02;
+    foreground = hex.base05;
+    # base03/base04 are surface tones in some schemes; dim the foreground instead.
+    secondaryForeground = "${hex.base05}cc";
+    mutedForeground = "${hex.base05}99";
+    border = hex.base03;
+    accent = hex.base0D;
+    accentForeground = hex.base00;
+    success = hex.base0B;
+    warning = hex.base0A;
+    error = hex.base08;
+    focus = hex.base0D;
+    shadow = hex.base00;
+    scrim = "${hex.base00}66";
+    red = hex.base08;
+    orange = hex.base09;
+    yellow = hex.base0A;
+    green = hex.base0B;
+    mint = hex.base0B;
+    teal = hex.base0C;
+    cyan = hex.base0C;
+    blue = hex.base0D;
+    indigo = hex.base07;
+    purple = hex.base0E;
+    pink = hex.base0F;
+    brown = hex.base0F;
+    gray = hex.base04;
+  };
 
+  # Schema 5 leaves any action absent from `hotkeys` unassigned, so only bound
+  # actions are listed; native defaults outside this scheme stay off. Each
+  # action takes one binding, so the a/d aliases live in omniwm.skhd.
   bindings = {
     "switchWorkspace.next" = "Control+Option+J";
     "switchWorkspace.previous" = "Control+Option+K";
@@ -165,13 +84,15 @@ let
     "move.right" = "Option+Shift+L";
     moveColumnToFirst = "Option+Shift+U";
     moveColumnToLast = "Option+Shift+O";
-    "setContainerPrimarySpan.decrease10Percent" = "Option+Minus";
-    "setContainerPrimarySpan.increase10Percent" = "Option+Equal";
-    "setWindowSecondarySpan.decrease10Percent" = "Option+Shift+Minus";
-    "setWindowSecondarySpan.increase10Percent" = "Option+Shift+Equal";
+    consumeWindowIntoColumn = "Option+Comma";
+    expelWindowFromColumn = "Option+Period";
+    "resizeContainerPrimarySpan.shrink" = "Option+Minus";
+    "resizeContainerPrimarySpan.grow" = "Option+Equal";
+    "resizeWindowSecondarySpan.shrink" = "Option+Shift+Minus";
+    "resizeWindowSecondarySpan.grow" = "Option+Shift+Equal";
     centerColumn = "Option+C";
     toggleColumnTabbed = "Option+T";
-    toggleContainerFullPrimarySpan = "Option+W";
+    cycleSizeForward = "Option+W";
     balanceSizes = "Option+Shift+B";
     toggleFullscreen = "Option+Shift+F";
     toggleFocusedWindowFloating = "Option+G";
@@ -201,7 +122,7 @@ let
   ];
 
   settings = {
-    schemaVersion = 4;
+    schemaVersion = 5;
     general = {
       hotkeysEnabled = true;
       systemHyperTrigger = "None";
@@ -244,14 +165,12 @@ let
       visibleContainerCount = 2;
       infiniteLoop = false;
       centerFocusedColumn = "never";
-      alwaysCenterSingleColumn = false;
+      alwaysCenterSingleColumn = true;
       singleWindowFit = "fill";
+      # Two presets make cycleSizeForward (Option+W) a half <-> full toggle.
       containerPrimarySpanPresets = [
-        0.25
-        0.33
         0.5
-        0.66
-        0.75
+        1.0
       ];
       defaultContainerPrimarySpan = 0.5;
       resizeStepPercent = 5;
@@ -269,16 +188,20 @@ let
       enabled = true;
       width = 3.0;
       color = color "base0D" 1.0;
-      # Solid borders draw square corners on macOS 26: their native layer API
-      # only exists on macOS 27. The gradient renderer follows window corners,
-      # so a single-color gradient looks solid but stays rounded.
+      # Solid borders draw square corners on macOS 26 (native layer API is
+      # macOS 27 only); the gradient renderer follows window corners.
       # https://github.com/OmniNull/OmniWM/issues/726
-      # REMOVE WHEN: the host runs macOS 27 (check `sw_vers -productVersion`).
       gradient = {
         enabled = true;
         direction = "topLeftToBottomRight";
         start = color "base0D" 1.0;
-        end = color "base0D" 1.0;
+        end = color "base0E" 1.0;
+      };
+      # Inherits the gradient endpoints.
+      glow = {
+        enabled = true;
+        radius = 4.0;
+        opacity = 0.6;
       };
     };
     overview = {
@@ -310,8 +233,7 @@ let
       revealModifier = "off";
       revealHoldMilliseconds = 200.0;
       hideInNativeFullscreen = false;
-      # Same height and top offset as the SketchyBar bar (sketchybarrc), so the
-      # workspace pill sits flush inside it.
+      # The selected OmniShell style overrides most of these keys.
       height = 32.0;
       backgroundOpacity = 0.1;
       xOffset = 0.0;
@@ -353,22 +275,21 @@ let
       widthPercent = 50.0;
       heightPercent = 50.0;
       animationDuration = 0.2;
-      autoHide = false;
+      autoHide = true;
+      opacity = 0.55;
       backgroundEffect = "standardBlur";
+      backgroundBlurRadius = 20;
     };
     scratchpads.labels = { };
     appearance.mode = "dark";
-    hotkeys = map (id: {
-      inherit id;
-      binding = allBindings.${id} or "Unassigned";
-    }) requiredActions;
+    hotkeys = lib.mapAttrsToList (id: binding: { inherit id binding; }) allBindings;
     workspaces = lib.imap0 (i: id: {
       inherit id;
       name = toString (i + 1);
       layoutType = "niri";
       monitorAssignment.type = if i == 3 || i == 4 then "secondary" else "main";
     }) workspaceIDs;
-    # Preserve the v0.7.6 built-in minimum-size rules when replacing the GUI file.
+    # Preserve the built-in minimum-size rules when replacing the GUI file.
     appRules = [
       {
         id = "6A31F08A-4051-4354-B439-42F4C71894A3";
@@ -449,25 +370,29 @@ let
         minHeight = 320.0;
       }
     ];
-    monitorBarOverrides = [ ];
-    monitorOrientationOverrides = [ ];
-    monitorNiriOverrides = [ ];
-    monitorDwindleOverrides = [ ];
-    monitorGapOverrides = [ ];
   };
 in
 {
   assertions = lib.optionals (lib.elem "omniwm" cfg.enabled) [
     {
-      assertion = builtins.length (lib.unique requiredActions) == builtins.length requiredActions;
-      message = "OmniWM schema 4 hotkey action IDs must appear exactly once";
-    }
-    {
-      assertion = lib.all (id: lib.elem id requiredActions) (lib.attrNames allBindings);
-      message = "OmniWM bound action is absent from the schema 4 required action list";
+      # Number-key bindings stop at Option+9.
+      assertion = builtins.length workspaceIDs <= 9;
+      message = "OmniWM workspace number bindings support at most 9 workspaces";
     }
   ];
-  xdg.configFile."omniwm/settings.toml" = lib.mkIf (lib.elem "omniwm" cfg.enabled) {
-    source = (pkgs.formats.toml { }).generate "omniwm-settings.toml" settings;
-  };
+  xdg.configFile = lib.mkIf (lib.elem "omniwm" cfg.enabled) (
+    {
+      "omniwm/settings.toml".source = (pkgs.formats.toml { }).generate "omniwm-settings.toml" settings;
+      "omniwm/shell/themes/stylix.toml".source =
+        (pkgs.formats.toml { }).generate "omnishell-stylix.toml"
+          {
+            dark = shellPalette;
+          };
+    }
+    // dots.mkDirSymlink {
+      inherit config;
+      srcRel = "omniwm/shell/nix";
+      xdgRel = "omniwm/shell/nix";
+    }
+  );
 }

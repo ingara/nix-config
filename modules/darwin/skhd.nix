@@ -7,9 +7,7 @@
 # TCC prompts, grabber + dext installation).
 #
 # Config files + entrypoint: written here (this module owns skhd's whole
-# concern). Run-one WMs (window-manager.nix) get one runtime-selected include,
-# written by wm-switch; other WM layers load statically. Homebrew cask:
-# homebrew.nix.
+# concern). Homebrew cask: homebrew.nix.
 { lib, ... }:
 let
   dots = import ../shared/home/lib/dotfiles.nix { inherit lib; };
@@ -23,27 +21,13 @@ in
         # This sharedModule only exists on darwin (skhd is macOS-only), so the
         # isDarwin guard the central dotfiles.nix used is implicit here.
         anyWM = wm.enabled != [ ];
+        omniwm = lib.elem "omniwm" wm.enabled;
         src = relPath: dots.mkSource { inherit config relPath; };
-        runOne = wm.default == "omniwm";
       in
       {
+        # `skhd --restart-service` (SMAppService) fails with SpawnFailed in
+        # the activation context — kickstart the agent via launchd instead.
         home.activation.restartSkhd = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-          ${lib.optionalString runOne ''
-            # Keep this atomic and under wm-switch's lock: a concurrent switch
-            # must not turn the placeholder write into a write through its
-            # mutable-dotfile symlink.
-            /bin/mkdir -p "$HOME/.local/state"
-            /usr/bin/lockf -t 120 "$HOME/.local/state/wm-switch.lock" /bin/sh -c '
-              layer="$HOME/.config/skhd/active-wm.skhd"
-              if [ ! -e "$layer" ]; then
-                tmp=$(/usr/bin/mktemp "$HOME/.config/skhd/.active-wm.XXXXXXXX") || exit 1
-                /usr/bin/printf "%s\n" "# no active WM-specific bindings" > "$tmp" || exit 1
-                /bin/mv -f "$tmp" "$layer"
-              fi
-            ' || exit 1
-          ''}
-          # `skhd --restart-service` (SMAppService) fails with SpawnFailed in
-          # the activation context — kickstart the agent via launchd instead.
           /bin/launchctl kickstart -k "gui/$(id -u)/com.jackielii.skhd" || true
         '';
 
@@ -57,15 +41,11 @@ in
                   ''.load "builtin-keyboard.skhd"''
                   ''.load "common.skhd"''
                 ]
-                ++ lib.optional (lib.elem "yabai" wm.enabled) ''.load "yabai.skhd"''
-                ++ lib.optional runOne ''.load "active-wm.skhd"''
+                ++ lib.optional omniwm ''.load "omniwm.skhd"''
               )
               + "\n";
           }
-          // lib.optionalAttrs (lib.elem "yabai" wm.enabled) {
-            "skhd/yabai.skhd".source = src "skhd/yabai.skhd";
-          }
-          // lib.optionalAttrs (lib.elem "omniwm" wm.enabled) {
+          // lib.optionalAttrs omniwm {
             "skhd/omniwm.skhd".source = src "skhd/omniwm.skhd";
           };
       }

@@ -80,6 +80,12 @@ in
       targets = stylixTargets;
     };
 
+    # Stylix's fzf target sets normal text to base04, too dim to read unselected
+    # rows and previews.
+    programs.fzf.colors.fg = lib.mkIf config.stylix.targets.fzf.enable (
+      lib.mkForce config.lib.stylix.colors.withHashtag.base05
+    );
+
     # Stylix's fish target sets the palette and default colours with escape
     # codes at shell start. Herdr treats colours a shell sets as owned by that
     # pane, so the pane would stop following the host terminal; reset them.

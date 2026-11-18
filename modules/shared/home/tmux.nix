@@ -11,7 +11,7 @@
 # See `dotfiles/scripts/tmux-keys-popup.sh`.
 #
 # Status-bar layout is rendered here from `config.lib.stylix.colors`
-# (same pattern as `sketchybar.nix` / `nvim-theme.nix`) so the bar
+# (same pattern as `nvim-theme.nix`) so the bar
 # follows `myOptions.theme.scheme` without per-theme plugins. The bundled
 # `stylix.targets.tmux` is enabled below; its default
 # `status-style` etc. are overridden by the explicit `set -g` calls

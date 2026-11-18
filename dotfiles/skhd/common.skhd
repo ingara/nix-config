@@ -1,8 +1,7 @@
 # Terminal — Opt+Return → bare Ghostty; Opt+Shift+Return → Ghostty in the shared
 # `main` tmux session (docs/keybindings.md canonical terminal).
-# WM-agnostic: common.skhd stays loaded across the run-one WM switch (and
-# under other enabled macOS WMs). The canonical terminal chord is reserved for
-# Ghostty here, not by any WM's native hotkey configuration.
+# WM-agnostic: the canonical terminal chord is reserved for Ghostty here, not
+# by the WM's native hotkey configuration.
 # `open -na` opens a new window each press (macOS has no CLI to add a window to
 # the running instance — Ghostty's +new-window is Linux-only); the per-launch
 # --window-save-state=never stops that instance from restoring the previous
@@ -11,15 +10,14 @@ alt - return : open -na Ghostty.app --args --window-save-state=never
 shift + alt - return : open -na Ghostty.app --args --window-save-state=never -e tmux new -A -s main
 
 # App tier — cross-platform letters (docs/keybindings.md): s/d/e/v/z/t/c
-# match the Linux Ctrl+Super binds; c is the platform's Chromium-family
-# browser (Arc here). m/w/x/r are macOS-local extras.
+# match the Linux Ctrl+Super binds; c (the Chromium-family browser) is
+# unbound on macOS. m/w/x/r are macOS-local extras.
 cmd + ctrl - s : open -a Slack
 cmd + ctrl - d : open -a Discord
 cmd + ctrl - e : open -a Element
 cmd + ctrl - v : open -a Obsidian
 cmd + ctrl - z : open -a Zen
 cmd + ctrl - t : open -a Ghostty
-cmd + ctrl - c : open -a Arc
 cmd + ctrl - m : open -a Airmail
 cmd + ctrl - w : open -a WhatsApp
 cmd + ctrl - x : open /System/Applications/Music.app

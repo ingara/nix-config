@@ -4,10 +4,7 @@
 # (underscore prefix, same convention as roles/_lib.nix).
 {
   darwin = [
-    "yabai"
-    "aerospace"
     "omniwm"
-    "paneru"
   ];
   linux = [
     "hyprland"

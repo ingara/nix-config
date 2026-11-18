@@ -10,11 +10,10 @@ Shell scripts are the exception: files in `scripts/` must be wrapped by their
 owning Nix module to land in `$PATH`. Prefer `writeShellApplication` when the
 script invokes external runtime dependencies.
 
-Launchd plugins do not inherit interactive-shell PATH. Declare external tools
-through the owning service's runtime-package option; for SketchyBar, use
-`services.sketchybar.extraPackages`. Verify with the generated plist's
-environment. Literal `$HOME` and `$USER` in plist PATH entries are not
-expanded.
+Launchd agents do not inherit interactive-shell PATH. Declare external tools
+through the owning service's runtime-package option, or call them by absolute
+path. Verify with the generated plist's environment. Literal `$HOME` and
+`$USER` in plist PATH entries are not expanded.
 
 ## Neovim
 
@@ -47,14 +46,13 @@ Single source of truth: `myOptions.theme.scheme` in
 5. Custom adapters handle apps that need more control than a Stylix target:
    - `nvim-theme.nix` → generates `nvim/lua/theme.lua` (palette + colorscheme
      name)
-   - `sketchybar.nix` → generates `sketchybar/colors.sh` (30 `COLOR_*` vars)
 
 ### Edit patterns
 
-| Pattern                          | Apps                                                                                                                                                                   | Workflow                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Per-file source links            | nvim, sketchybar plugins, aerospace, yabai, skhd, wezterm/extra, git/extra                                                                                             | Live in mutable profiles; rebuild in store-backed profiles |
-| Nix-generated (rebuild required) | starship, tmux, fish, fzf, bat, ghostty (`programs.ghostty`), lazygit (`programs.lazygit`), wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, `colors.sh` | Edit the Nix module; run `just switch`                     |
+| Pattern                          | Apps                                                                                                                                                                       | Workflow                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Per-file source links            | nvim, omniwm shell profile, skhd, wezterm/extra, git/extra                                                                                                                 | Live in mutable profiles; rebuild in store-backed profiles |
+| Nix-generated (rebuild required) | starship, tmux, fish, fzf, bat, ghostty (`programs.ghostty`), lazygit (`programs.lazygit`), wezterm.lua (HM extraConfig), KDE Plasma, GTK/Qt, `theme.lua`, OmniWM settings | Edit the Nix module; run `just switch`                     |
 
 ### Adding a new theme
 

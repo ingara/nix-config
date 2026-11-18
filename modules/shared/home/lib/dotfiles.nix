@@ -2,9 +2,9 @@
 # dotfile-backed config dir. Two linking styles:
 #
 #   mkDirSymlink  — whole-dir symlink, for a clean config dir with no
-#                   Nix-generated file mixed in (yabai/aerospace/wezterm/git-extra).
+#                   Nix-generated file mixed in (wezterm/git-extra/omniwm).
 #   mkPerFileDots — per-file enumeration, for a live-edited dir that ALSO
-#                   receives a Nix-generated sidecar (nvim/ghostty/sketchybar):
+#                   receives a Nix-generated sidecar (nvim):
 #                   per-file linking keeps ~/.config/<app> a real dir so the
 #                   symlinked statics and the generated sidecar coexist, which a
 #                   whole-dir symlink can't do.
@@ -91,23 +91,20 @@ rec {
 
   # Build xdg.configFile entries for every file under a dotfile source dir.
   #   config       — HM config (for mutableDotfiles, repoRoot, mkOutOfStoreSymlink)
-  #   srcRel       — path relative to dotfilesRoot (e.g. "nvim", "sketchybar")
-  #   xdgRel       — path relative to ~/.config/    (e.g. "nvim", "sketchybar")
+  #   srcRel       — path relative to dotfilesRoot (e.g. "nvim")
+  #   xdgRel       — path relative to ~/.config/    (e.g. "nvim")
   #   skip         — basenames to skip at any depth (default: defaultSkip)
-  #   extraExclude — source-relative paths to skip entirely (e.g.
-  #                  [ "colors.sh" ] for sketchybar — Nix-generated)
   mkPerFileDots =
     {
       config,
       srcRel,
       xdgRel,
       skip ? defaultSkip,
-      extraExclude ? [ ],
       dotfilesRoot ? defaultDotfilesRoot,
     }:
     let
       absSrc = dotfilesRoot + "/${srcRel}";
-      files = builtins.filter (f: !(builtins.elem f extraExclude)) (listFilesRec skip absSrc);
+      files = listFilesRec skip absSrc;
       entry = file: {
         name = "${xdgRel}/${file}";
         value.source = mkSource {

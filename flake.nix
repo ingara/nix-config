@@ -33,13 +33,12 @@
       url = "github:zhaofengli/nix-homebrew";
       inputs.brew-src.follows = "brew-src";
     };
-    # The cask tap uses DSL newer than nix-homebrew's bundled brew can parse:
-    # `zap :not_required` needs brew >= 7.0.11 (Homebrew/brew#24315).
-    # REMOVE WHEN nix-homebrew's own brew-src is >= 7.0.11; check with
-    # `nix flake metadata github:zhaofengli/nix-homebrew --json | jq -r '.locks.nodes."brew-src".original.ref'`.
-    # Bump this to the latest Homebrew release whenever the homebrew taps are bumped.
+    # The homebrew taps adopt new cask DSL faster than nix-homebrew bumps its
+    # bundled brew (weeks behind), and a brew too old for the tap fails
+    # `brew bundle` at activation. Pin the latest Homebrew release instead,
+    # retagged whenever the taps are bumped.
     brew-src = {
-      url = "github:Homebrew/brew/7.0.11";
+      url = "github:Homebrew/brew/7.0.14";
       flake = false;
     };
 
@@ -60,10 +59,6 @@
       url = "github:withgraphite/homebrew-tap";
       flake = false;
     };
-    homebrew-aerospace = {
-      url = "github:nikitabobko/homebrew-tap";
-      flake = false;
-    };
     homebrew-skhd-zig = {
       url = "github:jackielii/homebrew-tap";
       flake = false;
@@ -76,10 +71,7 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # numtide's AI-agent package set; we consume only its prebuilt
-    # `packages.<system>.opencode`. `follows` nixpkgs, and since the derivation
-    # is fetchurl + autoPatchelf + wrapper with no compilation, it needs no
-    # binary cache.
+    # OpenCode v2's prebuilt recipe; Linux also builds its Rust ELF helper.
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -87,14 +79,6 @@
     lavish-axi = {
       url = "github:kunchenguid/lavish-axi/lavish-axi-v0.1.96";
       flake = false;
-    };
-    aerospace-scratchpad = {
-      url = "github:cristianoliveira/aerospace-scratchpad";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    paneru = {
-      url = "github:karinushka/paneru";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";

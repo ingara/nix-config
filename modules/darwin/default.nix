@@ -1,5 +1,5 @@
 # Darwin platform entry point — user account, home-manager wiring, and
-# imports of darwin-only concerns (window manager, status/border bar).
+# imports of darwin-only concerns (window manager, hotkeys).
 #
 # Homebrew lives in `./homebrew.nix`; it's imported from `public/hosts/darwin`
 # rather than from here so the HM-less darwin test builds can skip it.
@@ -17,18 +17,17 @@ in
     inputs.stylix.darwinModules.stylix
     ./window-manager.nix
     ./skhd.nix
-    ./bar.nix
     ./claude-code.nix
   ];
 
-  # System-level Stylix (currently the only consumer is the jankyborders
-  # target, which lives at the nix-darwin SYSTEM scope, not HM). HM-side
-  # Stylix wiring is below in `home-manager.users.${user}`.
+  # System-level Stylix exists for its Home Manager integration: it imports
+  # the HM Stylix module configured below and in shared/home/stylix-base.nix
+  # and seeds it with these values. Its auto-enabled darwin targets theme
+  # nothing here (services.jankyborders is off; font-packages is disabled).
   stylix = {
     enable = true;
     base16Scheme = "${inputs.tinted-schemes}/base16/${config.myOptions.theme.scheme}.yaml";
     polarity = config.myOptions.theme.polarity;
-    targets.jankyborders.enable = true;
     # Fonts are owned by HM Stylix (shared/home/stylix-base.nix); without this
     # off-switch the autoEnabled system-scope font-packages target would
     # install the four never-referenced stylix.fonts defaults system-wide
@@ -52,9 +51,7 @@ in
       }:
       {
         imports = [
-          inputs.paneru.homeModules.paneru
           ./colima.nix
-          ./paneru.nix
           ./omniwm.nix
           ../shared/home
           ../shared/home/stylix-base.nix

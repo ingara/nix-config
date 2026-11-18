@@ -26,12 +26,11 @@
     ./ghostty.nix
     ./wezterm.nix
     ./theme.nix
-    ./sketchybar.nix
   ];
 
   # Adopt XDG base dirs on every HM host: exports XDG_*_HOME to shells (and the
-  # systemd user env on Linux) and lets xdg.enable-gating modules (e.g. paneru)
-  # default their configs under ~/.config.
+  # systemd user env on Linux) and lets xdg.enable-gating modules default
+  # their configs under ~/.config.
   xdg.enable = true;
 
   # Cross-platform windowManager invariants. Shared HM scope so they run on

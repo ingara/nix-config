@@ -9,7 +9,7 @@
 # Slots the renderer does not draw with are omitted; it ignores unknown keys and
 # falls back to its own defaults for any it does not find here.
 #
-# Same pattern as `sketchybar.nix` / `nvim-theme.nix`: a generated file, NOT a
+# Same pattern as `nvim-theme.nix`: a generated file, NOT a
 # live-edit dotfile — change this module and rebuild rather than editing the
 # result, which the next activation overwrites.
 { config, ... }:

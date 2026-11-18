@@ -22,6 +22,9 @@
         lavish-axi = prev.callPackage ../../overlays/lavish-axi/package.nix {
           src = inputs.lavish-axi;
         };
+        opencode = prev.callPackage ../../overlays/opencode-v2/package.nix {
+          upstream = inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system}.opencode2;
+        };
       })
     ];
   };

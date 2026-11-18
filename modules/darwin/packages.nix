@@ -26,5 +26,4 @@ with pkgs;
   pkgs.nerd-fonts.victor-mono
   # The monospace font (Pragmasevka) is installed by Stylix's font-packages
   # target from `stylix.fonts.monospace` (shared/home/stylix-base.nix).
-  pkgs.sketchybar-app-font
 ]

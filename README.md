@@ -4,7 +4,7 @@ Multi-platform Nix configuration for macOS (nix-darwin) and NixOS.
 
 ## What's Included
 
-- macOS configuration with Homebrew, AeroSpace WM, and sketchybar
+- macOS configuration with Homebrew and the OmniWM window manager
 - NixOS configuration
 - Home Manager for dotfiles and user packages
 - Global theming via Stylix (single `myOptions.theme.scheme` knob drives all
@@ -96,7 +96,7 @@ just dev            # Enter development shell
 - `modules/shared/` — cross-platform: options, theming, dotfiles, packages
   - `shared/system/` — NixOS/darwin system-level modules
   - `shared/home/` — home-manager program modules (git, fish, tmux, etc.)
-- `modules/darwin/` — macOS-specific: homebrew, window manager, sketchybar
+- `modules/darwin/` — macOS-specific: homebrew, window manager, hotkeys
 - `modules/nixos/` — NixOS system-level configuration
 - `modules/linux/` — Linux home-manager base
 - `modules/desktop/` — opt-in Linux desktop extras (GTK, polybar)

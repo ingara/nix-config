@@ -26,18 +26,18 @@ in
     };
     casks = [
       "1password"
-      "arc"
       "balenaetcher" # flash ISOs to USB (not in nixpkgs — removed over old-Electron CVEs)
-      "bettertouchtool"
       "claude"
       "discord"
       "element"
       "elgato-stream-deck"
+      "fantastical"
       "figma"
       "firefox"
       "ghostty" # config + theming: shared/home/ghostty.nix (programs.ghostty, package=null on darwin)
       "google-chrome"
       "jordanbaird-ice@beta"
+      "linearmouse"
       "lookaway"
       "notion"
       "obsidian"
@@ -49,9 +49,7 @@ in
       "slack"
       "spotify"
       "steam"
-      "steermouse"
       "tailscale-app"
-      "vial"
       "visual-studio-code"
       "vivaldi"
       "whatsapp"
@@ -60,7 +58,7 @@ in
       # skhd.zig — hotkey daemon
       "skhd-zig"
 
-      # SF Mono font for sketchybar
+      # Apple SF fonts and symbols
       "font-sf-mono"
       "font-sf-pro"
       "sf-symbols"
@@ -84,6 +82,7 @@ in
       }
     ) (builtins.attrNames config.nix-homebrew.taps);
     masApps = {
+      "Airmail" = 918858936;
       "Amphetamine" = 937984704;
       "Balance Lock" = 1019371109;
       "Canary Mail App" = 1236045954;

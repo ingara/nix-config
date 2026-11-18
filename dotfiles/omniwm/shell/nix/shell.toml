@@ -1,0 +1,7 @@
+theme = "stylix"
+
+[workspaceBar]
+fullWidthNotchMode = "leftOfNotch"
+
+[hiddenBar]
+enabled = false
