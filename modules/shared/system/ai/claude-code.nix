@@ -101,13 +101,13 @@ let
     theme = "custom:stylix";
     preferredNotifChannel = "terminal_bell";
     agentPushNotifEnabled = true;
-    # Keep every session local, including explicit CLI and in-session attempts.
-    disableRemoteControl = true;
+    # Keep sessions local unless Remote Control is explicitly requested.
+    remoteControlAtStartup = false;
 
     env = {
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
-      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
       DISABLE_ERROR_REPORTING = "1";
+      DISABLE_FEEDBACK_COMMAND = "1";
       DISABLE_TELEMETRY = "1";
       # Disable auto memory (the per-repo store Claude writes itself) across
       # all hosts. Durable conventions belong in committed AGENTS.md/CLAUDE.md,

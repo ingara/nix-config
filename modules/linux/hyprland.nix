@@ -10,10 +10,11 @@
 # xdg-desktop-portal-hyprland is wired. This module sets package = null /
 # portalPackage = null to consume that system Hyprland and avoid version skew.
 #
-# Scope: the compositor itself plus Hyprland-coupled tooling (hyprshell,
-# grimblast/satty). WM-agnostic session plumbing (launcher, polkit agent,
-# cursor, cross-WM Stylix targets) lives in wm-common.nix; the desktop shell
-# (Noctalia or the composable waybar/mako/… stack) is layered on per-host.
+# Scope: the compositor itself plus Hyprland-coupled tooling (grimblast/satty).
+# WM-agnostic session plumbing (launcher, polkit agent, cursor, cross-WM Stylix
+# targets) lives in wm-common.nix; the desktop shell (Noctalia or the
+# composable waybar/mako/… stack) is layered on per-host. Alt+Tab is not bound
+# here; a per-host desktop shell may supply a switcher.
 {
   config,
   lib,
@@ -94,8 +95,7 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
   # Screenshots: grimblast is a self-contained grim+slurp+hyprctl wrapper
   # (it bundles its own grim/slurp/wl-clipboard via wrapper PATH); satty is
   # the post-capture editor. wl-clipboard is here for satty's copy-command.
-  # Standalone CLIs, NOT a compositor plugin — no Hyprland-ABI coupling
-  # (same reasoning that picked hyprshell over plugin-based switchers).
+  # Standalone CLIs, NOT a compositor plugin — no Hyprland-ABI coupling.
   # playerctl for the media-key binds comes from wm-common.nix.
   home.packages = [
     pkgs.grimblast
@@ -119,39 +119,6 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
     };
   };
 
-  # hyprshell — GTK4 window switcher + workspace overview driven by Hyprland IPC.
-  # It is a standalone app, NOT a compositor plugin, so it carries no ABI-match
-  # risk against the system Hyprland (unlike hyprexpo/hyprspace/the archived
-  # hycov). IPC compatibility still matters: 4.10.8 supports the Lua manager.
-  #
-  # It self-registers its keybinds from config.json (no Hyprland `bind` lines
-  # here — a static bind on the same key would collide):
-  #   - Switch  (hold Alt + Tab to cycle windows, release Alt to select) — the
-  #     Windows-style alt-tab. Owns Alt+Tab.
-  #   - Overview (Super + Tab) — expose all workspaces with live previews.
-  #
-  # Theming: uses hyprshell's built-in GTK theme. There is no Stylix target; a
-  # base16 `style` (CSS from config.lib.stylix.colors) is a deliberate follow-up.
-  services.hyprshell = {
-    enable = true;
-    systemd.enable = true; # runs `hyprshell run` under the wayland session
-    settings = {
-      version = 4;
-      windows = {
-        switch.modifier = "alt";
-        overview = {
-          modifier = "super";
-          key = "tab";
-        };
-      };
-    };
-  };
-
-  # The HM unit lacks PartOf, so a compositor exit makes Restart=on-failure
-  # revive hyprshell outside any session. It then finds no Hyprland socket,
-  # registers no binds, and stays active, so the next session never restarts it.
-  systemd.user.services.hyprshell.Unit.PartOf = [ config.services.hyprshell.systemd.target ];
-
   # Stylix merges colours into settings.config for the Lua config manager.
   stylix.targets.hyprland.enable = true;
 
@@ -169,16 +136,11 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       on = [
         {
           _args = [
-            # Not open_early: that precedes layout attachment, which the float
-            # dispatcher requires.
             "window.open"
             (lua ''
               function(window)
                 if not ${isGame}(window) then return end
-                hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
                 hl.dispatch(hl.dsp.window.move({ workspace = ${gamesWorkspace}, window = window }))
-                -- Floating keeps the window's scrolling-tape position, which can be off-screen.
-                hl.dispatch(hl.dsp.window.center({ window = window }))
               end
             '')
           ];
@@ -365,9 +327,12 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
           monitor = "DP-3";
           default = true;
         }
+        # Monocle: a game that drops fullscreen keeps covering the workspace,
+        # and any other window opened here stays one focus switch away.
         {
           workspace = gamesWorkspace;
           monitor = gamesMonitor;
+          layout = "monocle";
         }
         {
           workspace = "3";
@@ -381,12 +346,10 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
       }) (lib.range 4 9);
 
       # Match before mapping; the environment handler catches native games with unknown classes.
-      # Floating games on their own workspace keeps focus-loss fullscreen drops off the tiling tape.
       window_rule = [
         {
           name = "steam-games";
           match.class = "^(steam_app_[0-9]+|gamescope)$";
-          float = true;
           workspace = gamesWorkspace;
         }
       ];
@@ -428,7 +391,6 @@ lib.mkIf (lib.elem "hyprland" wm.enabled) {
         (bind "ALT + SHIFT + M" "window.move({ monitor = '+1' })")
         (bind "ALT + SHIFT + N" "window.move({ monitor = '-1' })")
       ]
-      # Alt+Tab and Super+Tab belong to hyprshell; do not duplicate its grabs.
       ++
         lib.concatMap
           (entry: [

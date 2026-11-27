@@ -11,7 +11,7 @@
 # without it.
 #
 # A deliberate deviation from scripts/AGENTS.md, which reserves bash for glue
-# under ~50 lines: claude-statusline.sh is ~250. It buys per-turn startup
+# under ~50 lines: claude-statusline.sh is ~470. It buys per-turn startup
 # (measured here: bash+jq 4.4ms, python3+stdlib 17.5ms) and build-time
 # shellcheck via writeShellApplication. Only the 13ms is a hot-path argument,
 # and it is small — revisit the lane if this grows another parser.

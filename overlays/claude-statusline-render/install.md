@@ -59,16 +59,18 @@ layout — check what you find before writing anything.
             "five_hour":  {"used_percentage": 18, "resets_at": '"$(( $(date +%s) + 7200 ))"'},
             "seven_day":  {"used_percentage": 63, "resets_at": '"$(( $(date +%s) + 300000 ))"'}
           }
-        }' | <path to script>
+        }' | COLUMNS=120 <path to script>
 
-    Expect two lines: repo/branch/working-tree state plus model on the first,
-    and ctx / 5h / 7d meters on the second. If only the first line renders,
-    the download is corrupt or jq is missing — refetch from the raw URL.
+    Expect two lines: repo/branch/working-tree state on the left of the first
+    with the model right-aligned, and ctx / 5h / 7d meters in three columns on
+    the second. If only the first line renders, the download is corrupt or jq
+    is missing — refetch from the raw URL.
 
 6.  Tell your user the palette is overridable, and offer to set it up — don't
-    guess. The script reads eight base16 slots from
+    guess. The script reads ten base16 slots from
     `$XDG_CONFIG_HOME/claude-statusline/theme.env` (bare hex, no leading `#`):
-    base03, base08, base09, base0A, base0B, base0C, base0D, base0E.
+    base03, base04, base05, base08, base09, base0A, base0B, base0C, base0D,
+    base0E.
     If you can identify a base16/stylix/catppuccin scheme they already use,
     offer to generate a matching theme.env — and if they manage themes
     declaratively, wire it through that rather than dropping a loose file. If
@@ -88,6 +90,8 @@ layout — check what you find before writing anything.
 
   ```
   base03=6e6a86
+  base04=908caa
+  base05=e0def4
   base08=eb6f92
   base09=f6c177
   base0A=f6c177
@@ -97,12 +101,16 @@ layout — check what you find before writing anything.
   base0E=c4a7e7
   ```
 
-  Only those eight are read; anything else is ignored. The file is parsed, not
+  Only those ten are read; anything else is ignored. The file is parsed, not
   sourced — a status line has no business being a code-execution entry point.
 
 - **The meters are omitted, not empty, when there's no data.** `rate_limits`
   only arrives after the first API response, and never on API-key billing. If
   the second line is missing entirely, that's why.
+
+- **Width.** The line fits the pane width Claude Code passes in `COLUMNS`.
+  In a narrow pane, session facts drop from the right first, then the bars
+  shrink, then reset times go, then the meters become bare numbers.
 
 - **Updating.** The script header names this gist as its source. Ask your
   agent to "update my statusline" and it can fetch the latest copy — from the

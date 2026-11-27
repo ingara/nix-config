@@ -159,7 +159,7 @@ let
         Alt+X { focus-window-previous; }
         // Alt+Tab is deliberately NOT bound here: niri's built-in
         // recent-windows MRU switcher (on by default) owns Alt+Tab /
-        // Alt+Shift+Tab — the hyprshell role under Hyprland. A general bind on
+        // Alt+Shift+Tab — the desktop shell's role under Hyprland. A general bind on
         // the same key would shadow it. Overview rides Super+Tab per the
         // convention (shadowing the switcher's Mod+Tab default).
         Super+Tab repeat=false { toggle-overview; }
